@@ -1,0 +1,20 @@
+---
+title: "rlang - Tidy evaluation"
+date: "2023-02-13"
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+## rlang Tidy evaluation vignettes
+- [What is data-masking and why do I need `{{`?](https://rlang.r-lib.org/reference/topic-data-mask.html)
+- [Data mask programming patterns](https://rlang.r-lib.org/reference/topic-data-mask-programming.html)
+- [The data mask ambiguity](https://rlang.r-lib.org/reference/topic-data-mask-ambiguity.html)
+- [The double evaluation problem](https://rlang.r-lib.org/reference/topic-double-evaluation.html)
+- [What happens if I use injection operators out of context?](https://rlang.r-lib.org/reference/topic-inject-out-of-context.html)
+- [Does `{{` work on regular objects?](https://rlang.r-lib.org/reference/topic-embrace-non-args.html)
+
+## What is data-masking and why do I need `{{`?

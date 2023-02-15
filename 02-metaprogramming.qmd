@@ -1,0 +1,178 @@
+---
+title: "Metaprogramming"
+date: "2023-02-13"
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+```{r}
+#| label: setup
+library(rlang)
+```
+
+Metaprogramming is the idea that code is data that can be inspected and modified programmatically. [Wickham, *Advanced R*'s section on Metaprogramming](https://adv-r.hadley.nz/metaprogramming.html) is organized around the idea that there are three main pillars to tidy evaluation: quasiquotation, quosures, and data masks.
+
+## Quasiquotation
+
+Tidy eval also enables the ability to use **quasiquotation**. This is the ability to both quote by capturing an unevaluated expression and unquote by selectively evaluate parts of an otherwise quoted expression. You can distinguish between *evaluated* arguments that obey R's usual evaluation rules and *quoted* arguments that are captured by the function and evaluated in some custom way.
+
+If you cannot evaluate a piece of code outside a function, it is quoted. Thus, the first argument of `library()` is a quoted argument, allowing you to write `library(rlang)` instead of `library("rlang")`. If you just write `rlang`, you will get an error.
+
+```{r}
+#| label: quoted argument
+#| error: true
+rlang
+```
+
+**Expression** is captured code that you can compute on and treat as a list. Can use `expr()` to capture code and make it into an expression. `expr()` captures code and returns exactly what you pass in. It *quotes* code.
+
+```{r}
+#| label: expr
+expr(mean(x, na.rm = TRUE))
+expr(10 + 100 + 1000)
+```
+
+You can capture user-specified code in function arguments with `enexpr()`.
+
+```{r}
+#| label: enexpr capture_it
+capture_it <- function(x) {
+  enexpr(x)
+}
+
+capture_it(x + y)
+```
+
+Use base `eval()` to evaluate an expression in a given environment.
+
+```{r}
+#| label: eval
+x <- 10
+y <- 2
+eval(expr(x + y))
+
+# eval with a specified environment
+eval(expr(x + y), env(x = 1000))
+```
+
+You can use `!!` (bang-bang) to unquote a single argument at a time. `!!` takes a single expression, evaluates it, and inlines the result in the abstract syntax tree. Compare the quoted expression with the unquoted expression.
+
+```{r}
+#| label: unquoting
+a <- sym("y")
+b <- 1
+expr(f(a, b))
+
+expr(f(!!a, !!b))
+
+```
+
+You can unquote a list of expressions that have been captured by `...` with `!!!`. You can capture the dots with `list2()`. To unquote the left-hand side of an expression you need to use `:=` because R does not allow expressions as argument names. These steps are shown in the below example of a function that allows you to set attributes for an object. Note the difference between unquoting a list of quoted expressions (`attrs`) and unquoting an argument name (`attr_name`).
+
+```{r}
+#| label: quoting dots
+set_attr <- function(.x, ...) {
+  attr <- rlang::list2(...) # Collect and quote the dots
+  attributes(.x) <- attr
+  .x
+}
+
+attrs <- list(x = 1, y = 2)
+attr_name <- "z"
+
+1:10 |> 
+  set_attr(w = 0, !!!attrs, !!attr_name := 3) |>  
+  str()
+```
+
+## Quosures
+
+However, what you usually want to do is to use `enquo()` to create a **quosure** in which the expression is bundled with the environment. This ensures that the data environment is used when evaluating the code and not affected by variables from the user environment.
+
+```{r}
+#| label: enquo capture_it
+capture_it <- function(x) {
+  enquo(x)
+}
+
+capture_it(x + y)
+```
+
+`eval_tidy()` can take a single quosure to evaluate instead of an expression-environment pair. This can be seen by creating a quosure from scratch with `new_quosure()` and then evaluating it.
+
+```{r}
+#| label: eval_tidy
+x <- 100
+y <- 20
+q1 <- new_quosure(expr(x + y), env(x = 1, y = 10))
+eval_tidy(q1)
+```
+
+## Data mask
+
+Quasiquotation and quosures come together in creating a **data mask** in which the evaluation process is modified to be able to treat variables in data frames as if they are variables in the user environment. You can see this with a simplified replacement for the `with()` function that uses a data mask.
+
+In `with2()` the user-specified input is captured as an expression by `enquo()`, creating a quosure that associates it with the data frame `df`, and then uses `eval_tidy()` to evaluate the quosure.
+
+```{r}
+#| label: with2
+with2 <- function(df, expr) {
+  eval_tidy(enquo(expr), df)
+}
+
+df <- data.frame(x = 1:5, y = 100)
+with2(df, x * y)
+```
+
+Data masks introduce ambiguity because you cannot be sure if a variable comes from the data or user environment. Data masks provide two pronouns to deal with this ambiguity: `.data$x` always refers to `x` in the data mask and `.env$x` always refers to `x` in the environment.
+
+```{r}
+#| label: data mask ambiguity
+x <- 1
+with2(df, .data$x)
+with2(df, .env$x)
+```
+
+You can also subset data mask pronouns with `[[`.
+
+```{r}
+#| label: data mask subsetting
+with2(df, .data[["x"]])
+```
+
+Another example is provided by creating a simple function for `subset()` that is similar to `dplyr::filter()`. This uses `enquo()` to create the quosure and evaluate with `tidy_eval()` since a data masking function is being created from scratch instead of being passed on to another function.
+
+```{r}
+#| label: subset2
+subset2 <- function(data, rows) {
+  rows <- enquo(rows)
+  rows_val <- eval_tidy(rows, data)
+  stopifnot(is.logical(rows_val))
+
+  data[rows_val, , drop = FALSE]
+}
+df <- data.frame(a = 1:5, b = 5:1, c = c(5, 3, 1, 4, 1))
+
+subset2(df, b == c)
+```
+
+If you want to use `subset2()` within another function, you need to use the quoting and unquoting pattern because `cond` is now a quoted argument.
+
+```{r}
+#| label: subsample
+subsample <- function(df, cond, n = nrow(df)) {
+  cond <- enquo(cond)
+  # subset
+  df <- subset2(df, !!cond)
+  # resample
+  idx <- sample(nrow(df), n, replace = TRUE)
+  df[idx, , drop = FALSE]
+}
+
+df <- data.frame(x = c(1, 1, 1, 2, 2), y = 1:5)
+subsample(df, x == 1)
+```

@@ -1,0 +1,366 @@
+---
+title: "dplyr-1.1.0"
+date: "2023-02-01"
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+## dplyr 1.1.0 Blog contents
+- [dplyr 1.1.0 is coming soon](https://www.tidyverse.org/blog/2022/11/dplyr-1-1-0-is-coming-soon/)
+- [Joins](https://www.tidyverse.org/blog/2023/01/dplyr-1-1-0-joins/)
+- [Per-operation grouping](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-per-operation-grouping/)
+- [The power of vctrs](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-vctrs/)
+- [`pick()`, `reframe()`, and `arrange()`](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-pick-reframe-arrange/)
+
+```{r}
+#| label: setup
+#| message: false
+library(dplyr)
+```
+
+## Joins
+
+### Data
+
+Data with two tables of `transactions` with company id and `companies` with information about the company.
+
+```{r}
+#| label: join data
+transactions <- tibble(
+  company = c("A", "A", "B", "B"),
+  year = c(2019, 2020, 2021, 2023),
+  revenue = c(50, 4, 10, 12)
+)
+
+companies <- tibble(
+  id = c("A", "B"),
+  name = c("Patagonia", "RStudio")
+)
+```
+
+### `join_by()`
+
+Instead of the syntax: `by = c(company = "id")` use function `join_by()`: `by = join_by(company == id)`
+
+```{r}
+#| label: use of join_by()
+
+transactions |> 
+  inner_join(companies, by = join_by(company == id))
+```
+
+### Multiple matches
+
+Add column to `companies` with information about founding date.
+
+```{r}
+#| label: since column
+companies <- tibble(
+  id = c("A", "B", "B"),
+  since = c(1973, 2009, 2022),
+  name = c("Patagonia", "RStudio", "Posit")
+)
+```
+
+Warning when multiple matches appear and extra rows are added.
+
+```{r}
+#| label: multiple matches warning
+transactions |> 
+  inner_join(companies, by = join_by(company == id))
+```
+
+Suppress warning with `multiple = "all"` or make it an error with `multiple = "error"`.
+
+```{r}
+#| label: multiple matches error
+#| error: true
+transactions |> 
+  inner_join(companies, by = join_by(company == id),
+             multiple = "error")
+```
+
+### Inequality joins
+
+Use of inequality joins to help to fix the issue of multiple matches. Use of inequality expression in `join_by()`. In this case, we only want transactions to be linked to companies after they have been founded: `year >= since`.
+
+```{r}
+#| label: inequality joins
+transactions |>
+  inner_join(companies, join_by(company == id, year >= since))
+
+```
+
+This eliminates the 2021 match to Posit, but inequality joins are still likely to return multiple matches because they are only bounded on one side.
+
+### Rolling joins
+
+Rolling joins are meant to help fix the issue of the one-sided nature of inequality joins. This can be done with the `closest()` helper to filter matches to those that are closest between `year` and `since`.
+
+```{r}
+#| label: rolling joins
+
+transactions |>
+  inner_join(companies, join_by(company == id, closest(year >= since)))
+```
+
+### Unmatched rows
+Can catch unmatched rows with argument `unmatched`. Can set `unmatched = "error"` to catch it rows are dropper in `inner_join()`.
+
+```{r}
+#| label: unmatched rows
+#| error: true
+
+# Add row that will not be matched
+transactions <- transactions |>
+  tibble::add_row(company = "C", year = 2023, revenue = 15)
+
+# Unmatched rows silently dropped
+transactions |>
+  inner_join(
+    companies, 
+    join_by(company == id, closest(year >= since))
+  )
+
+# Error with unmatched rows
+transactions |>
+  inner_join(
+    companies, 
+    join_by(company == id, closest(year >= since)),
+    unmatched = "error"
+  )
+```
+
+## Per-operation grouping
+
+```{r}
+#| label: group data
+transactions <- tibble(
+  company = c("A", "A", "A", "B", "B", "B"),
+  year = c(2019, 2019, 2020, 2021, 2023, 2023),
+  revenue = c(20, 50, 4, 10, 12, 18)
+)
+```
+
+### Persistent grouping with `group_by()`
+
+Groups are maintained through other function calls, such as to `mutate()` or `summarise()`.
+
+```{r}
+#| label: persistence of grouping
+transactions |>
+  group_by(company, year) |>
+  mutate(total = sum(revenue))
+```
+
+### Per-operation grouping with `.by/by`
+
+[Documentation](https://dplyr.tidyverse.org/reference/dplyr_by.html)
+
+dplyr 1.1.0 adds per-operation grouping within `summarise()`, `mutate()`, `filter()`, and some other dplyr verbs with the new `.by` argument.
+
+```{r}
+#| label: by argument
+transactions |>
+  summarise(total = sum(revenue), .by = c(company, year))
+```
+
+The results are always ungrouped, and tidyselect is used to group multiple columns.
+
+### `group_by()` vs `.by`
+
+Difference in how the two ways deal with ordering rows from `arrange()`.
+
+```{r}
+#| label: ordering
+
+# Ordered tibble
+transactions2 <- transactions |>
+  arrange(company, desc(year))
+transactions2
+
+# `group_by()` re-sorts by grouping keys
+transactions2 |>
+  group_by(company, year) |>
+  summarise(total = sum(revenue), .groups = "drop")
+
+# `.by` keeps the previous ordering
+transactions2 |>
+  summarise(total = sum(revenue), .by = c(company, year))
+```
+
+## The power of vctrs
+
+### `case_when()`
+
+Ability to use regular `NA` in `case_when()` instead of specific class of `NA`. The following now just works.
+
+```{r}
+#| label: case_when NA
+x <- c(1, 12, -5, 6, -2, NA, 0)
+
+case_when(
+  x >= 10 ~ "large",
+  x >= 0 ~ "small",
+  x < 0 ~ NA
+)
+```
+
+New `.default` argument for when none of the cases are met. The `.default` is always processed last, so the recommendation is to place it at the end of the list of cases. Now the negative values are labeled "other".
+
+```{r}
+#| label: case_when default
+case_when(
+  x >= 10 ~ "large",
+  x >= 0 ~ "small",
+  is.na(x) ~ "missing",
+  .default = "other"
+)
+```
+
+### case_match()
+
+Remapping values with `case_when()` has been possible, but is a bit verbose.
+
+```{r}
+#| label: case_when remapping
+x <- c("USA", "Canada", "Wales", "UK", "China", NA, "Mexico", "Russia")
+
+case_when(
+  x %in% c("USA", "Canada", "Mexico") ~ "North America",
+  x %in% c("Wales", "UK") ~ "Europe",
+  x %in% "China" ~ "Asia"
+)
+```
+
+`case_match()` is a new function that removes the  repetition involved with `x %in%`.
+
+```{r}
+#|label: case_match
+case_match(
+  x,
+  c("USA", "Canada", "Mexico") ~ "North America",
+  c("France", "UK") ~ "Europe",
+  "China" ~ "Asia"
+)
+```
+
+`case_match()` is particularly helpful in a replacement helper function where you might want to change only a couple of values but leave everything else as is.
+
+```{r}
+#| label: case_match function
+replace_match <- function(x, ...) {
+  case_match(x, ..., .default = x, .ptype = x)
+}
+
+replace_match(
+  x, 
+  "USA" ~ "United States", 
+  c("UK", "Wales") ~ "United Kingdom",
+  NA ~ "[Missing]"
+)
+```
+
+### `consecutive_id()`
+
+The ability to create a consecutive id column linked to another id column so that only consecutive columns are collapsed with `group_by()` and `summarise()`. Create this with `mutate(id = consecutive_id(name))`.
+
+```{r}
+#| label: consecutive_id
+transcript <- tribble(
+  ~name, ~text,
+  "Hadley", "I'll never learn Python.",
+  "Davis", "But aren't you speaking at PyCon?",
+  "Hadley", "So?",
+  "Hadley", "That doesn't influence my decision.",
+  "Hadley", "I'm not budging!",
+  "Mara", "Typical, Hadley. Stubborn as always.",
+  "Davis", "Fair enough!",
+  "Davis", "Let's move on."
+)
+
+# Create consecutive id column
+transcript |>
+  mutate(id = consecutive_id(name))
+```
+
+Now you can do the grouping and summarize. You could do it just by `id`, but it is useful to `group_by()` name and id to keep the name in the summary table.
+
+```{r}
+#| label: consecutive_id summary
+transcript |>
+  mutate(id = consecutive_id(name)) |>
+  summarise(text = stringr::str_flatten(text, collapse = " "), .by = c(id, name))
+```
+
+## `pick()`, `reframe()`, and `arrange()`
+
+### `pick()`
+`pick()` is a new function that is meant to be a compliment to `across()`. With `across()`, you typically apply a function to each column. With `pick()`, you typically apply a function to the full data frame of columns that you pick. In this way, `pick()` is replaceable with an equivalent call to `tibble()`. `pick(a, c)` creates a data frame that is the same as `tibble(a = a, c = c)`.
+
+```{r}
+#| label: pick
+df <- tibble(
+  x_1 = c(1, 3, 2, 1, 2), 
+  x_2 = 6:10, 
+  w_4 = 11:15, 
+  y_2 = c(5, 2, 4, 0, 6)
+)
+
+# For instance finding the number of columns selected
+# makes more semantic sense for pick() than across()
+df |>
+  summarise(
+    n_x = ncol(pick(starts_with("x"))),
+    n_y = ncol(pick(starts_with("y")))
+  )
+```
+
+`pick()` is particularly useful in combination with ranking functions like `dense_rank()` that can take a data frame and rank the values.
+
+```{r}
+#| label: dense_rank
+df |>
+  mutate(
+    rank1 = dense_rank(x_1), 
+    rank2 = dense_rank(pick(x_1, y_2)) # Using `y_2` to break ties in `x_1`
+  )
+```
+
+### `reframe()`
+
+`reframe()` is intended as a replacement for the ability to use `summarise()` to return multiple results per group that was introduced in dplyr 1.0.0. Now using `summarise()` to do this causes a warning. `reframe()` now takes on the role of "doing something" to each group with no restrictions on the number of rows returned per group.
+
+One nice application of `reframe()` is computing quantiles at various probability thresholds.
+
+```{r}
+#| label: reframe
+df <- tibble(
+  g = c(1, 1, 1, 2, 2),
+  x = c(4, 3, 6, 2, 8),
+  y = c(5, 1, 2, 8, 9)
+)
+
+# Helper function
+quantile_df <- function(x, probs = c(0.25, 0.5, 0.75)) {
+  tibble(
+    value = quantile(x, probs, na.rm = TRUE),
+    prob = probs
+  )
+}
+
+df |>
+  reframe(quantile_df(x), .by = g)
+```
+
+You can apply such a function to multiple columns using `across()`, which returns a packed data frame. You can unnest this using the new `.unpack` argument from `across()`.
+
+```{r}
+#| label: reframe and unpack
+df %>%
+  reframe(across(x:y, quantile_df, .unpack = TRUE), .by = g)
+```

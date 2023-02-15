@@ -1,0 +1,33 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "tidyverse notes"
+  author: "Jesse Sadler"
+  date: last-modified
+  
+  chapters:
+    - index.qmd
+    
+    - part: "tidyverse"
+      chapters: 
+        - 01-dplyr-1.1.0.qmd
+    - part: "tidy eval"
+      chapters: 
+        - 02-programming-dplyr-superceded.qmd
+        - 02-programming-dplyr.qmd
+        - 02-metaprogramming.qmd
+        - 02-rlang-tidyeval.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+# YAML    
+format: 
+  html:
+    toc: true
+    code-link: true
+
+
+

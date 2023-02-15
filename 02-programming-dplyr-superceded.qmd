@@ -1,0 +1,235 @@
+---
+title: "Programming with dplyr (pre 1.0.0)"
+date: "2017-08-04"
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+```{r}
+#| label: setup
+#| message: false
+library(tidyverse)
+```
+
+*These notes refer to the vignette prior to dplyr 1.0.0, which fundamentally changed how the issue of non-standard evaluation or tidy evaluation is presented.* 
+
+## Introduction
+- `dplyr` uses non-standard evaluation (NSE)
+    - Positives
+		    - Enables ability to only state name of data frame once and perform multiple operations.
+		    - Better able to integrate with SQL
+	  - Negatives
+		    - Arguments are not referentially transparent, meaning that you cannot replace a value with a seemingly equivalent object that has been defined elsewhere. This makes it hard to create functions with arguments that change how dplyr verbs are computed.
+		    - Because of its terseness, dplyr code can be ambiguous, making functions more unpredictable.
+	  - Tools to help solve this problem in working with functions.
+		    - Pronouns
+		    - Quasiquotation
+	  - Goals of tutorial
+		    - Teach **quosures**: the data structure that stores both an expression and an environment
+		    - Teach **tidyeval**, which is the underlying toolkit through which this is implemented.
+- Programming recipes
+	  - dplyr verbs in functions can fail silently if one of the variables is not present in the data frame, but is present in the global environment.
+	  - Writing a function is hard if you want one of the arguments to be a variable name (like `x`) or an expression (like `x + y`). That is because dplyr automatically "quotes" those inputs, so they are not referentially transparent.
+
+```{r}
+df <- tibble(
+  g1 = c(1, 1, 2, 2, 2),
+  g2 = c(1, 2, 1, 2, 1),
+  a = sample(5), 
+  b = sample(5)
+)
+```
+
+## Examples
+
+### Simple example and steps to fix the problem
+
+#### Example of function that does not work
+```{r}
+#| error: true
+my_summarise <- function(df, group_var) {
+  df %>%
+  group_by(group_var) %>%
+  summarise(a = mean(a))
+}
+
+my_summarise(df, g1)
+```
+
+The problem is that `group_by()` works by quoting the input rather than evaluating it.
+
+* Two steps to fix problem
+  * Need to manually quote the input so that the function can take a take a bare variable name like `group_by()`
+	* Tell `group_by()` function not to quote its input
+* Manually quote input
+	* Use `quo()` from rlang package: this function quotes the input rather than evaluating it. It returns a **quosure**
+* Unquote dplyr function
+	* In dplyr `!!` is used to unquote an input so that it’s evaluated, not quoted.
+
+#### Fixed function
+```{r}
+my_summarise <- function(df, group_var) {
+  df %>%
+    group_by(!!group_var) %>%
+    summarise(a = mean(a))
+}
+
+my_summarise(df, quo(g1))
+```
+
+Note the use of `!!` within `group_by()` and `quo(g1)` in the function call
+
+* Step to be able to call function without using `quo()` in function call.
+	* Need a function that turns an argument into a string.
+	* This is done by `enquo()`: this looks at the argument, sees what the user typed, and returns that value as a quosure
+
+#### Fully fixed function
+```{r}
+my_summarise <- function(df, group_var) {
+  group_var <- enquo(group_var)
+  print(group_var)
+
+  df %>%
+    group_by(!!group_var) %>%
+    summarise(a = mean(a))
+}
+
+my_summarise(df, g1)
+```
+
+- First part of function is what fixes the need for `quo()`. Second part of function is same as above.
+- New function enables call of `my_summarise(df, g1)`.
+
+## Different input variable
+
+Solution for the same problem as above but with multiple arguments within a **dplyr** function
+
+#### Example
+```{r}
+summarise(df, mean = mean(a), sum = sum(a), n = n())
+summarise(df, mean = mean(a * b), sum = sum(a * b), n = n())
+```
+
+Test the approach above using `quo()` and `!!`
+```{r}
+my_var <- quo(a)
+summarise(df, mean = mean(!!my_var), sum = sum(!!my_var), n = n())
+```
+
+Can also wrap `quo()` around the dplyr call to see what will happen from dplyr’s perspective. This is useful for debugging.
+```{r}
+quo(summarise(df, mean = mean(!!my_var), sum = sum(!!my_var), n = n()))
+```
+
+#### Create a function using `enqo()` on argument
+```{r}
+my_summarise2 <- function(df, expr) {
+  expr <- enquo(expr)
+  
+  summarise(df, 
+    mean = mean(!!expr),
+    sum = sum(!!expr),
+    n = n()
+  )
+}
+my_summarise2(df, a)
+my_summarise2(df, a * b)
+```
+
+### Different input and output variable
+
+#### Example
+```{r}
+mutate(df, mean_a = mean(a), sum_a = sum(a))
+mutate(df, mean_b = mean(b), sum_b = sum(b))
+```
+
+* This is different in that we want a function that will not only do the mean and sum calculation, but will also name the column correctly.
+  * Need to create new names by pasting strings. Use `quo_name()` for this.
+  * `!!mean_name = mean(!!expr)` is not valid R code, so need helper of `:=`, thus `!!mean_name := mean(!!expr)`
+
+#### Solution
+```{r}
+my_mutate <- function(df, expr) {
+  expr <- enquo(expr)
+  mean_name <- paste0("mean_", quo_name(expr))
+  sum_name <- paste0("sum_", quo_name(expr))
+  
+  mutate(df, 
+    !!mean_name := mean(!!expr), 
+    !!sum_name := sum(!!expr)
+  )
+}
+
+my_mutate(df, a)
+```
+
+### Capturing multiple variables
+
+* In order to make the `my_summarise()` function accept any number of grouping variables need to make three changes:
+  * Use `...` in the function definition so our function can accept any number of arguments.
+  * Use `quos()` to capture all the `...` as a list of formulas.
+  * Use `!!!` instead of `!!` to **splice** the arguments into `group_by()`.
+
+#### Example
+```{r}
+my_summarise <- function(df, ...) {
+  group_var <- quos(...)
+
+  df %>%
+    group_by(!!!group_var) %>%
+    summarise(a = mean(a))
+}
+
+my_summarise(df, g1, g2)
+```
+
+## Theory
+
+### Quoting
+
+See also: http://rlang.tidyverse.org/reference/quosure.html
+
+* Defining quotation in R: "Quoting is the action of capturing an expression instead of evaluating it. All expression-based functions quote their arguments and get the R code as an expression rather than the result of evaluating that code."
+  * Note that `""` is not a quoting operation, because it returns a string rather than an expression
+* Common quote expression is use of *formula* in statistical evaluations such as `disp ~ cyl + drat`
+* Have to be careful in creating formulas, because expressions could be different based on their environment.
+  * Ability for one name to refer to different values in  different environments is an important part of R and dplyr.
+* When an object keeps track of an environment, it is said to have an **enclosure**.
+* **quosures**: one-sided formulas; one-sided formulas are quotes (they carry an expression) with an environment.
+  * Example: `var <- ~toupper(letters[1:5])`
+
+### Quasiquotation
+Automatic quoting makes dplyr very convenient for interactive use. But if you want to program with dplyr, you need some way to refer to variables indirectly. The solution to this problem is quasiquotation, which allows you to evaluate directly inside an expression that is otherwise quoted.
+
+Automatic quoting makes dplyr very convenient for interactive use. But if you want to program with dplyr, you need some way to refer to variables indirectly. The solution to this problem is **quasiquotation**, which allows you to evaluate directly inside an expression that is otherwise quoted.
+
+* Three types of unquoting in the tidyeval framework
+  * basic
+  * unquote splicing
+  * unquoting names
+
+#### Unquoting
+Can do basic unquoting with either `UQ()` or `!!`
+```{r}
+# Here we capture `letters[1:5]` as an expression:
+quo(toupper(letters[1:5]))
+
+# Here we capture the value of `letters[1:5]`
+quo(toupper(!!letters[1:5]))
+quo(toupper(UQ(letters[1:5])))
+```
+
+#### Unquote-splicing
+Unquote-splicing's functional form is `UQS()` and the syntactic shortcut is `!!!`. It takes a vector and inserts each element of the vector in the surrounding function call.
+
+```{r}
+quo(list(!!! letters[1:5]))
+```
+
+#### Setting variable names
+Setting argument names with `:=`
