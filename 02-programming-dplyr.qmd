@@ -1,0 +1,182 @@
+---
+title: "Programming with dplyr"
+date: "2023-02-15"
+url: https://dplyr.tidyverse.org/articles/programming.html
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+```{r}
+#| label: setup
+#| message: false
+library(dplyr)
+```
+
+[Programming with dplyr vignette](https://dplyr.tidyverse.org/articles/programming.html#data-masking)
+
+This vignette covers tidy evaluation. The language used to describe tidy evaluation was changed greatly with the release of [`dplyr 1.0.0` on 29 May 2020](https://dplyr.tidyverse.org/news/index.html#dplyr-100). This coincided with `rlang` changes with [version 0.4.0](https://rlang.r-lib.org/news/index.html#rlang-040) from June 2019 that introduced `{{}}` (curly-curly) and this was confirmed by the rewriting of the `rlang` tidy evaluation and metaprogramming vignettes with `rlang 1.0.0` released 26 January 2022.
+
+This vignette provides a basic overview of the main user-facing features of tidy evaluation and the new nomenclature used for tidy evaluation. For the previous language see [Wickham, *Advanced R* - Metaprogramming](02-metaprogramming.qmd) and the [Programming with `dplyr` vignette](02-programming-dplyr-superceded.qmd) before 1.0.0.
+
+The vignette divides the concept of tidy evaluation into two main parts: data masking and tidy selection. **Data masking** allows you to "use data variables as if they were variables in the environment." **tidy selection** makes it "so you can easily choose variables based on their position, name, or type."
+
+## Data masking
+Data masking allows you to refer to variables in data frames (*data-variables*) as if they were objects in your R environment (*env-variables*). This blurring of the meaning of "variable" is useful within interactive data analysis, but it introduces problems when programming with these tools.
+
+### Indirection
+The concept of indirection is a replacement for the language of quasiquotation. Indirection occurs "when you want to get the data-variable from an env-variable instead of directly typing the data-variable's name." There are two main cases:
+
+1. Data-variable in a function argument: Need to **embrace** the argument with curly-curly (`{{`).
+
+```{r}
+#| label: data mask - embrace
+var_summary <- function(data, var) {
+  data %>%
+    summarise(n = n(), min = min({{ var }}), max = max({{ var }}))
+}
+```
+
+2. Environment-variable that is a character vector: Need to index into the `.data` pronoun.
+
+`.data` is not a data frame but a pronoun that provides access to current variables with either `.data$x` or `.data[[var]]`
+
+```{r}
+#| label: data mask - .data pronoun
+#| eval: false
+for (var in names(mtcars)) {
+  mtcars %>% count(.data[[var]]) %>% print()
+}
+```
+
+### Name injection
+Name injection is related to [dynamic dots](https://rlang.r-lib.org/reference/dyn-dots.html), which makes it possible to generate names programmatically with `:=`. There are two forms of name injection:
+
+1. If the name is an env-variable, use `glue` syntax.
+
+```{r}
+#| label: name injection - glue
+name <- "susan"
+tibble("{name}" := 2)
+```
+
+2. If the name is derived from a data-variable in an argument, use embracing syntax.
+
+```{r}
+#| label: name injection - embracing
+my_df <- function(x) {
+  tibble("{{x}}_2" := x * 2)
+}
+y <- 10
+my_df(y)
+```
+
+## Tidy selection
+The capabilities of tidy selection are based on the [tidyselect](https://tidyselect.r-lib.org) package. Tidy select provides a domain specific language to select columns by name, position, or type.
+
+### Indirection
+Indirection with tidy select occurs when column selection is stored in an intermediate variable. There are two main cases:
+
+1. Data-variable in a function argument: Need to **embrace** the argument with curly-curly (`{{`).
+
+```{r}
+#| label: tidy select - embrace
+summarise_mean <- function(data, vars) {
+  data %>% summarise(n = n(), across({{ vars }}, mean))
+}
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise_mean(where(is.numeric))
+```
+
+2. Environment-variable that is a character vector: Need to use `all_of()` or `any_of()` depending on whether you want the function to error if a variable is not found.
+
+```{r}
+#| label: tidy select - any_of/all_of
+vars <- c("mpg", "vs")
+mtcars %>% select(all_of(vars)) %>% head()
+```
+
+## How-tos
+
+### Eliminating `R CMD check` `NOTE`s
+If you have a function that uses data masking or tidy selection the variables used within the function will lead to a note about undefined global variables. There are two ways to eliminate this note depending on whether it derives from data masking or tidy selection.
+
+1. Data masking: use `.data$var` and import `.data` from its source in the `rlang` package.
+2. Tidy selection: use `"var"` instead of `var`.
+
+```{r}
+#| label: CMD check notes
+#| eval: false
+#' @importFrom rlang .data
+my_summary_function <- function(data) {
+  data %>% 
+    select("grp", "x", "y") %>% 
+    filter(.data$x > 0) %>% 
+    group_by(.data$grp) %>% 
+    summarise(y = mean(.data$y), n = n())
+}
+```
+
+### User-suplied expressions in function arguments
+
+Use embracing to capture and inject the expression into the function.
+
+```{r}
+#| label: embrace
+my_summarise <- function(data, expr) {
+  data %>% summarise(
+    mean = mean({{ expr }}),
+    sum = sum({{ expr }}),
+    n = n()
+  )
+}
+```
+
+To use the name of the variable in the output embrace the variable on the left side and use `{{` to embrace.
+
+```{r}
+#| label: name injection
+my_summarise2 <- function(data, mean_var, sd_var) {
+  data %>% 
+    summarise(
+      "mean_{{mean_var}}" := mean({{ mean_var }}), 
+      "sd_{{sd_var}}" := sd({{ sd_var }})
+    )
+}
+```
+
+### Any number of user-supplied expressions
+
+Use `...` to take any number of user-specified expressions. When using `...` all named arguments should begin with `.` to minimize chances for argument clashes. See the [tidyverse design guide](https://design.tidyverse.org/dots-prefix.html) for details.
+
+```{r}
+#| label: dots
+my_summarise <- function(.data, ...) {
+  .data %>%
+    group_by(...) %>%
+    summarise(mass = mean(mass, na.rm = TRUE),
+              height = mean(height, na.rm = TRUE))
+}
+starwars %>% my_summarise(homeworld, gender)
+```
+
+### Transforming user-supplied variables
+Use `across()` and `pick()` (new with `dplyr 1.1.0`) to transform sets of data variables. You can also use the `.names` argument to `across()` to control the names of the output columns.
+
+```{r}
+#| label: across and pick
+my_summarise <- function(data, group_var, summarise_var) {
+  data %>%
+    group_by(pick({{ group_var }})) %>% 
+    summarise(across({{ summarise_var }},
+                     ~ mean(., na.rm = TRUE),
+                     .names = "mean_{.col}"))
+}
+my_summarise(starwars, 
+             group_var = c(species, gender),
+             summarise_var = c(mass, height))
+```

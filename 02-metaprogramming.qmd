@@ -18,9 +18,7 @@ Metaprogramming is the idea that code is data that can be inspected and modified
 
 ## Quasiquotation
 
-Tidy eval also enables the ability to use **quasiquotation**. This is the ability to both quote by capturing an unevaluated expression and unquote by selectively evaluate parts of an otherwise quoted expression. You can distinguish between *evaluated* arguments that obey R's usual evaluation rules and *quoted* arguments that are captured by the function and evaluated in some custom way.
-
-If you cannot evaluate a piece of code outside a function, it is quoted. Thus, the first argument of `library()` is a quoted argument, allowing you to write `library(rlang)` instead of `library("rlang")`. If you just write `rlang`, you will get an error.
+**Quasiquotation** is the ability to both quote—by capturing an unevaluated expression—and unquote—by selectively evaluating parts of an otherwise quoted expression. You can distinguish between *evaluated* arguments and *quoted* arguments by whether they obey R's usual evaluation rules or not. If you cannot evaluate a piece of code outside a function, it is quoted. Thus, the first argument of `library()` is a quoted argument, allowing you to write `library(rlang)` instead of `library("rlang")`. If you just write `rlang`, you will get an error.
 
 ```{r}
 #| label: quoted argument
@@ -28,7 +26,7 @@ If you cannot evaluate a piece of code outside a function, it is quoted. Thus, t
 rlang
 ```
 
-**Expression** is captured code that you can compute on and treat as a list. Can use `expr()` to capture code and make it into an expression. `expr()` captures code and returns exactly what you pass in. It *quotes* code.
+An **expression** is captured code that you can compute on and treat as a list. Can use `expr()` to capture code and make it into an expression. `expr()` captures code and returns exactly what you pass in. It *quotes* code.
 
 ```{r}
 #| label: expr
@@ -59,14 +57,15 @@ eval(expr(x + y))
 eval(expr(x + y), env(x = 1000))
 ```
 
-You can use `!!` (bang-bang) to unquote a single argument at a time. `!!` takes a single expression, evaluates it, and inlines the result in the abstract syntax tree. Compare the quoted expression with the unquoted expression.
+Use `!!` (bang-bang) to unquote a single argument at a time. `!!` takes a single expression, evaluates it, and inlines the result in the abstract syntax tree. Compare the quoted expression with the unquoted expression.
 
 ```{r}
 #| label: unquoting
 a <- sym("y")
 b <- 1
+# Quoted
 expr(f(a, b))
-
+# Quoted and unquoted
 expr(f(!!a, !!b))
 
 ```
