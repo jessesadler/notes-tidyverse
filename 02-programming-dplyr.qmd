@@ -16,7 +16,7 @@ source("_common.R")
 library(dplyr)
 ```
 
-[Programming with dplyr vignette](https://dplyr.tidyverse.org/articles/programming.html#data-masking)
+[Programming with dplyr vignette](https://dplyr.tidyverse.org/articles/programming.html)
 
 This vignette covers tidy evaluation. The language used to describe tidy evaluation was changed greatly with the release of [`dplyr 1.0.0` on 29 May 2020](https://dplyr.tidyverse.org/news/index.html#dplyr-100). This coincided with `rlang` changes with [version 0.4.0](https://rlang.r-lib.org/news/index.html#rlang-040) from June 2019 that introduced `{{}}` (curly-curly) and this was confirmed by the rewriting of the `rlang` tidy evaluation and metaprogramming vignettes with `rlang 1.0.0` released 26 January 2022.
 
@@ -42,7 +42,7 @@ var_summary <- function(data, var) {
 
 2. Environment-variable that is a character vector: Need to index into the `.data` pronoun.
 
-`.data` is not a data frame but a pronoun that provides access to current variables with either `.data$x` or `.data[[var]]`
+`.data` is not a data frame but a pronoun that provides access to current variables by either referring directly to the column with `.data$x` or indirectly through a character vector with `.data[[var]]`.
 
 ```{r}
 #| label: data mask - .data pronoun

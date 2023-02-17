@@ -6,15 +6,15 @@ book:
   title: "tidyverse notes"
   author: "Jesse Sadler"
   date: last-modified
-  
+
   chapters:
     - index.qmd
-    
+
     - part: "tidyverse"
-      chapters: 
+      chapters:
         - 01-dplyr-1.1.0.qmd
     - part: "tidy eval"
-      chapters: 
+      chapters:
         - 02-programming-dplyr-superceded.qmd
         - 02-programming-dplyr.qmd
         - 02-metaprogramming.qmd
@@ -23,11 +23,12 @@ book:
 
 bibliography: references.bib
 
-# YAML    
-format: 
+# YAML
+format:
   html:
     toc: true
     code-link: true
+    number-depth: 3
 
 
 
