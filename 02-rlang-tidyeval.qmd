@@ -1,6 +1,6 @@
 ---
 title: "rlang - Tidy evaluation"
-date: "2023-02-13"
+date: "2023-02-17"
 ---
 
 ```{r}
@@ -17,4 +17,483 @@ source("_common.R")
 - [What happens if I use injection operators out of context?](https://rlang.r-lib.org/reference/topic-inject-out-of-context.html)
 - [Does `{{` work on regular objects?](https://rlang.r-lib.org/reference/topic-embrace-non-args.html)
 
-## What is data-masking and why do I need `{{`?
+```{r}
+#| label: setup
+#| message: false
+library(rlang)
+library(dplyr)
+```
+
+## What is data-masking and why do I need `{{`? {#sec-data-mask}
+
+"Data-masking is a distinctive feature of R whereby programming is performed directly on a data set, with columns defined as normal objects." This is achieved by **defusing** R code (quoting it) and then **injecting** (unquoting) the defused expression in the correct context of the data frame instead of the user environment.
+
+If you pass arguments to a data-masking function in a normal way such as `dplyr::summarise()` the arguments are defused, but the user-defined arguments are not injected. For instance, below `my_mean()` does not know to look for `cyl` and `am` in the `mtcars` data frame and instead looks for them in the user environment.
+
+```{r}
+#| label: my_mean error
+#| error: true
+my_mean <- function(data, var1, var2) {
+  summarise(data, mean(var1 + var2))
+}
+
+my_mean(mtcars, cyl, am)
+```
+If you introduce objects named `cyl` and `am` into the user environment, those will be used and the `mtcars` data frame will not be used at all. Notice that the column is named `mean(var1 + var2)`, just like the error message above, indicating the actual code that is being run. 
+
+```{r}
+#| label: my_mean silent error
+cyl <- 1
+am <- 2
+my_mean(mtcars, cyl, am)
+```
+
+To inject a function argument in a data masking context use the embracing syntax curly-curly (`{{`). Note that when this is done the column is correctly named `mean(cyl + am)` and the names properly refer to variables in the `mtcars` data frame and not the user environment.
+
+```{r}
+#| label: my_mean embracing variables
+my_mean <- function(data, var1, var2) {
+  summarise(data, mean({{ var1 }} + {{ var2 }}))
+}
+
+my_mean(mtcars, cyl, am)
+```
+
+### What does "masking" mean? {#sec-what-data-mask}
+
+Data masking occurs by placing the data frame at the bottom of the chain of environments so that it takes precedence over the user environment. It thus *masks* the user environment. This means that data masking functions will use a data frame variable instead of a variable in the user environment as in the above `my_mean()` function. Tidy eval provides `.data` and `.env` [pronouns](https://rlang.r-lib.org/reference/dot-data.html) to help deal with this ambiguity.
+
+```{r}
+#| label: pronouns
+mtcars  |> 
+  summarise(
+    mean_data = mean(.data$cyl),
+    mean_env = mean(.env$cyl)
+  )
+```
+
+### How does data-masking work? {#sec-how-data-mask}
+
+Data masking relies on three language features of R:
+
+1. Argument defusal
+2. First class environments: Environments are a special type of list-like object in which defused R code can be evaluated.
+3. Explicit evaluation with `eval()` (base) or `eval_tidy()` (rlang).
+
+The below code brings these three features together: the code is defused (quoted) and then explicitly evaluated within the environment of the `mtcars` data frame instead of the default user environment.
+
+```{r}
+#| label: how data masking works
+code <- expr(mean(cyl + am))
+eval(code, mtcars)
+```
+
+```{r}
+#| label: clean up section 1
+#| echo: false
+rm(am, cyl, code)
+```
+
+## Data mask programming patterns {#sec-data-mask-patters}
+
+There are two main considerations when determining which programming pattern should be used to wrap a data-masking function:
+
+1. What behavior does the *wrapped* function implement?
+2. What behavior should *your* function implement?
+
+### Argument behaviors
+Data masking arguments are not only defined by the type of objects they accept but also the special computational behaviors they exhibit. Options include:
+
+- Base data-masked expressions (e.g. `with()`): Expressions may refer to the columns of the supplied data frame.
+- Tidy eval data-masked expressions: Same as base data-masked expressions but with addition features such as injection operators: `{{` and `!!` and the `.data` and `.env` pronouns.
+- Data-masked symbols: Supplied expressions must be simple column names.
+- Tidy selections: Tidy selection is an alternative to data masking and does not involve masking. Expressions are either interpreted in the context of a data frame (`c(cyl, am)`) or evaluated in the user environment (`starts_with()`).
+- Dynamic dots: These may be data-masked arguments, tidy selections, or just regular arguments.
+
+You can include documentation about the three main tidy eval options with the following tags:
+
+- ```@param foo <[`data-masked`][dplyr::dplyr_data_masking]> What `foo` does```.
+- ```@param bar <[`tidy-select`][dplyr::dplyr_tidy_select]> What `bar` does.```
+- ```@param ... <[`dynamic-dots`][rlang::dyn-dots]> What these dots do.```
+
+### Forwarding patterns {#sec-forward-pattern}
+Your function inherits the behavior of the function it interfaces with. In both data masking and tidy selection contexts use the embrace operator (`{{`).
+
+```{r}
+#| label: my_summarise
+my_summarise <- function(data, var) {
+  data %>% dplyr::summarise({{ var }})
+}
+mtcars %>% my_summarise(mean(cyl))
+```
+
+The behavior of `my_summarise()` is the same as `dplyr::summarise()`. This includes the ability to use the `.data` pronoun to refer to columns. The below both work in the same way.
+
+```{r}
+#| label: my_summarise and .data
+x <- "cyl"
+mtcars %>% dplyr::summarise(mean(.data[[x]]))
+mtcars %>% my_summarise(mean(.data[[x]]))
+```
+
+Dots can be forwarded by simply passing them on to another argument.
+
+```{r}
+#| label: my_group_by
+my_group_by <- function(.data, ...) {
+  .data %>% dplyr::group_by(...)
+}
+```
+
+There are some tidy selection functions that use a single named argument instead of `...` such as `pivot_longer()`. In that case, pass the `...` inside `c()`, which acts as a selection combinator in this context.
+
+```{r}
+#| label: my_pivot_longer
+my_pivot_longer <- function(.data, ...) {
+  .data %>% tidyr::pivot_longer(c(...))
+}
+```
+
+### Names patterns {#sec-names-pattern}
+Your function takes strings or character vectors to refer to column names.
+
+The `.data` pronoun is a tidy eval feature enabled within data-masked arguments and represents the data mask. It can be subset with `[[` and `$`. The three below statements are equivalent just as above with `my_summarise()`.
+
+```{r}
+#| label: subsetting .data
+mtcars %>% dplyr::summarise(mean = mean(cyl))
+
+mtcars %>% dplyr::summarise(mean = mean(.data$cyl))
+
+var <- "cyl"
+mtcars %>% dplyr::summarise(mean = mean(.data[[var]]))
+```
+
+You can also use the `.data` pronoun to connect function arguments to a data-variable. This insulates the function from data-masking behavior. Notice that `my_mean()` now needs a character vector and uses the environmental variable equivalent to `"cyl"` instead of the data variable of `am`.
+
+```{r}
+#| label: my_mean
+my_mean <- function(data, var) {
+  data %>% dplyr::summarise(mean = mean(.data[[var]]))
+}
+
+my_mean(mtcars, "cyl")
+
+am <- "cyl"
+my_mean(mtcars, am)
+```
+
+`.data` does not support character vectors of length greater than one. For character vectors of names greater than one use `all_of()` or `any_of()`.
+
+```{r}
+#| label: all_of
+vars <- c("cyl", "am")
+mtcars %>% tidyr::pivot_longer(all_of(vars))
+```
+
+### Bridge patterns {#sec-bridge-pattern}
+You change the behavior of an argument instead of inheriting it.
+
+You can use `across()` or `pick()` as a bridge between selection and data masking.
+
+```{r}
+#| label: my_group_by bridge
+my_group_by <- function(data, cols) {
+  group_by(data, pick({{ cols }}))
+}
+
+mtcars %>% my_group_by(starts_with("c"))
+```
+
+`pick()`, unlike `across()` takes dynamic dots, so you can also just pass on the dots. With `across()` you need to collect the dots with `c(...)`.
+
+```{r}
+#| label: my_group_by dots
+my_group_by <- function(.data, ...) {
+  group_by(.data, pick(...))
+}
+
+mtcars %>% my_group_by(starts_with("c"), vs:gear)
+```
+
+Use `all_of()` or `any_of()` to bridge names, or character vectors, to a data mask.
+
+```{r}
+#| label: my_group_by names
+my_group_by <- function(data, vars) {
+  data %>% dplyr::group_by(pick(all_of(vars)))
+}
+
+mtcars %>% my_group_by(c("cyl", "am"))
+```
+
+Use `mutate(.keep = "none")` to bridge data-mask to selection. This pattern is a little trickier and uses `mutate()` as a way to inspect the names passed to `...` and make sure that they are included in the data frame. The column names and any transformation are done with the splice operator (`!!!`) and then the selection can be passed to `pivot_longer()` through `all_of()`. For the output, look to the columns on the right that show name and value.
+
+```{r}
+#| label: my_pivot_longer bridge
+my_pivot_longer <- function(data, ...) {
+  # Forward `...` in data-mask context with `mutate(.keep = "none")`
+  # to create a new data frame and save the inputs names
+  inputs <- dplyr::mutate(data, ..., .keep = "none")
+  names <- names(inputs)
+  
+  # Update the data with the inputs
+  data <- dplyr::mutate(data, !!!inputs)
+
+  # Select the inputs by name with `all_of()`
+  tidyr::pivot_longer(data, cols = all_of(names))
+}
+
+mtcars %>% my_pivot_longer(cyl, am = am * 100)
+```
+
+### Transformation patterns
+
+You can transform inputs with `across()` by forwarding `...` to `across()` and performing an action on it. This cuases `...` to inherit tidy selection behavior.
+
+```{r}
+#| label: my_mean across
+my_mean <- function(data, ...) {
+  data %>% dplyr::summarise(across(c(...), ~ mean(.x, na.rm = TRUE)))
+}
+
+mtcars %>% my_mean(cyl, carb)
+
+mtcars %>% my_mean(foo = cyl, bar = carb)
+
+mtcars %>% my_mean(starts_with("c"), mpg:disp)
+```
+
+`filter()` necessitates a different pattern because it is built on logical expressions. `if_all()` and `if_any()` provide variants of `across()` suitable to use in filter. For instance, creating a function to filter all rows for which a set of variables are not equal to their minimum value.
+
+```{r}
+#| label: filter_non_baseline
+filter_non_baseline <- function(.data, ...) {
+  .data %>% dplyr::filter(if_all(c(...), ~ .x != min(.x, na.rm = TRUE)))
+}
+
+mtcars %>% filter_non_baseline(vs, am, gear)
+```
+
+```{r}
+#| label: clean up section 2
+#| echo: false
+rm(am, var, vars, x)
+```
+
+## The data mask ambiguity
+
+The convenience of data masking makes it possible to refer to both columns in data frames and objects in the user environment. However, this convenience introduces ambiguity.
+
+For instance, which value of `x` is being referred to in the `mutate()` function. The problem occurs when you want to use an object from the user environment but there is a column with the same name.
+
+```{r}
+#| label: column collisions
+df <- data.frame(x = NA, y = 2)
+x <- 100
+
+df %>% dplyr::mutate(y = y / x)
+```
+
+Another issue occurs when you have a typo in a data-variable name or you were expecting a column that is missing and there is an object with that name in the user environment. In a data-masking context if a variable cannot be found in the data mask, R looks for variables in the surrounding environment.
+
+```{r}
+#| label: object collisions
+df <- data.frame(foo = "right")
+ffo <- "wrong"
+
+df %>% dplyr::mutate(foo = toupper(ffo))
+```
+
+### Preventing collisions
+
+#### The `.data` and `.env` pronouns
+
+The easiest solution to disambiguate between data-variables and environment-variables is to use the `.data` and `.env` pronouns.
+
+```{r}
+#| label: avoid collision with pronouns
+df <- data.frame(x = 1, y = 2)
+x <- 100
+
+df %>% dplyr::mutate(y = .data$y / .env$x)
+```
+
+This is particularly useful when using named arguments with values in a function to avoid name conflicts with data frames. Use the `.env` pronoun for any environment variables scoped in the function to avoid hitting a masking column. The below example shows how the `factor` column is given preference over the argument `factor` in a data-masking context. The function is fixed through the `.env` pronoun.
+
+```{r}
+#| label: my_rescale pronouns
+df <- data.frame(factor = 0, value = 1)
+
+# Without .env pronoun
+my_rescale <- function(data, var, factor = 10) {
+  data %>% dplyr::mutate("{{ var }}" := {{ var }} / factor)
+}
+
+# Oh no!
+df %>% my_rescale(value)
+
+# With .env pronoun to ensure factor argument is used
+my_rescale <- function(data, var, factor = 10) {
+  data %>% dplyr::mutate("{{ var }}" := {{ var }} / .env$factor)
+}
+
+# Yay!
+data.frame(factor = 0, value = 1) %>% my_rescale(value)
+```
+
+#### Subsetting `.data` with env-variables
+
+The use of `.data[[var]]` pattern to bridge from name to data mask is insulated from column name collisions. You can only subset the `.data` pronoun with environment variables not data variables. `[[` works as an injection operator when applied to `.data` and so is evaluated before the data mask is created.
+
+```{r}
+#| label: subsetting .data avoids collisions
+var <- "cyl"
+
+mtcars2 <- mtcars
+mtcars2$var <- "wrong"
+
+mtcars2 %>% dplyr::summarise(mean = mean(.data[[var]]))
+```
+
+#### Injecting env-variables with `!!`
+
+As noted above, injection operators modify a piece of code early in the evaluation process before any data-masking logic occurs. "If you inject the value of a variable, it becomes inlined in the expression. R no longer needs to look up any variable to find the value."
+
+Injection with `!!` can be used to solve the same problem as using `.data` and `.env` pronouns, but the current advice is that it is preferable to use the pronouns instead of the injection operators.
+
+```{r}
+#| label: avoid collision with injection
+df <- data.frame(x = 1, y = 2)
+x <- 100
+
+# .data and .env pronouns
+df %>% dplyr::mutate(y = .data$y / .env$x)
+
+# Injection
+df %>% dplyr::mutate(y = y / !!x)
+```
+
+#### No ambiguity in tidy selections
+
+"The selection language is designed in such a way that evaluation of expressions is either scoped in the data mask only, or in the environment only." For instance, in the code below `data` is a symbol given to the selection operator `:`. It is scoped in the data mask only and, therefore, refers to the "data" column. `ncol(data)` is evaluated as normal R code. It is an environmental expression referring to the environmental variable of the `data` data frame.
+
+```{r}
+#| label: no ambiguity in tidy select
+data <- data.frame(x = 1, data = 1:3)
+
+data %>% dplyr::select(data:ncol(data))
+```
+
+```{r}
+#| label: clean up section 3
+#| echo: false
+rm(data, df, mtcars2, ffo, var, x)
+```
+
+## The double evaluation problem
+
+A problem with metaprogramming is that it introduces the ability to evaluate the same code multiple times when a piece of code is contained within a data-masking context that is evaluated in multiple places. For instance, a function that summarizes multiple functions on a single column has the potential to run twice if there is also a computation (`mutate()`-like functionality) on the column. The following function seems to work as expected.
+
+```{r}
+#| label: summarise_stats
+summarise_stats <- function(data, var) {
+  data %>%
+    dplyr::summarise(
+      mean = mean({{ var }}),
+      sd = sd({{ var }})
+    )
+}
+
+summarise_stats(mtcars, cyl)
+```
+
+However, if a computation is added to `var`, that computation will be run on the `var` column for both the `mean()` and `sd()` calculations. Thus, if you multiply `cyl` by 100, that code is evaluated twice. 
+
+```{r}
+#| label: summarise_stats with calc
+summarise_stats(mtcars, cyl * 100)
+```
+
+The output is correct, but the code will take longer to evaluate. Below shows what is actually happening in the code because a defused expression is injected in two places. The caret signs represent quosure boundaries.
+
+```{r}
+#| label: summarise_stats actual code
+#| eval: false
+dplyr::summarise(
+  mean = ^mean(^cyl * 100),
+  sd = ^sd(^cyl * 100)
+)
+```
+
+We can confirm this by creating a function with a side effect of printing some messages and running it on `cyl`.
+
+```{r}
+#| label: summarise_stats w/ times
+times100 <- function(x) {
+  message("Takes a long time...")
+  Sys.sleep(0.1)
+
+  message("And causes side effects such as messages!")
+  x * 100
+}
+
+summarise_stats(mtcars, times100(cyl))
+```
+
+The issue of double evaluation can be fixed by ensuring that any computations on `var` are performed before the `summarise()` function. This can be done with `mutate(.keep = "none")`.
+
+```{r}
+#| label: summarise_stats fix
+summarise_stats <- function(data, var) {
+  data %>%
+    # Evaluate calculations on val
+    dplyr::mutate(var = {{ var }}, .keep = "none") %>%
+    # Then summarise
+    dplyr::summarise(mean = mean(var),
+                    sd = sd(var))
+}
+
+# Now the defused input is only evaluated the one time in mutate
+summarise_stats(mtcars, times100(cyl))
+```
+
+## What happens if I use injection operators out of context?
+
+Injection operators `{{`, `!!`, and `!!!` are parts of tidy evaluation and not part of base R. Therefore, they are special characters that should only be used in data-masked arguments powered by tidy eval. Outside of the context of tidy eval data masks they have different meaning.
+
+### Using `{{` out of context
+
+In R `{` is like `(` but takes multiple expressions instead of one. Wrapping an expression in multiple curly brackets does not do anything special.
+
+```{r}
+#| label: curly-curly out of context
+# Multiple expressions
+list(
+  { message("foo"); 2 }
+)
+
+{{ 2 }}
+```
+
+Here, the result is at worst a silent error. However, an error will occur if `{{` is used in a base R data mask.
+
+```{r}
+#| label: curly-curly and with
+#| error: true
+my_mean <- function(data, var) {
+  with(data, mean({{ var }}))
+}
+
+my_mean(mtcars, cyl)
+```
+
+### Using `!!` and `!!!` out of context
+
+`!!` and `!!!` are interpreted as double and triple negation in regular R code.
+
+```{r}
+#| label: bang-bang out of context
+!! TRUE
+!!! TRUE
+```
