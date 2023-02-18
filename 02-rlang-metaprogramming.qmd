@@ -1,0 +1,431 @@
+---
+title: "rlang - Metaprogramming"
+date: "2023-02-17"
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+## `rlang` metaprogramming vignettes
+- [Defusing R expressions](https://rlang.r-lib.org/reference/topic-defuse.html)
+- [Injecting with `!!`, `!!!`, and glue syntax](https://rlang.r-lib.org/reference/topic-inject.html)
+- [Metaprogramming patterns](https://rlang.r-lib.org/reference/topic-metaprogramming.html)
+- [What are quosures and when are they needed?](https://rlang.r-lib.org/reference/topic-quosure.html)
+
+```{r}
+#| label: setup
+#| message: false
+library(rlang)
+library(dplyr)
+```
+
+## Defusing R expressions
+
+Defusing is the act of capturing code and returning an expression in a tree-like structure that provides a recipe for how to compute the value.
+
+Defuse your own R expressions with `expr()`; defuse expressions supplied by the user of a function you write with `enquo()` or `enquos()`; and evaluate it with `eval()` or `eval_tidy()`.
+
+```{r}
+#| label: defusion
+# Return the result of `1 + 1`
+1 + 1
+
+# Defuse the code and return the expression `1 + 1`
+expr(1 + 1)
+
+# Evaluate the defused code and return the result
+eval(expr(1 + 1))
+```
+
+"The most common use case for defusing expressions is to resume its evaluation in a data mask. This makes it possible for the expression to refer to columns of a data frame as if they were regular objects."
+
+```{r}
+#| label: defuse and data mask
+e <- expr(mean(cyl))
+eval(e, mtcars)
+```
+
+### The booby trap analogy {#sec-booby-trap}
+
+With lazy evaluations arguments are like booby traps. They are only evaluated when touched. "Defusing an argument can be seen as defusing the booby trap." The argument is captured rather than evaluated, rather than setting off the booby trap.
+
+### Types of defused expressions {#sec-defused-types}
+
+There are three basic types of defused expressions. See [Wickham, *Advanced R*, Chapter 18: Expressions](https://adv-r.hadley.nz/expressions.html#expression-details) for more details.
+
+1. Calls: calling a function
+2. Symbols: named objects
+    - Environment-variable: object defined in the global environment or a function.
+    - Data-variable: object is a column in a data frame.
+3. Constants: Either `NULL` or an atomic vector of length 1.
+
+```{r}
+#| label: defused types
+
+# 1. Create a call representing the computation of the mean of `foo`
+expr(mean(foo, na.rm = TRUE))
+
+# 2. Create a symbol representing objects called `foo`
+expr(foo)
+
+# 3. Return a constant
+expr(1)
+```
+
+Another way to create defused expressions is to assemble them from data.
+
+```{r}
+#| label: assemble call
+# Assemble a symbol from a string
+var <- "foo"
+sym(var)
+
+# Assemble a call from strings, symbols, and constants
+call("mean", sym(var), na.rm = TRUE)
+```
+
+### Defuse and inject {#sec-defuse-inject}
+
+The defuse and inject pattern is to defuse an argument and inject the expression into another function in the context of a data mask. This can be done in two steps with `enquo()` and `!!` or in a single defuse-and-inject step with the embrace operator `{{`. The two-step process can be useful in more complex settings where you need access to the defused expression rather than just passing it on.
+
+```{r}
+#| label: my_summarise
+#| eval: false
+
+# Defuse-and-inject: two steps
+my_summarise2 <- function(data, arg) {
+  # Defuse the user expression in `arg`
+  arg <- enquo(arg)
+
+  # Inject the expression contained in `arg`
+  # inside a `summarise()` argument
+  data |> 
+    dplyr::summarise(mean = mean(!!arg, na.rm = TRUE))
+}
+
+# Defuse and inject in a single step with the embracing operator
+my_summarise1 <- function(data, arg) {
+  data |> 
+    dplyr::summarise(mean = mean({{ arg }}, na.rm = TRUE))
+}
+```
+
+### Defused arguments and quosures {#sec-defuse-quosures}
+
+`expr()` returns a defused expression, while `enquo()` returns a quosure, an expression along with an environment. See @sec-quosures.
+
+```{r}
+#| label: cleanup Defusing R
+#| echo: false
+rm(var)
+```
+
+## Injecting with `!!`, `!!!`, and glue syntax {#sec-injecing}
+
+There are two main families of injection operators that are used to modify code before R processes it:
+
+1. [Dynamic dots](https://rlang.r-lib.org/reference/dyn-dots.html) operators: `!!!` and `"{"`
+2. Metaprogramming operators: `!!`, splicing with `!!!`, {{`, and `"{{"`
+
+### Dots injection {#sec-dots-injection}
+
+Dynamic dots make `...` programmable with injection operators.
+
+#### Splicing with `!!!` {#sec-splicing}
+You can use `list2()` to turn `...` into dynamic dots. For instance, to turn a list into a set of arguments taken in by `...` in base R you can use `do.call()`, but if you use `list2()` within the `do.call()` call, you can splice this list of arguments with `!!!`.
+
+```{r}
+#| label: rbind
+# Create an rbind function that takes dynamic dots
+rbind2 <- function(...) {
+  do.call("rbind", list2(...))
+}
+
+rows <- list(a = 1:2, b = 3:4)
+rbind2(!!!rows, c = 5:6)
+```
+
+#### Injecting names with "{"
+Dynamic dots also allows you to use an argument name that is stored in a variable. In the case of `rbind2()` this makes it possible to use a variable to name the row.
+
+```{r}
+#| label: injecting names
+name <- "foo"
+
+rbind2("{name}" := 1:2, bar = 3:4)
+
+rbind2("prefix_{name}" := 1:2, bar = 3:4)
+```
+
+### Metaprogramming injection {#sec-metaprogramming-injection}
+
+#### Embracing with `{{`
+The embracing operator is made for dealing with function arguments. "It defuses the expression supplied as argument and immediately injects it in place." The evaluation usually takes place in the context of a data mask.
+
+#### Injecting with `!!`
+`!!` is meant to inject a single object in place. For example, it can inject a data-symbol object stored in an environment variable into a data-masking context to ensure that it is evaluated.
+
+```{r}
+#| label: inject with bang-bang
+var <- data_sym("disp")
+
+mtcars %>%
+  dplyr::summarise(avg = mean(!!var, na.rm = TRUE))
+```
+
+#### Splicing with `!!!`
+The splice operator `!!!` can be used in data-masking contexts and inside `inject()`. For example, `rbind2()` could be rewritten with `inject()` so that the function can also use the splice operator and no longer needs `do.call()`.
+
+```{r}
+#| label: rbind2 inject
+rbind2 <- function(...) {
+  inject(rbind(!!!list2(...)))
+}
+rbind2(!!!rows, c = 5:6)
+```
+
+```{r}
+#| label: cleanup injections
+#| echo: false
+rm(rows, name)
+```
+
+## Metaprogramming patterns
+
+This vignette is meant to present more theoretical and advanced patterns than those discussed in [Data mask programming patterns](02-rlang-tidyeval.qmd#sec-data-mask-patters).
+
+### Forwarding patterns
+
+#### Defuse and inject
+The defuse and inject pattern can be done in wither one or two steps. Using the embracing operator and passing the dots is the simpler form. However, sometimes you might want to inspect or modify the expression before injecting them in the target context. This is made possible by the two-step patterns of `enquo()` and `!!` or `enquos()` and `!!!`.
+
+- `{{` is the combination of `enquo()` and `!!`.
+- Passing `...` is equivalent to the combination of `enquos()` and `!!!`.
+
+```{r}
+#| label: defuse and inject patterns
+#| eval: false
+my_summarise <- function(data, var) {
+  data %>% dplyr::summarise({{ var }})
+}
+my_summarise <- function(data, var) {
+  data %>% dplyr::summarise(!!enquo(var))
+}
+
+my_group_by <- function(.data, ...) {
+  .data %>% dplyr::group_by(...)
+}
+my_group_by <- function(.data, ...) {
+  .data %>% dplyr::group_by(!!!enquos(...))
+}
+```
+
+#### Inspecting input labels
+Use of `as_label()` or `englue()` to create an automatic name for one or more defused arguments.
+
+```{r}
+#| label: as_label and englue
+
+# as_label()
+f <- function(var) {
+  var <- enquo(var)
+  as_label(var)
+}
+
+# englue()
+f2 <- function(var) {
+  englue("{{ var }}")
+}
+
+f(cyl)
+
+f2(1 + 1)
+```
+
+With multiple arguments you can use `enquos()` and set the `.name` argument to `TRUE` to automatically call `as_label()` on the inputs, though the user can also provide names.
+
+```{r}
+#| label: enquos and as_label
+g <- function(...) {
+  vars <- enquos(..., .named = TRUE)
+  names(vars)
+}
+
+# automatic names with as_label
+g(cyl, 1 + 1)
+
+# user provided names
+g(x = cyl, y = 1 + 1)
+```
+
+### Names patterns: Symbolize and inject {#sec-names-pattern}
+
+You can use a symbolize and inject pattern when `across(all_of())` is not supported. In this pattern defused expressions are created that refer to column names that are then injected into a data-mask context.
+
+You can cast a string to a symbol with `sym()` and `syms()` to return simple symbols or `data_sym()` and `data_syms()` that return calls to `$` to subset the `.data` pronoun. The later functions can only be used in a tidy eval context.
+
+```{r}
+#| label: symbols
+var <- "cyl"
+vars <- c("cyl", "am")
+
+sym(var)
+syms(vars)
+
+data_sym(var)
+data_syms(vars)
+```
+
+This pattern can be used to create a `group_by()` variant that takes a vector of names that is captured by `data_syms()` and then injected with the splice operator `!!!`.
+
+```{r}
+#| label: symbolize and inject
+my_group_by <- function(data, vars) {
+  data %>% dplyr::group_by(!!!data_syms(vars))
+}
+
+mtcars %>% my_group_by(vars)
+```
+
+### Bridge patterns {#sec-bridge-pattern}
+
+`mutate()` as a data-mask to selection bridge that accomplishes the same task as in [Data masking patterns - Bridge patterns](02-rlang-tidyeval.qmd#sec-bridge-pattern) but using `enquos()` to defuse and inspect the names.
+
+```{r}
+#| label: my_pivot_longer
+my_pivot_longer <- function(data, ...) {
+  # Defuse the dots and inspect the names
+  dots <- enquos(..., .named = TRUE)
+  names <- names(dots)
+
+  # Pass the inputs to `mutate()`
+  data <- data %>% dplyr::mutate(!!!dots)
+
+  # Select `...` inputs by name with `all_of()`
+  data %>%
+    tidyr::pivot_longer(cols = all_of(names))
+}
+
+mtcars %>% my_pivot_longer(cyl, am = am * 100)
+```
+
+### Transformation patterns {#sec-transformation-pattern}
+
+It is also possible to recreate `my_mean()` from [Data masking patterns - Transformation patterns](02-rlang-tidyeval.qmd#sec-transformation-pattern). "The pattern consists in defusing the input expression, building larger calls around them, and finally inject the modified expressions inside the data-masking functions." With `...` to take in multiple arguments, you need to use `purrr::map()` to loop over the arguments to construct the call.
+
+```{r}
+#| label: my_mean
+my_mean <- function(.data, ...) {
+  # Defuse the dots. Make sure they are automatically named.
+  vars <- enquos(..., .named = TRUE)
+
+  # Map over each defused expression and wrap it in a call to `mean()`
+  vars <- purrr::map(vars, ~ expr(mean(!!.x, na.rm = TRUE)))
+
+  # Inject the expressions
+  .data %>% dplyr::summarise(!!!vars)
+}
+
+mtcars %>% my_mean(cyl, mpg)
+```
+
+The difference with the [previous version](02-rlang-tidyeval.qmd#sec-transformation-pattern) of `my_mean()` is that the function does not inherit tidy selection helpers and syntax. However, it does gain the ability to create new vectors on the fly as in `summarise()`.
+
+```{r}
+#| label: my_mean with calcs
+mtcars %>% my_mean(cyl = cyl * 100, mpg)
+```
+
+```{r}
+#| label: cleanup Metaprogramming patterns
+#| echo: false
+rm(var, vars)
+```
+
+## What are quosures and when are they needed? {#sec-quosures}
+
+A quosure is a special type of defused expression that keeps track of the original context in which the expression was written. The ability to keep track of the original context helps to interface multiple data-masking functions that might come from two unrelated environments, like two different packages.
+
+### Blending environments
+
+Example of a function call that uses a function from a package that uses another function from another package, which, in turn, is built on data-masking functions in `dplyr`. This creates a number of different contexts or environments in which the code needs to pass through to be evaluated. The role of quosures is to ensure that each variable is evaluated in the correct context.
+
+```{r}
+#| label: blending environments
+#| eval: false
+
+# Function call
+dplyr::starwars %>%
+  foo::summarise_bmi(mass, div100(height))
+
+# Context 1: global environment of user
+div100 <- function(x) {
+  x / 100
+}
+
+# Context 2: foo package
+bmi <- function(mass, height) {
+  mass / height^2
+}
+
+summarise_bmi <- function(data, mass, height) {
+  data %>%
+    bar::summarise_stats(bmi({{ mass }}, {{ height }}))
+}
+
+# Context 3: bar package
+check_numeric <- function(x) {
+  stopifnot(is.numeric(x))
+  x
+}
+
+summarise_stats <- function(data, var) {
+  # Context 4: dplyr package
+  data %>%
+    dplyr::transmute(
+      var = check_numeric({{ var }})
+    ) %>%
+    dplyr::summarise(
+      mean = mean(var, na.rm = TRUE),
+      sd = sd(var, na.rm = TRUE)
+    )
+}
+
+# Final expression with quosures identified by ^
+dplyr::transmute(
+  var = ^check_numeric(^bmi(^mass, ^div100(height)))
+)
+```
+
+### When should I create quosures? {#sec-when-quosures}
+
+`{{` and dynamic dots create quosures for you, and so tidy eval documentation has moved away from directly discussing quosures.
+
+As a rule of thumb, quosures are only needed for defused arguments that come from another environment (often the user environment) not your own. Any local expressions created within a function do not need quosures because there is no exchange of environment. Thus, local expressions can be created with `expr()`, which do not carry an environment and so are not quosures. These expressions can be evaluated with either `!!` or `eval()`/`eval_tidy()`.
+
+```{r}
+#| label: local expressions
+my_mean <- function(data, var) {
+  # `expr()` is sufficient
+  expr <- expr(mean({{ var }}))
+  dplyr::summarise(data, !!expr)
+}
+my_mean(mtcars, cyl)
+
+my_mean <- function(data, var) {
+  expr <- expr(mean({{ var }}))
+  eval_tidy(expr, data)
+}
+my_mean(mtcars, cyl)
+```
+
+### Technical description of quosures {#sec-technical-quosures}
+
+- Quosures are made up of an expression and an environment.
+- Quosures are:
+    - Callable: evaluation produces a result
+    - Hygienic: evaluated in the tracked environment
+    - Maskable: can be evaluated in a data mask such that the mask comes first in scope before the quosure environment.

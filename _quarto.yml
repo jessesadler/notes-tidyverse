@@ -19,6 +19,7 @@ book:
         - 02-programming-dplyr.qmd
         - 02-metaprogramming.qmd
         - 02-rlang-tidyeval.qmd
+        - 02-rlang-metaprogramming.qmd
     - references.qmd
 
 bibliography: references.bib

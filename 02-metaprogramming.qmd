@@ -1,5 +1,5 @@
 ---
-title: "Metaprogramming"
+title: "Advanced R: Metaprogramming"
 date: "2023-02-13"
 ---
 
@@ -16,7 +16,7 @@ library(rlang)
 
 Metaprogramming is the idea that code is data that can be inspected and modified programmatically. [Wickham, *Advanced R*'s section on Metaprogramming](https://adv-r.hadley.nz/metaprogramming.html) is organized around the idea that there are three main pillars to tidy evaluation: quasiquotation, quosures, and data masks.
 
-## Quasiquotation
+## Quasiquotation {#sec-quasiquotation}
 
 **Quasiquotation** is the ability to both quote—by capturing an unevaluated expression—and unquote—by selectively evaluating parts of an otherwise quoted expression. You can distinguish between *evaluated* arguments and *quoted* arguments by whether they obey R's usual evaluation rules or not. If you cannot evaluate a piece of code outside a function, it is quoted. Thus, the first argument of `library()` is a quoted argument, allowing you to write `library(rlang)` instead of `library("rlang")`. If you just write `rlang`, you will get an error.
 
@@ -88,7 +88,7 @@ attr_name <- "z"
   str()
 ```
 
-## Quosures
+## Quosures {#sec-quosures}
 
 However, what you usually want to do is to use `enquo()` to create a **quosure** in which the expression is bundled with the environment. This ensures that the data environment is used when evaluating the code and not affected by variables from the user environment.
 
@@ -111,7 +111,7 @@ q1 <- new_quosure(expr(x + y), env(x = 1, y = 10))
 eval_tidy(q1)
 ```
 
-## Data mask
+## Data mask {#sec-data-mask}
 
 Quasiquotation and quosures come together in creating a **data mask** in which the evaluation process is modified to be able to treat variables in data frames as if they are variables in the user environment. You can see this with a simplified replacement for the `with()` function that uses a data mask.
 
