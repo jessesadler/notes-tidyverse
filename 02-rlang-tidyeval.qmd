@@ -1,6 +1,7 @@
 ---
 title: "rlang - Tidy evaluation"
 date: "2023-02-17"
+date-modified: last-modified
 ---
 
 ```{r}
@@ -9,7 +10,7 @@ date: "2023-02-17"
 source("_common.R")
 ```
 
-## rlang Tidy evaluation vignettes
+## `rlang` Tidy evaluation vignettes
 - [What is data-masking and why do I need `{{`?](https://rlang.r-lib.org/reference/topic-data-mask.html)
 - [Data mask programming patterns](https://rlang.r-lib.org/reference/topic-data-mask-programming.html)
 - [The data mask ambiguity](https://rlang.r-lib.org/reference/topic-data-mask-ambiguity.html)
