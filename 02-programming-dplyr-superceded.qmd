@@ -22,20 +22,20 @@ library(tidyverse)
 `dplyr` uses non-standard evaluation (NSE)
 
 - Positives
-    - Enables ability to only state name of data frame once and perform multiple operations.
-		- Better able to integrate with SQL
+  - Enables ability to only state name of data frame once and perform multiple operations.
+  - Better able to integrate with SQL
 - Negatives
-		- Arguments are not referentially transparent, meaning that you cannot replace a value with a seemingly equivalent object that has been defined elsewhere. This makes it hard to create functions with arguments that change how dplyr verbs are computed.
-		- Because of its terseness, dplyr code can be ambiguous, making functions more unpredictable.
+	- Arguments are not referentially transparent, meaning that you cannot replace a value with a seemingly equivalent object that has been defined elsewhere. This makes it hard to create functions with arguments that change how dplyr verbs are computed.
+	- Because of its terseness, dplyr code can be ambiguous, making functions more unpredictable.
 - Tools to help solve this problem in working with functions.
-		- Pronouns
-		- Quasiquotation
+	- Pronouns
+	- Quasiquotation
 - Goals of tutorial
-		- Teach **quosures**: the data structure that stores both an expression and an environment
-		- Teach **tidyeval**, which is the underlying toolkit through which this is implemented.
+	- Teach **quosures**: the data structure that stores both an expression and an environment
+	- Teach **tidyeval**, which is the underlying toolkit through which this is implemented.
 - Programming recipes
-	  - dplyr verbs in functions can fail silently if one of the variables is not present in the data frame, but is present in the global environment.
-	  - Writing a function is hard if you want one of the arguments to be a variable name (like `x`) or an expression (like `x + y`). That is because dplyr automatically "quotes" those inputs, so they are not referentially transparent.
+	- dplyr verbs in functions can fail silently if one of the variables is not present in the data frame, but is present in the global environment.
+	- Writing a function is hard if you want one of the arguments to be a variable name (like `x`) or an expression (like `x + y`). That is because dplyr automatically "quotes" those inputs, so they are not referentially transparent.
 
 ```{r}
 df <- tibble(
