@@ -27,9 +27,10 @@ bibliography: references.bib
 # YAML
 format:
   html:
+    theme:
+      - default
+      - theme.scss
     toc: true
     code-link: true
     number-depth: 3
-
-
-
+    highlight-style: arrow

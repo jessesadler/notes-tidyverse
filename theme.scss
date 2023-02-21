@@ -1,0 +1,14 @@
+/*-- scss:defaults --*/
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital@0;1&display=swap');
+
+$font-family-sans-serif: "Avenir" !default;
+$font-family-monospace:  "Source Code Pro" !default;
+$line-height-base:       1.4 !default;
+$primary: #00b3b3 !default;
+
+/*-- scss:rules --*/
+
+.sidebar-title {
+  color: #00b3b3;
+}
