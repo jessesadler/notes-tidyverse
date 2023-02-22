@@ -5,7 +5,6 @@ project:
 book:
   title: "tidyverse notes"
   author: "Jesse Sadler"
-  date: last-modified
 
   chapters:
     - index.qmd
