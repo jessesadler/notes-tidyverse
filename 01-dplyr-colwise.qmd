@@ -1,0 +1,121 @@
+---
+title: "dplyr: Column-wise operations"
+date: "2023-03-13"
+date-modified: last-modified
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+```{r}
+#| label: setup
+#| message: false
+library(dplyr)
+```
+
+This vignette centers on the use of `across()`, which was introduced in 2020 with `dplyr 1.0.0`. See [dplyr 1.0.0 notes](01-dplyr-1.0.0.qmd#sec-across).
+
+
+## Basic usage {#sec-basic}
+
+Two main arguments of `across()`
+
+1. `.cols`: selects the columns you want to operate on using tidy select syntax.
+2. `.fns`: a function or list of functions to apply to each column.
+
+`across()` uses [tidyselect](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html) and so uses helper functions such as `where()`, `starts_with()` and can use `c()` to select multiple columns instead of the old function of `vars()`.
+
+```{r}
+#| label: across-basic
+starwars %>% 
+  summarise(across(where(is.character), n_distinct))
+
+starwars %>% 
+  summarise(across(c(sex, gender, homeworld), n_distinct))
+```
+
+You can also apply a function with arguments, but with `dplyr 1.1.0` you now need to use an anonymous function or lambda syntax.
+
+```{r}
+#| label: across-anonymous
+starwars %>% 
+  group_by(homeworld) %>% 
+  filter(n() > 1) %>% 
+  summarise(across(where(is.numeric), \(x) mean(x, na.rm = TRUE)), n = n())
+```
+
+
+## Multiple functions {#sec-multi-funcs}
+You can transform each variable with more than one function by supplying a named list of functions, lambda functions, or anonymous functions in the second argument.
+
+```{r}
+#| label: multi-funcs
+min_max <- list(
+  min = \(x) min(x, na.rm = TRUE),
+  max = \(x) max(x, na.rm = TRUE)
+)
+starwars %>% 
+  summarise(across(where(is.numeric), min_max))
+```
+
+You can control the names created for the columns with the `.names` argument and [glue style syntax](https://glue.tidyverse.org).
+
+```{r}
+#| label: glue-names
+starwars %>% 
+  summarise(across(where(is.numeric), min_max, .names = "{.fn}.{.col}"))
+```
+
+
+## Gotchas {#sec-gotchas}
+
+Be careful when combining numeric summaries with `where(is.numeric)`. For instance, if using `n = n()`, make sure that it comes after the transformation of `across(where(is.numeric)`.
+
+```{r}
+#| label: gotchas-numeric
+df <- data.frame(x = c(1, 2, 3), y = c(1, 4, 9))
+
+df %>% 
+  summarise(across(where(is.numeric), sd), n = n())
+```
+
+Another way to do this and make it more explicit is to call `tibble()` within `summarise()` to create a new tibble from the different pieces.
+
+```{r}
+#| label: gotchas-tbl
+df %>% 
+  summarise(
+    tibble(n = n(), across(where(is.numeric), sd))
+  )
+```
+
+
+## `filter()` and `across()` {#sec-filter}
+Cannot directly use `across()` and tidyselect methods with filter because you need another step to combine the results. This can be done with `if_any()` and `if_all()`.
+
+- `if_any()` keeps the rows where the predicate is true for at least one selected column.
+- `if_all()` keeps the rows where the predicate is true for all selected columns.
+
+```{r}
+#| label: filter across
+nrow(starwars)
+
+# Keep rows with at least one non-NA value
+starwars %>% 
+  filter(if_any(everything(), ~ !is.na(.x))) %>% 
+  nrow()
+
+# Keep rows that do not have any NA values
+starwars %>% 
+  filter(if_all(everything(), ~ !is.na(.x))) %>% 
+  nrow()
+```
+
+## Replacing `_if`, `_at`, and `_all`
+1. `across()` makes it possible to compute useful summaries that were previously impossible. For example, it’s now easy to summarise numeric vectors with one function, factors with another, and still compute the number of rows in each group.
+2. `across()` reduces the number of functions that `dplyr` needs to provide.
+3. With the `where()` helper, `across()` unifies `_if` and `_at` semantics, allowing combinations that used to be impossible. For example, you can now transform all numeric columns whose name begins with "x": `across(where(is.numeric) & starts_with("x"))`.
+4. `across()` doesn’t need `vars()`.
