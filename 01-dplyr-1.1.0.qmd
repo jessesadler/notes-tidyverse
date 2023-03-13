@@ -10,6 +10,8 @@ date-modified: last-modified
 source("_common.R")
 ```
 
+`dplyr 1.1.0` was released on 29 January 2023. 
+
 ## dplyr 1.1.0 Blog posts
 - [dplyr 1.1.0 is coming soon](https://www.tidyverse.org/blog/2022/11/dplyr-1-1-0-is-coming-soon/)
 - [Joins](https://www.tidyverse.org/blog/2023/01/dplyr-1-1-0-joins/)
@@ -343,7 +345,7 @@ my_group_by <- function(data, cols) {
 my_group_by(df, starts_with("x"))
 ```
 
-### `reframe()`
+### `reframe()` {#sec-reframe}
 
 `reframe()` is intended as a replacement for the ability to use `summarise()` to return multiple results per group that was introduced in dplyr 1.0.0. Now using `summarise()` to do this causes a warning. `reframe()` now takes on the role of "doing something" to each group with no restrictions on the number of rows returned per group.
 

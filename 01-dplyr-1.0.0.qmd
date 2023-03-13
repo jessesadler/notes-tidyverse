@@ -1,0 +1,193 @@
+---
+title: "dplyr 1.0.0"
+date: "2020-06-03"
+date-modified: last-modified
+---
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+`dplyr 1.0.0` was released on 1 June 2020. 
+
+## dplyr 1.0.0 Blog posts
+1. [dplyr 1.0.0 is coming soon](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-is-coming-soon/)
+2. [dplyr 1.0.0: new summarise() features](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-summarise/)
+3. [dplyr 1.0.0: select, rename, relocate](https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-select-rename-relocate/)
+4. [dplyr 1.0.0: working across columns](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-colwise/)
+5. [dplyr 1.0.0: working within rows](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-rowwise/)
+6. [dplyr 1.0.0 and vctrs](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-and-vctrs/)
+7. [dplyr 1.0.0 for package developers](https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-package-dev/)
+8. [dplyr 1.0.0: last minute additions](https://www.tidyverse.org/blog/2020/05/dplyr-1-0-0-last-minute-additions/)
+
+```{r}
+#| label: setup
+#| message: false
+library(dplyr)
+```
+
+## Overview of new features {#sec-overview}
+- Better support for row-wise operations: [Row-wise operations](https://dplyr.tidyverse.org/dev/articles/rowwise.html).
+- A new, simpler, approach to column-wise operations: [Column-wise operations](https://dplyr.tidyverse.org/dev/articles/colwise.html)
+- `select()` can select columns based on their type, and has a new syntax that better matches how you describe selections in English.
+- A new `relocate()` verb makes it easier change the position of columns.
+- New way to [program with dplyr](https://dplyr.tidyverse.org/dev/articles/programming.html). See [Programming with dplyr notes](02-programming-dplyr.qmd).
+- `dplyr` is now based on the [vctrs package](http://vctrs.r-lib.org/).
+
+
+## New summarise() features {#sec-summarise}
+New feature to allow multiple summarizations per group, outputting multiple rows. This ability was removed in [dplyr 1.1.0](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-pick-reframe-arrange/) and moved to the new function `reframe()`. See [`reframe()`](01-dplyr-1.1.0.qmd#sec-reframe).
+
+`summarise()` also gains a new `.groups` argument to control how groups are dropped if `summarise()` is used on a grouped data frame. See [`summarise()` and grouping](https://www.tidyverse.org/blog/2020/05/dplyr-1-0-0-last-minute-additions/#summarise-and-grouping). The options are:
+
+- Addition of a `.groups` argument to:
+- `"drop_last"`: (default) drops the last grouping level.
+- `"drop"`: drops all grouping levels.
+- `"keep"` preserves the grouping of the input.
+- `"rowwise"` turns each row into its own group.
+
+## `select()`, `rename()`, `relocate()` {#sec-tidyselect}
+
+These features are implemented in the [tidyselect](https://tidyselect.r-lib.org) package. See [`dplyr` Argument type: tidy-select](https://dplyr.tidyverse.org/dev/reference/dplyr_tidy_select.html).
+
+### Five ways to select variables in `select()` and `rename()`:
+1. Position: `df %>% select(1:4)`
+	  - Generally not recommended, but it can be very useful, particularly if the variable names are very long, non-syntactic, or duplicated.
+2. Name: `df %>% select(a, e, j)`
+3. Function of name: `df %>% select(starts_with("x"))`
+    - Helper functions: `starts_with()`, `ends_with()`, `contains()`, `matches()`
+4. Type: `df %>% select(where(is.numeric))`
+5. Any combination with Boolean operators `!`, `&`, and `|`: `df %>% select(!where(is.factor))`
+
+### Programming
+- `any_of()`: Takes a character vector of variable names and silently ignores the missing columns.
+- `all_of()` throws an error if a column name is missing.
+
+```{r}
+#| label: any_of
+#| error: true
+df <- tibble(x1 = 1, x2 = "a", x3 = 2, y1 = "b", y2 = 3, y3 = "c", y4 = 4)
+
+vars <- c("x1", "x2", "y1", "z")
+df %>% select(any_of(vars))
+
+# all_of() errors if variable is missing
+df %>% select(all_of(vars))
+```
+
+`rename_with()` makes it easier to rename variables programmatically. It supersedes `rename_if()` and `rename_at()`.
+
+```{r}
+#| label: rename_with
+df %>% rename_with(toupper)
+```
+
+You can optionally choose which columns to apply the transformation to:
+
+```{r}
+#| label: rename_with-selection
+df %>% rename_with(toupper, starts_with("x"))
+
+df %>% rename_with(toupper, where(is.numeric))
+```
+
+### `relocate()`
+`relocate()` is a specialized function to move columns around. The default behavior is to move columns to the front, to the left.
+
+```{r}
+#| label: relocate-default
+df <- tibble(w = 0, x = 1, y = "a", z = "b")
+
+df %>% relocate(y, z)
+
+# Programatic movement
+df %>% relocate(where(is.character))
+```
+
+If you want to move columns to a different position use `.before` or .`after`:
+
+```{r}
+#| label: relocate-position
+df %>% relocate(w, .after = y)
+
+df %>% relocate(w, .before = y)
+```
+
+Use `last_col()` to move to the right-hand side:
+
+```{r}
+#| label: relocate-last-col
+df %>% relocate(w, .after = last_col())
+```
+
+
+## Working across columns {#sec-across}
+See [Column-wise operations vignette](https://dplyr.tidyverse.org/dev/articles/colwise.html).
+
+Use of `across()` to replace and supersede `_if()`, `_at(`) and `_all()` suffix versions of `summarise()` and `mutate()`.
+
+### Basic usage
+Two main arguments of `across()`
+
+1. `.cols`: selects the columns you want to operate on using tidy select syntax.
+2. `.fns`: a function or list of functions to apply to each column.
+
+`across()` uses [tidyselect](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html) and so uses helper functions such as `where()`, `starts_with()` and can use `c()` to select multiple columns instead of the old function of `vars()`.
+
+```{r}
+#| label: across-basic
+starwars %>% 
+  summarise(across(where(is.character), n_distinct))
+
+starwars %>% 
+  summarise(across(c(sex, gender, homeworld), n_distinct))
+```
+
+You can also apply a function with arguments, but with `dplyr 1.1.0` you now need to use an anonymous function or lambda syntax.
+
+```{r}
+#| label: across-anonymous
+starwars %>% 
+  group_by(homeworld) %>% 
+  filter(n() > 1) %>% 
+  summarise(across(where(is.numeric), \(x) mean(x, na.rm = TRUE)), n = n())
+```
+
+
+## Working within rows {#sec-rowwise}
+
+See [Row-wise operations vignette](https://dplyr.tidyverse.org/dev/articles/rowwise.html).
+
+`rowwise()` works like `group_by()` in the sense that it doesn’t change what the data looks like; it changes how dplyr verbs operate on the data.
+
+Example of wanting to calculate mean of each students' test scores:
+
+```{r}
+#| label: rowwise
+df <- tibble(
+  student_id = 1:4, 
+  test1 = 10:13, 
+  test2 = 20:23, 
+  test3 = 30:33, 
+  test4 = 40:43
+)
+
+# mutate() does not do what we want
+df %>% mutate(avg = mean(c(test1, test2, test3, test4)))
+
+# change with rowwise
+df %>% 
+  rowwise %>% 
+  mutate(avg = mean(c(test1, test2, test3, test4)))
+```
+
+You can also pair `rowwise()` with `c_across()` to use tidyselect functions. It is based on `vec_c()`.
+
+```{r}
+#| label: rowwise-c_across
+df %>% 
+  rowwise %>% 
+    mutate(avg = mean(c_across(starts_with("test"))))
+```
