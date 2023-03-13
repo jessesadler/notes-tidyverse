@@ -1,5 +1,5 @@
 ---
-title: "dplyr-1.1.0"
+title: "dplyr 1.1.0"
 date: "2023-02-01"
 date-modified: last-modified
 ---
@@ -10,7 +10,7 @@ date-modified: last-modified
 source("_common.R")
 ```
 
-## dplyr 1.1.0 Blog contents
+## dplyr 1.1.0 Blog posts
 - [dplyr 1.1.0 is coming soon](https://www.tidyverse.org/blog/2022/11/dplyr-1-1-0-is-coming-soon/)
 - [Joins](https://www.tidyverse.org/blog/2023/01/dplyr-1-1-0-joins/)
 - [Per-operation grouping](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-per-operation-grouping/)

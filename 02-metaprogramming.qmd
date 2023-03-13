@@ -15,11 +15,11 @@ source("_common.R")
 library(rlang)
 ```
 
-Metaprogramming is the idea that code is data that can be inspected and modified programmatically. [Wickham, *Advanced R*'s section on Metaprogramming](https://adv-r.hadley.nz/metaprogramming.html) is organized around the idea that there are three main pillars to tidy evaluation: quasiquotation, quosures, and data masks.
+Metaprogramming is the idea that code is data that can be inspected and modified programmatically. [Wickham, *Advanced R*'s section on Metaprogramming](https://adv-r.hadley.nz/metaprogramming.html) is organized around the idea that there are three main pillars to tidy evaluation: quasiquotation, quosures, and data masks. See [@wickham19].
 
 ## Quasiquotation {#sec-quasiquotation}
 
-**Quasiquotation** is the ability to both quote—by capturing an unevaluated expression—and unquote—by selectively evaluating parts of an otherwise quoted expression. You can distinguish between *evaluated* arguments and *quoted* arguments by whether they obey R's usual evaluation rules or not. If you cannot evaluate a piece of code outside a function, it is quoted. Thus, the first argument of `library()` is a quoted argument, allowing you to write `library(rlang)` instead of `library("rlang")`. If you just write `rlang`, you will get an error.
+**Quasiquotation** is the ability to both quote---by capturing an unevaluated expression---and unquote---by selectively evaluating parts of an otherwise quoted expression. You can distinguish between *evaluated* arguments and *quoted* arguments by whether they obey R's usual evaluation rules or not. If you cannot evaluate a piece of code outside a function, it is quoted. Thus, the first argument of `library()` is a quoted argument, allowing you to write `library(rlang)` instead of `library("rlang")`. If you just write `rlang`, you will get an error.
 
 ```{r}
 #| label: quoted argument
