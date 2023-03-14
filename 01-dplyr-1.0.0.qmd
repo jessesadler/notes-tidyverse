@@ -124,7 +124,7 @@ df %>% relocate(w, .after = last_col())
 
 
 ## Working across columns {#sec-across}
-See [Column-wise operations vignette](https://dplyr.tidyverse.org/dev/articles/colwise.html).
+See [Column-wise operations vignette](https://dplyr.tidyverse.org/dev/articles/colwise.html) and [notes on the vignette](01-dplyr-colwise.qmd)
 
 Use of `across()` to replace and supersede `_if()`, `_at(`) and `_all()` suffix versions of `summarise()` and `mutate()`.
 
@@ -158,7 +158,7 @@ starwars %>%
 
 ## Working within rows {#sec-rowwise}
 
-See [Row-wise operations vignette](https://dplyr.tidyverse.org/dev/articles/rowwise.html).
+See [Row-wise operations vignette](https://dplyr.tidyverse.org/dev/articles/rowwise.html) and [notes on the vignette](01-dplyr-rowwise.qmd).
 
 `rowwise()` works like `group_by()` in the sense that it doesn’t change what the data looks like; it changes how dplyr verbs operate on the data.
 
@@ -179,7 +179,7 @@ df %>% mutate(avg = mean(c(test1, test2, test3, test4)))
 
 # change with rowwise
 df %>% 
-  rowwise %>% 
+  rowwise() %>% 
   mutate(avg = mean(c(test1, test2, test3, test4)))
 ```
 
@@ -188,6 +188,6 @@ You can also pair `rowwise()` with `c_across()` to use tidyselect functions. It 
 ```{r}
 #| label: rowwise-c_across
 df %>% 
-  rowwise %>% 
+  rowwise() %>% 
     mutate(avg = mean(c_across(starts_with("test"))))
 ```
