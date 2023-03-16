@@ -1,0 +1,65 @@
+---
+toc: false
+number-depth: 0
+execute: 
+  freeze: true
+---
+
+# readr example data {#sec-exdata}
+
+This document creates some toy data to be read in by `readr` as shown in [`readr` notes](01-readr.qmd).
+
+```{r}
+#| label: data
+
+my_vctr <- function(x) {
+  sample(x, 50, replace = TRUE)
+}
+my_dates <- function(x) {
+  formatC(my_vctr(x), width = 2, flag = "0")
+}
+years <- 1200:1700
+months <- 1:12
+
+
+set.seed(240)
+df <- data.frame(
+  a = my_vctr(letters),
+  b = my_vctr(c("", "NA", letters[1:5])),
+  c = runif(50, 10, 100), 
+  d = my_vctr(c("T", "F")),
+  e = my_vctr(c("hello", "goodbye", "kook", "gnarly", "none")), 
+  f = my_vctr(20:50),
+  g = paste0("$", formatC(runif(50, 1000, 200000), digits = 2, big.mark = ",", format = "f")),
+  h = paste0(my_vctr(years), my_dates(months), my_dates(1:28)),
+  i = paste(my_vctr(years), my_dates(months), my_dates(1:28), sep = "-"),
+  j = paste(my_vctr(1:28), my_vctr(month.name), my_vctr(years)),
+  k = paste(my_vctr(month.abb), my_vctr(1:28), my_vctr(years)),
+  l = my_vctr(10000:500000),
+  m = paste0("2023", "-", my_dates(months), "-", my_dates(1:28), " ", my_dates(0:23), ":", my_dates(0:59))
+)
+
+head(df)
+```
+
+## Column type specifications {#sec-key}
+- a: character
+- b: character with `NA`s as blank character and "NA"
+- c: double
+- d: logical
+- e: factor with optional `NA` with "none"
+- f: integer
+- g: number
+- h: date: "20230316"
+- i: date in locale: "2023-03-16"
+- j: date: 16 March 2023
+- k: date: Mar 16 2023
+- l: time
+- m: datetime in locale: "2023-03-16 11:38"
+
+### Write the data frame to `data/`
+
+```{r}
+#| label: write.csv
+write.csv(df, "data/example.csv", row.names = FALSE)
+```
