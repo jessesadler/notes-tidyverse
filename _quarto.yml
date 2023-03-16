@@ -11,6 +11,7 @@ book:
 
     - part: "tidyverse"
       chapters:
+        - 01-readr.qmd
         - 01-dplyr-colwise.qmd
         - 01-dplyr-rowwise.qmd
         - 01-dplyr-1.0.0.qmd
@@ -22,6 +23,8 @@ book:
         - 02-metaprogramming.qmd
         - 02-rlang-tidyeval.qmd
         - 02-rlang-metaprogramming.qmd
+  appendices:
+    - readr-data.qmd
     - references.qmd
 
 bibliography: references.bib
