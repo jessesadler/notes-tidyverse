@@ -1,8 +1,9 @@
 ---
-title: "rlang - Tidy evaluation"
 date: "2023-02-17"
 date-modified: last-modified
 ---
+
+# rlang: Tidy evaluation {#sec-rlang-tidyeval}
 
 ```{r}
 #| label: common.r

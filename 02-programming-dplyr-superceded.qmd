@@ -1,8 +1,9 @@
 ---
-title: "Programming with dplyr (pre 1.0.0)"
 date: "2017-08-04"
 date-modified: last-modified
 ---
+
+# Programming with dplyr (pre 1.0.0) {#sec-prog-dplyr-superceded}
 
 ```{r}
 #| label: common.r

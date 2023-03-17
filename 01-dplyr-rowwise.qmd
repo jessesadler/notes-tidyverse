@@ -1,8 +1,9 @@
 ---
-title: "dplyr: Row-wise operations"
 date: "2023-03-14"
 date-modified: last-modified
 ---
+
+# dplyr: Row-wise operations {#sec-rowwise}
 
 ```{r}
 #| label: common.r

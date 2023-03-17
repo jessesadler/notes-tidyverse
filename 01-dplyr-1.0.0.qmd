@@ -1,8 +1,9 @@
 ---
-title: "dplyr 1.0.0"
 date: "2020-06-03"
 date-modified: last-modified
 ---
+
+# dplyr 1.0.0 {#sec-dplyr100}
 
 ```{r}
 #| label: common.r

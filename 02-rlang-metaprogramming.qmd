@@ -1,8 +1,9 @@
 ---
-title: "rlang - Metaprogramming"
 date: "2023-02-17"
 date-modified: last-modified
 ---
+
+# rlang: Metaprogramming {#sec-rlang-meta}
 
 ```{r}
 #| label: common.r

@@ -1,8 +1,9 @@
 ---
-title: "Programming with dplyr"
 date: "2023-02-15"
 date-modified: last-modified
 ---
+
+# Programming with dplyr {#sec-prog-dplyr}
 
 ```{r}
 #| label: common.r
