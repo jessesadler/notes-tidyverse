@@ -1,0 +1,243 @@
+---
+date: "2023-03-16"
+date-modified: last-modified
+---
+
+# forcats {#sec-forcats}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+## `forcats` resources {#sec-resources}
+
+- [`forcats` website](https://forcats.tidyverse.org/index.html)
+- [R for Data Science, Chapter 17: Factors](https://r4ds.hadley.nz/factors.html)
+- [Introduction to forcats vignette](https://forcats.tidyverse.org/articles/forcats.html)
+- McNamara and Horton, "Wrangling categorical data in R"[^1]
+
+These notes use both the `forcats` vignette and the chapter from *R for Data Science*, but they focus more on the latter, which is more robust. The notes use the `gss_cat` data from `forcats` from the [General Social Survey](https://gss.norc.org/).
+
+```{r}
+#| label: setup
+#| message: false
+library(forcats)
+library(dplyr)
+library(ggplot2)
+```
+
+## Create factors {#sec-create}
+
+You can create a factor from a character vector with base `factor()`, `forcats::fct()`, or base `as.factor()`, `forcats::as_factor()`. `fct()` is stricter than `factor()`; it errors if your specification of levels is inconsistent with the values in the character vector. `as_factor()` creates levels in the order in which they appear, not in alphabetical order by locale as in base R.
+
+```{r}
+#| label: create
+fct(c("Dec", "Apr", "Jan", "Mar"), levels = month.abb)
+```
+
+You can also create a factor when reading your data with `readr::col_factor()`. See the [`readr` notes](01-readr.qmd#sec-factors).
+
+```{r}
+#| label: read-factor
+library(readr)
+csv <- "
+month,value
+Jan,12
+Feb,56
+Mar,12"
+
+read_csv(csv, col_types = list(month = col_factor(month.abb)))
+```
+
+When working with factors, the two most common operations are changing the **order** of the levels and changing the **values** of the levels.
+
+## Modifying factor order {#sec-order}
+
+Modifying factor order is particularly useful for purposes of visualization so that the geoms are ordered by frequency or a specified value in the data.
+
+Reordering functions:
+
+- `fct_infreq()`
+- `fct_reorder()`
+- `fct_reorder2()`
+- `fct_relevel()`
+
+### `fct_infreq()` {#sec-fct_infreq}
+
+`fct_infreq()` is particularly useful for bar plots. It orders factor levels by the number of observations of each level, placing the largest first. It can be used with `fct_rev()` to reverse the order of the levels if you want smallest first.
+
+```{r}
+#| label: fct_infreq
+#| layout-ncol: 2
+# fct_infreq
+ggplot(gss_cat) +
+  geom_bar(aes(y = fct_infreq(marital)))
+
+# fct_rev
+gss_cat |>
+  mutate(marital = marital |> fct_infreq() |> fct_rev()) |>
+  ggplot() +
+  geom_bar(aes(y = marital))
+```
+
+### `fct_reorder()` {#sec-fct_reorder}
+
+`fct_reorder()` reorders factor levels by sorting along another variable. This is only useful when factor levels have an arbitrary order such as alphabetical or first appearance.
+
+```{r}
+#| label: reorder
+#| layout-ncol: 2
+relig_summary <- gss_cat |>
+  group_by(relig) |>
+  summarize(
+    tvhours = mean(tvhours, na.rm = TRUE),
+    n = n()
+  )
+
+# Without reordering
+ggplot(relig_summary) +
+  geom_point(aes(x = tvhours, y = relig))
+
+# Reorder relig levels by tvhours
+ggplot(relig_summary) +
+  geom_point(aes(x = tvhours, y = fct_reorder(relig, tvhours)))
+```
+
+### `fct_reorder2()` {#sec-fct_reorder2}
+
+`fct_reorder2()` is useful for when a factor is mapped to a non-position aesthetic such as color. `fct_reorder2(f, x, y)` reorders the factor `f` by the `y` values associated with the largest `x` values. This makes the colors of the line at the far right of the plot line up with the legend.
+
+```{r}
+#| label: reorder2
+by_age <- gss_cat |>
+  filter(!is.na(age)) |> 
+  count(age, marital) |>
+  group_by(age) |>
+  mutate(prop = n / sum(n))
+
+ggplot(by_age) +
+  geom_line(aes(x = age, y = prop, color = fct_reorder2(marital, age, prop)),
+            linewidth = 1) +
+  labs(color = "marital") 
+```
+
+### `fct_relevel()` {#sec-fct_relevel}
+
+`fct_relevel()` manually moves levels. It can be used as a shortcut to move individual levels to the beginning of the order of levels. For instance, we can move "Not applicable" from the `rincome` variable to the front to be with the other non-answer types.
+
+```{r}
+#| label: fct_relevel
+rincome_summary <- gss_cat |>
+  group_by(rincome) |>
+  summarize(
+    age = mean(age, na.rm = TRUE),
+    n = n()
+  )
+
+ggplot(rincome_summary) +
+  geom_point(aes(x = age, y = fct_relevel(rincome, "Not applicable")))
+```
+
+## Modifying factor level {#sec-level}
+
+Modifying functions:
+
+- `fct_recode()`
+- `fct_collapse()`
+- `fct_lump_*()`
+
+### `fct_recode()` {#sec-fct_recode}
+
+`fct_recode()` changes factor levels by hand. This is useful when the factor levels are abbreviations or shorthand that you want to change for presentation. `fct_recode()` will leave the levels that are not explicitly mentioned as is, and will warn you if you accidentally refer to a level that does not exist.
+
+```{r}
+#| label: fct_recode
+# partyid levels are awkward
+gss_cat |> count(partyid)
+
+# recode partyid levels
+gss_cat |>
+  mutate(
+    partyid = fct_recode(partyid,
+      "Republican, strong"    = "Strong republican",
+      "Republican, weak"      = "Not str republican",
+      "Independent, near rep" = "Ind,near rep",
+      "Independent, near dem" = "Ind,near dem",
+      "Democrat, weak"        = "Not str democrat",
+      "Democrat, strong"      = "Strong democrat"
+    )
+  ) |>
+  count(partyid)
+```
+
+### `fct_collapse()` {#sec-fct_collapse}
+
+You can use `fct_recode()` to lump levels together, but you need to retype the new level multiple times. If you want to collapse multiple levels into a smaller number of levels, it is best to use `fct_collapse()`.
+
+```{r}
+#| label: fct_collapse
+gss_cat |>
+  mutate(
+    partyid = fct_collapse(partyid,
+      "other" = c("No answer", "Don't know", "Other party"),
+      "rep" = c("Strong republican", "Not str republican"),
+      "ind" = c("Ind,near rep", "Independent", "Ind,near dem"),
+      "dem" = c("Not str democrat", "Strong democrat")
+    )
+  ) |>
+  count(partyid)
+```
+
+### `fct_lump_*()` {#sec-fct_lump}
+
+Use the `fct_lump_*()` family of functions to quickly lump together small groups of factor levels to make a plot.
+
+`fct_lump_lowfreq()` progressively lumps the smallest groups categories into "Other", always keeping "Other" as the smallest category. It is not overly useful in the case below, but it shows how it works.
+
+```{r}
+#| label: fct_lump_lowfreq
+gss_cat |>
+  mutate(relig = fct_lump_lowfreq(relig)) |>
+  count(relig)
+```
+
+`fct_lump_n()` is more exact, allowing you to control the number of levels to end up with.
+
+```{r}
+#| label: fct_lump_n
+gss_cat |>
+  mutate(relig = fct_lump_n(relig, 10)) |>
+  count(relig, sort = TRUE)
+```
+
+`fct_lump_min()` lumps levels that appear fewer than `min` times.
+
+```{r}
+#| label: fct_lump_min
+gss_cat |>
+  mutate(relig = fct_lump_min(relig, 100)) |>
+  count(relig, sort = TRUE)
+```
+
+`fct_lump_prop()` lumps levels that appear in fewer than (or equal to) `prop * n` times.
+
+```{r}
+#| label: fct_lump_prop
+gss_cat |>
+  mutate(relig = fct_lump_prop(relig, 0.01)) |>
+  count(relig, sort = TRUE)
+```
+
+`fct_other()` is a convenience function that manually recodes levels with "Other" if you want to do it by hand. You can either list the levels to `keep` or those to `drop` to convert to other.
+
+```{r}
+#| label: fct_other
+gss_cat |>
+  mutate(relig = fct_other(relig, drop = c("Other eastern"))) |>
+  count(relig, sort = TRUE)
+```
+
+
+[^1]: [@mcnamara_horton17]
