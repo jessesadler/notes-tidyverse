@@ -1,0 +1,437 @@
+---
+date: "2023-03-17"
+date-modified: last-modified
+---
+
+# purrr {#sec-purrr}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+## `purrr` resources {#sec-resources}
+[`purrr` website](https://purrr.tidyverse.org/)
+
+```{r}
+#| label: setup
+#| message: false
+library(purrr)
+```
+
+## Map family {#sec-map-family}
+
+### Functions {#sec-funcs}
+- `map()` always returns a list.
+- `map_lgl()`, `map_int()`, `map_dbl()`, and `map_chr()` return an atomic vector of the indicated type (or die trying).
+- `map_vec(.ptype = NULL)` simplifies to the common type of the output. It works with most types of simple vectors like Date, POSIXct, factors, etc.
+- `walk()`: calls `.f` for its side-effect and returns the input `.x`.
+
+### Arguments {#sec-args}
+- `.f` options
+	- A named function: `mean`
+	- Anonymous function: `\(x) x + 1`
+	- Formula: `~ .x + 1`
+	- A string, integer, or list as short hand for `pluck()`
+- `.progress`: Whether to have a progress bar
+- `.default`: specifies value for elements that are missing or `NULL`.
+
+The preference from [`purrr 1.0.0`](https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/) is to use anonymous function style instead of formula or using `...` to put in arguments.
+
+### `map()` {#sec-map}
+
+```{r}
+#| label: map-family
+# Random generation of vector with the normal distribution of set mean
+1:5 |>
+  map(\(x) rnorm(n = 10, mean = x))
+
+# Simplify output to a vector instead of a list
+# by computing the mean of the distributions
+1:5 |>
+  map(\(x) rnorm(n = 10, mean = x)) |> 
+  map_dbl(mean)
+```
+
+### `pluck()` style {#sec-pluck-style}
+
+Use string, integer, or list as short hand for `pluck()`. See @sec-pluck on using `pluck()`.
+
+- `"idx"` short hand for `\(x) pluck(x, "idx")`
+- `1` short hand for `\(x) pluck(x, 1)`
+- `list("idx", 1)` short hand for `\(x) pluck(x, "idx", 1)`
+- Use `.default` argument to specify elements that are missing or `NULL`
+  - Need to change `.default = NA` to use `map_dbl()` or `map_int()`
+
+```{r}
+#| label: map-lists
+# Extract by name or position
+l1 <- list(list(a = 1L), list(a = NULL, b = 2L), list(b = 3L))
+
+# name: elements named "b"
+l1 |> map_int("b", .default = NA)
+
+# position: 2nd element
+l1 |> map_int(2, .default = NA)
+
+# Supply multiple values to index deeply into a list
+l2 <- list(
+  list(num = 1:3,     letters[1:3]),
+  list(num = 101:103, letters[4:6]),
+  list()
+)
+# map vs pluck
+l2 |> map(c(2, 2))
+l2 |> map(\(x) pluck(x, 2, 2))
+
+# Use a list to mixes numeric indices and names
+l2 |> map_int(list("num", 3), .default = NA)
+```
+
+### `map()` with data frames {#sec-map-df}
+
+```{r}
+#| label: map-dataframe
+# Calculate on data frame columns and turn into list or vector
+mtcars |> map_dbl(sum)
+```
+
+## Map variants {#sec-map-variant}
+
+### `map_if()` and `map_at()` {#sec-map_if}
+Conditionally apply function to some elements of `x`.
+
+- `map_if(.x, .p, .f, .else = NULL)` and `map_at(.x, .at, .f)`
+
+```{r}
+#| label: map_if
+iris |> map_if(is.factor, as.character, .else = as.integer) |> str()
+
+# Use numeric vector of positions select elements to change:
+iris |> map_at(c(4, 5), is.numeric) |> str()
+
+# Use vector of names to specify which elements to change:
+iris |> map_at("Species", toupper) |> str()
+```
+
+### `map_depth(.x, .depth, .f)` {#sec-map_depth}
+Map or modify elements at a given depth
+
+- `map_depth()` or `modify_depth()`
+- `.depth` argument
+  - `map_depth(x, 0, fun)` is equivalent to `fun(x)`.
+  - `map_depth(x, 1, fun)` is equivalent to `x <- map(x, fun)`
+  - `map_depth(x, 2, fun)` is equivalent to `x <- map(x, \(y) map(y, fun))`
+
+```{r}
+#| label: map_depth
+x <- list(a = list(foo = 1:2, bar = 3:4), b = list(baz = 5:6))
+
+x |> map_depth(2, sum) |> str()
+```
+
+### `map2(.x, .y, .f)` {#sec-map2}
+Map over two inputs
+
+- `map2_lgl()`, `map2_int()`, `map2_dbl()`, `map2_chr()`, `map2_vec()`, and `walk2()`
+
+```{r}
+#| label: map2
+x <- list(1, 1, 1)
+y <- list(10, 20, 30)
+
+map2(x, y, \(x, y) x + y)
+
+map2_dbl(x, y, \(x, y) x + y)
+```
+
+### `pmap(.l, .f)` {#sec-pmap}
+Map over multiple input simultaneously
+
+- `pmap_lgl()`, `pmap_int()`, `pmap_dbl()`, `pmap_chr()`, `pmap_vec()`, and `pwalk()`
+
+```{r}
+#| label: pmap
+x <- list(1, 1, 1)
+y <- list(10, 20, 30)
+z <- list(100, 200, 300)
+
+pmap(list(x, y, z), sum)
+
+pmap_dbl(list(x, y, z), sum)
+```
+
+### `imap(.x, .f)`
+Apply a function to each element of a vector and its index.
+
+- Short hand for `map2(x, names(x), ...)` if `x` has names, or `map2(x, seq_along(x), ...)` if it does not.
+- `imap_lgl()`, `imap_chr()`, `imap_int()`, `imap_dbl()`, and `iwalk()`
+
+```{r}
+#| label: imap
+# Note that the order is value then index
+imap_chr(sample(10), paste)
+
+# Use anonymous function to reverse value/index order in output
+imap_chr(sample(10), \(x, idx) paste0(idx, ": ", x))
+
+# Name of column and calculated value of column
+iwalk(mtcars, \(x, idx) cat(idx, ": ", median(x), "\n", sep = ""))
+```
+
+### `modify(.x, .f)` {#sec-modify}
+Modify elements of `.x` by `.f`. Unlike `map()` family, `modify()` always returns an object of the same type.
+
+- `modify()` is a shortcut for `x[[i]] <- f(x[[i]]); return(x)`
+- `modify2()`, `modify_if()`, `modify_at()`
+- Very similar to `map()` family.
+
+
+## Predicate functionals {#sec-predicate}
+
+A predicate function is a function that either returns `TRUE` or `FALSE`. The predicate functionals take a vector and a predicate function and do something useful.
+
+### `keep()`, `discard()`, `compact()` {#sec-keep}
+By predicate function
+
+- `keep()`: keep elements
+- `discard()`: discard elements
+
+```{r}
+#| label: pred-func
+set.seed(24)
+# Create a list of 5 values from 1:10
+x <- rep(10, 10) |>
+  map(\(x) sample(x, size = 5))
+
+# Keep
+x |> keep(\(x) mean(x) > 6)
+
+# Discard
+x |> discard(\(x) mean(x) > 6) |> length()
+```
+
+By name or position
+
+- `keep_at()`: keep by name or position
+- `discard_at()`: discard by name or position
+
+```{r}
+#| label: keep_at
+x <- c(a = 1, b = 2, cat = 10, dog = 15, elephant = 5, e = 10)
+x |> keep_at(letters)
+x |> discard_at(letters)
+```
+
+`compact()`: discards elements that are `NULL` or that have length zero
+
+```{r}
+#| label: compact
+list(a = "a", b = NULL, c = integer(0), d = NA, e = list()) |>
+  compact()
+```
+
+### `detect()` {#sec-detect}
+Find the value or position of the first match
+
+- `detect()`
+- `detect_index()`
+- `.direction` argument
+  - `"forward"`: starts at the beginning of the vector and move towards the end.
+  - `"backward"`: starts at the end of the vector and moves towards the beginning.
+
+```{r}
+#| label: detect
+is_even <- function(x) x %% 2 == 0
+
+3:10 |> detect(is_even)
+3:10 |> detect_index(is_even)
+
+# If you need to find all values, use keep()
+3:10 |> keep(is_even)
+
+# If you need to find all positions, use map_lgl()
+3:10 |> map_lgl(is_even) |> which()
+```
+
+### `every()`, `some()`, `none()` {#sec-every}
+Do every, some, or none of the elements of a list satisfy a predicate?
+
+- `some()`:  `TRUE` when `.p` is `TRUE` for at least **one** element.
+- `every()`: `TRUE` when `.p` is `TRUE` for **all** elements.
+- `none()`:  `TRUE` when `.p` is `FALSE` for **all** elements.
+
+```{r}
+#| label: every
+x <- list(0:10, 5.5)
+every(x, is.integer)
+some(x, is.integer)
+none(x, is.character)
+```
+
+### `has_element()` {#sec-has-element}
+`has_element(.x, .y)`: Does a list contain an object?
+
+```{r}
+#| label: has_element
+x <- list(1:10, 5, 9.9)
+x |> has_element(1:10)
+x |> has_element(3)
+```
+
+## Plucking {#sec-plucking}
+
+### `pluck()` {#sec-pluck}
+`pluck(.x, ...)` implements a generalized form of `[[` that allow you to index deeply and flexibly into data structures. It always succeeds, returning `.default` if the index you are trying to access does not exist or is `NULL`.
+
+You can use a combination of numeric positions, vector or list names, and accessor functions.
+
+- `pluck(x, 1)` is equivalent to `x[[1]]`
+- `pluck(x, 1, 2)` is equivalent to `x[[1]][[2]]`
+
+```{r}
+#| label: pluck
+x <- list(
+  list("a", list(1, elt = "foo")),
+  list("b", list(2, elt = "bar"))
+)
+# equivalent to `x[[1]][[2]]`
+pluck(x, 1, 2)
+
+# Combine numeric positions with names
+pluck(x, 1, 2, "elt")
+
+# By default returns `NULL` when an element does not exist
+pluck(x, 10)
+
+# You can supply a default value for non-existing elements
+pluck(x, 10, .default = NA)
+```
+
+Can assign values with `pluck() <- x`
+
+```{r}
+#| label: pluck-assign
+pluck(x, 1, 2, 2) <- "kook"
+pluck(x, 1, 2, 2)
+```
+
+### `chuck()` {#sec-chuck}
+`chuck()` is the same as `pluck()` but throws an error if the index does not exist.
+
+```{r}
+#| label: chuck
+#| error: true
+chuck(x, 1, 2, 2)
+
+# pluck vs chuck
+pluck(x, 10)
+chuck(x, 10)
+```
+
+
+### `assign_in()` and `modify_in()` {#sec-assign_in}
+Modify values in a pluck location.
+
+- `assign_in(x, where, value)`: Assigns a value to a pluck location.
+- `modify_in(.x, .where, .f)`: Applies a function to a pluck location.
+- `where/.where` arguments are a pluck location as a numeric vector of positions, a character vector of names, or a list combining both.
+
+```{r}
+#| label: assign_in
+# Return "kook" back to "foo"
+pluck(x, 1, 2, 2)
+x <- assign_in(x, c(1, 2, 2), "foo")
+pluck(x, 1, 2, 2)
+
+# Modify a location by a function
+pluck(x, 1, 2, "elt")
+x <- modify_in(x, list(1, 2, "elt"), toupper)
+pluck(x, 1, 2, "elt")
+```
+
+
+## Transforming lists and vectors {#sec-transform}
+
+### `list_flatten()` {#sec-flatten}
+Removes a single level of hierarchy from a list; the output is always a list. Lists are flattened from outside to inside so the outermost list is flattened and inner lists are maintained.
+
+`list_flatten()` supersedes `flatten()` in [`purrr 1.0.0`][1].
+
+```{r}
+#| label: flatten
+x <- list(1, list(2, 3), list(4, list(5)))
+str(x)
+
+# 2nd-level lists are flattened
+# 3rd-level lists made into 2nd level
+x |> list_flatten() |> str()
+
+# Flat lists are left as is
+list(1, 2, 3, 4, 5) |> list_flatten() |> str()
+```
+
+### `list_c()` {#sec-list_c}
+Concatenate the elements of a list to produce a vector. This allows elements in a list to be different lengths, breaking the one-to-one mapping between input and output of `map()` family of functions. Optional argument `ptype` to provide a prototype to ensure that the output type is always the same.
+
+`list_c()` supersedes `flatten_lgl()`, `flatten_int()`, `flatten_dbl()`, and `flatten_chr()` in [`purrr 1.0.0`][1].
+
+```{r}
+#| label: list_c
+list_c(list(1, 1:2, 1:3))
+```
+
+### `list_simplify()` {#sec-list-simplify}
+Reduces a list to a homogeneous vector; the output is always the same length as the input. Thus, all elements of the list must be length 1. Use `.ptype` to specify what class the resulting vector should be.
+
+`list_simplify()` supersedes `simplify()`, `simplify_all()`, and `as_vector()` in [`purrr 1.0.0`][1].
+
+```{r}
+#| label: list-simplify
+#| error: true
+list_simplify(list(1, 2, 3))
+
+# Error with more than one element
+list_simplify(list(1, 2, 1:3))
+```
+
+### `list_rbind()` and `list_cbind()` {#sec-rbind}
+Combine data frames together to create a larger data frame either by row or column. `x` must be a list of data frames.
+
+`list_rbind()` and `list_cbind()` supersedes `flatten_dfr()` and `flatten_dfc()`in [`purrr 1.0.0`][1].
+
+```{r}
+#| label: rbind
+x <- list(
+  a = data.frame(x = 1:2),
+  b = data.frame(y = "a")
+)
+# rbind
+list_rbind(x)
+list_rbind(x, names_to = "id")
+
+#cbind
+list_cbind(x)
+```
+
+### `accumulate()` and `reduce()` {#sec-accumulate}
+- Accumulate intermediate results of a vector reduction.
+  - `accumulate()` and `accumulate2()`
+- Reduce a list to a single value by iteratively applying a binary function
+  - `reduce()` and `reduce2()`
+
+```{r}
+#| label: accumulate
+# accumulate is equivalent to cumsum
+1:5 |> accumulate(`+`)
+
+# reduce is equivalent to sum
+1:5 |> reduce(`+`)
+
+# with paste
+accumulate(letters[1:5], paste, sep = ".")
+reduce(letters[1:5], paste, sep = ".")
+```
+
+[1]: https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/#flattening-and-simplification

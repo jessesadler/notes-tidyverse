@@ -17,6 +17,7 @@ book:
         - 01-dplyr-1.0.0.qmd
         - 01-dplyr-1.1.0.qmd
         - 01-forcats.qmd
+        - 01-purrr.qmd
     - part: "tidy eval"
       chapters:
         - 02-programming-dplyr-superceded.qmd
