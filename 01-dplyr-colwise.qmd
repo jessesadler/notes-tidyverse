@@ -17,7 +17,7 @@ source("_common.R")
 library(dplyr)
 ```
 
-This vignette centers on the use of `across()`, which was introduced in 2020 with `dplyr 1.0.0`. See [dplyr 1.0.0 notes](01-dplyr-1.0.0.qmd#sec-across).
+[This vignette](https://dplyr.tidyverse.org/articles/colwise.html) centers on the use of `across()`, which was introduced in 2020 with `dplyr 1.0.0`. See [dplyr 1.0.0 notes](01-dplyr-1.0.0.qmd#sec-across).
 
 
 ## Basic usage {#sec-basic}
