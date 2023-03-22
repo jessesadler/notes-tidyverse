@@ -61,5 +61,5 @@ head(df)
 
 ```{r}
 #| label: write.csv
-write.csv(df, "data/example.csv", row.names = FALSE)
+write.csv(df, "data/readr-example.csv", row.names = FALSE)
 ```

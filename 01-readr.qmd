@@ -103,7 +103,7 @@ Start by seeing how it does by default with `guess_parser()` using `spec_csv()` 
 ```{r}
 #| label: ex-spec
 # Data
-read_csv("data/example.csv", show_col_types = FALSE)
+read_csv("data/readr-example.csv", show_col_types = FALSE)
 
 # Column specifications
 spec_csv("data/example.csv")
