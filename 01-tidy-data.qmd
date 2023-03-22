@@ -1,0 +1,212 @@
+---
+date: "2023-03-21"
+date-modified: last-modified
+---
+
+# Tidy data {#sec-tidy-data}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+[This vignette](https://tidyr.tidyverse.org/articles/tidy-data.html) is a code heavy version of the [Tidy Data paper](https://vita.had.co.nz/papers/tidy-data.html) [@wickham14] using data and code from [tidyr](https://tidyr.tidyverse.org/index.html). It defines tidy data, providing a nice clear example from some toy classroom data and then shows five types of messy data and how they might be tidied.
+
+```{r}
+#| label: setup
+#| message: false
+library(tidyverse)
+```
+
+## Tidy data: Definition {#sec-definition}
+
+"Tidy data is a standard way of mapping the meaning of a dataset to its structure. A dataset is messy or tidy depending on how rows, columns and tables are matched up with observations, variables and types."
+
+1. Every column is a **variable**.
+2. Every row is an **observation**.
+3. Every cell is a **single value**.
+
+## The structure and semantics of data {#sec-structure}
+
+Structure of rows and columns does little to help us define whether data is tidy or not and how they relate to each other. This can be seen in representing some typical data from a classroom in two different ways that are typical for how such data might be entered.
+
+```{r}
+#| label: classroom
+classroom <- tribble(
+  ~name,    ~quiz1, ~quiz2, ~test1,
+  "Billy",  NA,     "D",    "C",
+  "Suzy",   "F",    NA,     NA,
+  "Lionel", "B",    "C",    "B",
+  "Jenny",  "A",    "A",    "B"
+  )
+classroom
+
+tribble(
+  ~assessment, ~Billy, ~Suzy, ~Lionel, ~Jenny,
+  "quiz1",     NA,     "F",   "B",     "A",
+  "quiz2",     "D",    NA,    "C",     "A",
+  "test1",     "C",    NA,    "B",     "B"
+  )
+```
+
+To better define tidy data we can break data into values organized into observations and variables.
+
+- Values: Usually either numbers (if quantitative) or strings (if qualitative).
+- Variable: contains all values that measure the same underlying attribute (like height, temperature, duration) across units.
+- Observation: contains all values measured on the same unit (like a person, or a day, or a race) across attributes.
+
+The consequence of this definition of tidy data can be seen by making the `classroom` data tidy.
+
+```{r}
+#| label: tidy-classroom
+classroom |> 
+  pivot_longer(quiz1:test1, names_to = "assessment", values_to = "grade") |> 
+  arrange(name, assessment)
+```
+
+This structure of data is more repetitive, but it is easier to compute on and break down into variables and observations:
+
+- Variables: `name`, type of `assessment`, and `grade`
+- Observations: The grade given to each student for each test.
+
+It is often trivial to define variables and observations in a given context, but it is difficult to do so in general. Whether a value should be a different onservation or a different variable is often dependent upon the context of the data.
+
+"Tidy data is particularly well suited for vectorised programming languages like R, because the layout ensures that values of different variables from the same observation are always paired."
+
+## Tidying messy datasets {#sec-messy-data}
+
+Five types of messy data:
+
+1. Column headers are values, not variable names
+2. Multiple variables stored in one column
+3. Variables are stored in both rows and columns
+4. Multiple types in one table
+5. One type in multiple tables
+
+### Column headers are values, not variable names
+Having values in column headers can be a nice way to present data and can be efficient for computing if you can perform matrix expressions on the data.
+
+```{r}
+#| label: values-in-headers
+relig_income
+```
+
+The structure of the data frame is 11 columns that are actually variables, 18 religious groups, and the frequencies of the two other variables. To tidy the data the data frame needs to be pivoted to a longer format in which the column names into a key-value pairs.
+
+```{r}
+#| label: pivot-longer
+relig_income |> 
+  pivot_longer(-religion, names_to = "income", values_to = "frequency")
+```
+
+A good example of this kind of data is found in `billboard`, which records the ranking of songs after they crack the Billboard top 100 for 75 weeks. This form is not tidy, but it is good for data entry, as it reduces duplication of data. Here, there is a bit of extra tidying to do to make the variables more conducive to the tidy structure.
+
+```{r}
+#| label: billboard
+billboard
+
+billboard_long <- billboard |> 
+  pivot_longer(
+    wk1:wk76, 
+    names_to = "week", 
+    values_to = "rank", 
+    values_drop_na = TRUE
+  ) |> 
+  mutate(
+    week = as.integer(gsub("wk", "", week)),
+    date = as.Date(date.entered) + 7 * (week - 1),
+    date.entered = NULL
+  )
+billboard_long 
+```
+
+### Multiple variables stored in one column
+Sometimes there are more than one variable stored in each column. This is the case in the `tb` (tuberculosis) that comes from the World Health Organization. It shows tuberculosis cases by `country`, `year`, and demographic group that includes both gender `m` or `f` and `age` group.
+
+```{r}
+#| label: tb-data
+tb <- read_csv("data/tb.csv")
+tb
+```
+
+The transformation to pivot longer and split the header variable can be done in a single step by supplying multiple column names to `names_to` and also supplying a grouped regular expression to `names_pattern` to split the variable after the first character.
+
+```{r}
+#| label: pivot-longer-split
+tb %>% pivot_longer(
+  !c(iso2, year), 
+  names_to = c("sex", "age"), 
+  names_pattern = "(.)(.+)",
+  values_to = "n", 
+  values_drop_na = TRUE
+)
+```
+
+### Variables are stored in both rows and columns
+A complex form of messy data is when variables are stored in both rows and columns. This occurs in weather data recording max and min temperatures in day columns.
+
+```{r}
+#| label: weather-data
+weather <- read_csv("data/weather.csv")
+weather
+```
+
+To deal with this dual nature of the data we need to pivot the day variables longer to get the temperature readings in a column and then pivot the element column wider to split the temperature readings between min and max.
+
+```{r}
+#| label: weather-tidy
+# Pivot-longer: day columns
+weather_longer <- weather |> 
+  pivot_longer(
+    d1:d31, 
+    names_to = "day", 
+    values_to = "value", 
+    values_drop_na = TRUE
+  ) |> 
+  mutate(
+    date = ymd(paste(year, month, gsub("d", "", day), sep = "-"))
+  ) |> 
+  select(id, date, element, value) |> 
+  arrange(date)
+weather_longer
+
+# Pivot-wider: element column
+weather_longer |> 
+  pivot_wider(names_from = element, values_from = value)
+```
+
+### Multiple types in one table
+This occurs when multiple observational units are stored on one table instead of in multiple tables. One simple example of this is in the `billboard` data where there is information about both the song and its ranking on the billboard list. This leads to duplication of information about the `artist` in this case. It would be better to divide this information into two tables linked through a song id.
+
+```{r}
+#| label: billboard-two-tables
+# Song table
+song <- billboard_long |> 
+  distinct(artist, track) |>
+  mutate(song_id = row_number())
+song
+
+# Rank table
+rank <- billboard_long |> 
+  left_join(song, c("artist", "track")) |>
+  select(song_id, date, week, rank)
+rank
+```
+
+### One type in multiple tables
+Sometimes an observational unit is spread among many tables that might be split by a variable such as person, year, location, etc. The fix for this is to bring the tables together and tidy:
+
+1. Read the files into a list of tables.
+2. For each table, add a new column that records the original file name (the file name is often the value of an important variable).
+3. Combine all tables into a single table.
+
+This can be done with `purrr`
+
+```{r}
+#| label: purrr
+#| eval: false
+paths <- dir("data", pattern = "\\.csv$", full.names = TRUE)
+names(paths) <- basename(paths)
+map_dfr(paths, read.csv, stringsAsFactors = FALSE, .id = "filename")
+```
