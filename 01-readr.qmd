@@ -106,7 +106,7 @@ Start by seeing how it does by default with `guess_parser()` using `spec_csv()` 
 read_csv("data/readr-example.csv", show_col_types = FALSE)
 
 # Column specifications
-spec_csv("data/example.csv")
+spec_csv("data/readr-example.csv")
 ```
 
 The parser generally does well. Columns `a`, `b`, `c`, and `d` are all completely correct, including identifying `NA` values in column `b`, but there are some issues to deal with in columns `e`, `f`, and `g`.
@@ -116,7 +116,7 @@ To override the guesses from `guess_parser()` we can use `col_*` functions to be
 
 ```{r}
 #| label: ex-integer-factor
-read_csv("data/example.csv", 
+read_csv("data/readr-example.csv", 
          na = c("", "NA", "none"), # Add none as NA in b
          col_types = cols_only(
   e = col_factor(c("hello", "goodbye", "kook", "gnarly")),
@@ -130,7 +130,7 @@ Dealing with dates often requires the use of a date format in `col_date()`, `col
 
 ```{r}
 #| label: ex-dates
-read_csv("data/example.csv", col_types = cols_only(
+read_csv("data/readr-example.csv", col_types = cols_only(
   h = col_date("%Y%m%d"), # date as 8 digit number (20230316)
   i = col_date(), # date in locale (2023-03-16)
   j = col_date("%d %B %Y"), # 16 March 2023
