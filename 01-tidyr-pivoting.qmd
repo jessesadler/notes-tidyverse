@@ -1,0 +1,551 @@
+---
+date: "2023-03-31"
+date-modified: last-modified
+---
+
+# tidyr: Pivoting {#sec-pivoting}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+[This vignette](https://tidyr.tidyverse.org/articles/pivot.html) describes the usage of `pivot_longer()` and `pivot_wider()` as tidying methods that supersede `gather()` and `spread()`. The two new functions are meant to be more intuitive than `gather()` and `spread()`. They can work with multiple value variables that may have different types and can use specs to model the shape of the outcome.
+
+```{r}
+#| label: setup
+#| message: false
+library(tidyverse)
+```
+
+## Longer {#sec-longer}
+`pivot_longer()` makes datasets **longer** by increasing the number of rows and decreasing the number of columns.
+
+`pivot_longer()` arguments:
+
+- `data`
+- `cols`: Columns to pivot into longer format.
+- `names_to`: The new column or columns to create from the information stored in the column names of `data` specified by `cols`.
+- `values_to`: The name of the column to create from the data stored in cell values.
+- `names_prefix`: A regular expression used to remove matching text from the start of each variable name.
+- `names_transform`: Either a single function applied to all columns or a list of column name-function pairs.
+- `names_sep`, `names_pattern`: Control how the column name is broken up when multiple names are passed to `names_to`.
+  - `names_sep`: Either a numeric vector of where to split or regular expression.
+  - `names_pattern`: A regular expression containing matching groups.
+
+### String data in column names {#sec-string-data}
+Data: `relig_income`
+
+```{r}
+#| label: string-col
+relig_income
+
+# Pivot all columns except religion
+relig_income |> 
+  pivot_longer(
+    cols = !religion, 
+    names_to = "income", 
+    values_to = "count"
+  )
+```
+
+### Numeric data in column names {#sec-num-data}
+Data: `billboard`
+
+Use of arguments `names_prefix` to strip away prefix in column names of `wk` and `names_transform` to convert character to integer.
+
+```{r}
+#| label: numeric-col
+billboard
+
+billboard |>
+  pivot_longer(
+    cols = starts_with("wk"), 
+    names_to = "week", 
+    names_prefix = "wk",
+    names_transform = as.integer,
+    values_to = "rank",
+    values_drop_na = TRUE,
+  )
+```
+
+### Many variables in column names {#sec-multi-vars}
+Data `who`
+
+columns from `new_sp_m014` to `newrel_f65` encode four variables in their names:
+
+- The `new_`/`new` prefix indicates these are counts of new cases.
+- `sp`/`rel`/`ep` describe how the case was diagnosed.
+- `m`/`f` gives the gender.
+- `014`/`1524`/`2535`/`3544`/`4554`/`65` supplies the age range.
+
+To deal with this: 
+
+1. Specifying multiple column names in `names_to`.
+2. Separate column values with either `names_sep` or `names_pattern`.
+3. Use of `readr` functions to convert the gender and age to factors. This is faster than using `mutate()` afterwards.
+
+```{r}
+#| label: multi-var
+who
+
+who |>
+  pivot_longer(
+    cols = new_sp_m014:newrel_f65,
+    names_to = c("diagnosis", "gender", "age"), 
+    names_pattern = "new_?(.*)_(.)(.*)",
+    names_transform = list(
+      gender = ~ readr::parse_factor(.x, levels = c("f", "m")),
+      age = ~ readr::parse_factor(
+        .x,
+        levels = c("014", "1524", "2534", "3544", "4554", "5564", "65"), 
+        ordered = TRUE
+      )
+    ),
+    values_to = "count",
+)
+```
+
+### Multiple observations per row {#sec-multi-obs}
+Data: `household`
+
+Use of `".value"` in `names_to` to indicate that part of the column name specifies the "value" being measured and so should be used as a variable name.
+
+```{r}
+#| label: multi-obs-household
+household
+
+household |>
+  pivot_longer(
+    cols = !family, 
+    names_to = c(".value", "child"), 
+    names_sep = "_", 
+    values_drop_na = TRUE
+  )
+```
+
+Data: `anscombe`
+
+Use of `cols_vary = "slowest"` to group values from columns `x1` and `y1` together,.
+
+```{r}
+#| label: multi-obs-anscombe
+anscombe
+
+anscombe |>
+  pivot_longer(
+    cols = everything(), 
+    cols_vary = "slowest",
+    names_to = c(".value", "set"), 
+    names_pattern = "(.)(.)"
+  )
+```
+
+## Wider {#sec-wider}
+`pivot_wider()` makes a dataset **wider** by increasing the number of columns and decreasing the number of rows.
+
+`pivot_wider()` arguments:
+
+- `data`
+- `names_from`: Column used to create column names.
+- `values_from`: Column used to create cell values.
+- `values_fill`: Default value instead of `NA`.
+- `values_fn`: A function applied to the value in each cell in the output.
+  - You will typically use this when the combination of `id_cols` and `names_from` columns does not uniquely identify an observation.
+- `names_prefix`: String added to the start of every variable name.
+- `names_sep`: If `names_from` or `values_from` contains multiple variables, this will be used to join their values together into a single string to use as a column name.
+- `names_glue`: Instead of `names_sep` and `names_prefix`, you can supply a glue specification that uses the `names_from` columns (and special `.value`) to create custom column names.
+- `names_expand`: Whether to make implicit factor levels explicit.
+- `id_cols`: A set of columns that uniquely identify each observation.
+- `id_expand`: Whether to make implicit factor levels explicit in `id_cols`.
+- `unused_fn`: A function applied to summarize the values from the unused columns (i.e. columns not identified by `id_cols`, `names_from`, or `values_from`).
+
+### Capture-recapture data {#sec-capture}
+Data: `fish_encounters`
+
+```{r}
+#| label: capture
+fish_encounters
+
+fish_encounters |>
+  pivot_wider(
+    names_from = station, 
+    values_from = seen,
+    values_fill = 0
+  )
+```
+
+### Aggregation {#sec-agg}
+Data: `warpbreaks`
+
+Use of `values_fn` to create aggregate when `pivot_wider()` matches multiple cells.
+
+```{r}
+#| label: aggregation
+#| warning: true
+warpbreaks <- warpbreaks |>
+  as_tibble() |>
+  select(wool, tension, breaks)
+warpbreaks
+
+# Multiple matches creates list columns
+warpbreaks |>
+  pivot_wider(
+    names_from = wool, 
+    values_from = breaks
+  )
+
+# values_fn to summarise values
+warpbreaks |>
+  pivot_wider(
+    names_from = wool, 
+    values_from = breaks,
+    values_fn = mean
+  )
+```
+
+### Generate column name from multiple variables {#sec-create-colnames}
+Data: `production`
+
+Take tidy data and widen to have one column for each combination of two columns. Do this by specifying multiple variables for `names_from`.
+
+Control how the column names are constructed with `names_sep` and `names_prefix`, or the workhorse `names_glue`
+
+```{r}
+#| label: create-colnames
+# Create tidy data
+production <- 
+  expand_grid(
+    product = c("A", "B"), 
+    country = c("AI", "EI"), 
+    year = 2000:2014
+  ) %>%
+  filter((product == "A" & country == "AI") | product == "B") %>% 
+  mutate(production = rnorm(nrow(.)))
+production
+
+# With names_sep and names_prefix
+production |> 
+  pivot_wider(
+    names_from = c(product, country), 
+    values_from = production,
+    names_sep = ".",
+    names_prefix = "prod."
+  )
+
+# With names_glue
+production |> 
+  pivot_wider(
+    names_from = c(product, country), 
+    values_from = production,
+    names_glue = "prod_{product}_{country}"
+  )
+```
+
+### Tidy census {#sec-tidy-census}
+Data: `us_rent_income`
+
+```{r}
+#| label: tidy-census
+us_rent_income
+
+us_rent_income |> 
+  pivot_wider(
+    names_from = variable, 
+    values_from = c(estimate, moe)
+  )
+```
+
+See @sec-wide-spec for a different way to do this with a `spec`.
+
+### Implicit missing values {#sec-missing-vals}
+Data: Factor of weekdays
+
+When you want to turn a column of factor data into column names. `pivot_wider()` defaults to generating columns from the data that exists, but you might want to include columns from all possible factor levels. Use `names_expand` to make implicit factor levels explicit.
+
+```{r}
+#| label: missing-vals-1d
+# Data
+weekdays <- c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+daily <- tibble(
+  day = factor(c("Tue", "Thu", "Fri", "Mon"), levels = weekdays),
+  value = c(2, 3, 1, 5)
+)
+daily
+
+daily |> 
+  pivot_wider(
+    names_from = day, 
+    values_from = value, 
+    names_expand = TRUE
+  )
+```
+
+Data: Factor and year data
+
+If multiple `names_from` columns are provided, `names_expand` will generate a Cartesian product of all possible combinations of the names_from values.
+
+```{r}
+#| label: missing-vals-2d
+# Data
+percentages <- tibble(
+  year = c(2018, 2019, 2020, 2020),
+  type = factor(c("A", "B", "A", "B"), levels = c("A", "B")),
+  percentage = c(100, 100, 40, 60)
+)
+percentages
+
+percentages |> 
+  pivot_wider(
+    names_from = c(type, year),
+    values_from = percentage,
+    names_expand = TRUE,
+    values_fill = 0
+  )
+```
+
+Data: Missing factor levels in `id_cols`
+
+Missing rows in factor instead of missing columns as above. Need to use `id_expand = TRUE`.
+
+```{r}
+#| label: missing-vals-id_cols
+daily <- mutate(daily, type = factor(c("A", "B", "B", "A")))
+daily
+
+daily |> 
+  pivot_wider(
+    names_from = type, 
+    values_from = value,
+    values_fill = 0,
+    id_expand = TRUE
+  )
+```
+
+### Unused columns {#sec-unused-cols}
+Issue of retaining some data in a column that is not related to the pivoting process. Use of `unused_fn` to apply a function to unused columns instead of dropping them. You can retain the information by creating a list column.
+
+```{r}
+#| label: unused-cols
+# Data
+updates <- tibble(
+  county = c("Wake", "Wake", "Wake", "Guilford", "Guilford"),
+  date = c(as.Date("2023-01-01") + 0:2, as.Date("2023-01-03") + 0:1),
+  system = c("A", "B", "C", "A", "C"),
+  value = c(3.2, 4, 5.5, 2, 1.2)
+)
+updates
+
+# max
+updates |> 
+  pivot_wider(
+    id_cols = county, 
+    names_from = system, 
+    values_from = value,
+    unused_fn = list(date = max)
+  )
+
+# list column
+updates |> 
+  pivot_wider(
+    id_cols = county, 
+    names_from = system, 
+    values_from = value,
+    unused_fn = list(date = list)
+  )
+```
+
+### Contact list {#sec-contacts}
+Contact list with variable number of fields per contact. Can use `cumsum()` to create unique id based on first value for each person (`name`).
+
+```{r}
+#| label: contacts
+# Data
+contacts <- tribble(
+  ~field, ~value,
+  "name", "Jiena McLellan",
+  "company", "Toyota", 
+  "name", "John Smith", 
+  "company", "google", 
+  "email", "john@google.com",
+  "name", "Huxley Ratcliffe"
+)
+# Create unique id
+contacts <- contacts |> 
+  mutate(person_id = cumsum(field == "name"))
+contacts
+
+contacts |> 
+  pivot_wider(
+    names_from = field, 
+    values_from = value
+  )
+```
+
+## Longer, then wider {#sec-longer-wider}
+
+### World bank {#sec-worldbank}
+Data: `world_bank_pop`
+
+Problems: 
+
+1. Year variables are column names: `pivot_longer()`.
+2. `indicator` column contains multiple variables.
+3. This creates variable column with two variables that should be widened: `pivot_wider()`
+4. Make new column names lowercase: `dplyr::rename_with()`
+
+```{r}
+#| label: worldbank
+world_bank_pop
+
+# 1. Pivot longer
+world_bank_pop |> 
+  pivot_longer(
+    cols = `2000`:`2017`, 
+    names_to = "year", 
+    values_to = "value"
+  ) |> 
+# 2. separate indicator column
+  separate(indicator, c(NA, "area", "variable")) |> 
+# 3. pivot variable column wider
+  pivot_wider(
+    names_from = variable, 
+    values_from = value,
+  ) |> 
+# 4. Make new column names lowercase
+  rename_with(tolower)
+```
+
+### Multi-choice {#sec-multi-choice}
+
+Going from data that has choice number as columns to whether an individual selected that choice or not.
+
+1. Make data longer, while eliminating `NA`s to only have choices that were made.
+2. Add logical column with `TRUE`s.
+3. Pivot data wider and fill in missing observations with `FALSE`.
+
+```{r}
+#| label: multi-choice
+# Data
+multi <- tribble(
+  ~id, ~choice1, ~choice2, ~choice3,
+  1, "A", "B", "C",
+  2, "C", "B",  NA,
+  3, "D",  NA,  NA,
+  4, "B", "D",  NA
+)
+multi
+
+# 1. Pivot longer
+multi |> 
+  pivot_longer(
+    cols = !id, 
+    values_drop_na = TRUE
+  ) |>
+# 2. Add col whether choice was made
+  mutate(checked = TRUE) |> 
+# 3. Pivot wider
+  pivot_wider(
+    id_cols = id,
+    names_from = value, 
+    values_from = checked, 
+    values_fill = FALSE
+  )
+```
+
+## Manual specs {#sec-specs}
+
+To gain more control over pivoting, you can instead create a “spec” data frame that describes exactly how data stored in the column names becomes variables (and vice versa). This section focuses on the use of `build_longer_spec()`, `pivot_longer_spec()`, `build_wider_spec()`, and `pivot_wider_spec()`.
+
+A `spec` data frame created by `build_longer_spec()` or `build_wider_spec()` with special columns called `.name` for the name of the columns and `.value` for the name of the column that the values in the cells will go into. There is also one column in spec for each column present in the long format of the data that is not present in the wide format of the data. This corresponds to the `names_to` argument in `pivot_longer()` and the `names_from` argument in `pivot_wider()`.
+
+```{r}
+#| label: spec
+relig_income |> 
+  build_longer_spec(
+    cols = !religion, 
+    names_to = "income",
+    values_to = "count"
+  )
+```
+
+### Longer {#sec-long-spec}
+Data: `relig_income`
+
+With a spec the process for pivoting is two steps. Creating a spec and then pivoting the spec. This does the same as @sec-string-data.
+
+```{r}
+#| label: long-spec
+# Build spec
+spec <- relig_income |> 
+  build_longer_spec(
+    cols = !religion, 
+    names_to = "income",
+    values_to = "count"
+  )
+spec
+
+# Pivot with spec
+pivot_longer_spec(relig_income, spec)
+```
+
+### Wider {#sec-wide-spec}
+Data: `us_rent_income`
+
+Ability to improve the widening of the data from @sec-tidy-census through the use of a `spec`. Change the names of the columns from the default of `estimate_income`, `estimate_rent`, `moe_income`, and `moe_rent` to `income`, `rent`, `income_moe`, and `rent_moe`.
+
+```{r}
+#| label: wide-spec
+# Default spec
+spec1 <- us_rent_income |> 
+  build_wider_spec(
+    names_from = variable, 
+    values_from = c(estimate, moe)
+  )
+spec1
+
+# Modify spec with mutate on .names
+spec2 <- spec1 |>
+  mutate(
+    .name = paste0(variable, ifelse(.value == "moe", "_moe", ""))
+  )
+spec2
+
+# Pivot with spec
+us_rent_income |> 
+  pivot_wider_spec(spec2)
+```
+
+### By hand {#sec-by-hand}
+Data: `construction`
+
+The column names in the data are two different kinds of variables: `units` and `region`. This can be described by creating a `spec` by hand.
+
+```{r}
+#| label: by-hand
+spec <- tribble(
+  ~.name,            ~.value, ~units,  ~region,     
+  "1 unit",          "n",     "1",     NA,          
+  "2 to 4 units",    "n",     "2-4",   NA,          
+  "5 units or more", "n",     "5+",    NA,          
+  "Northeast",       "n",     NA,      "Northeast", 
+  "Midwest",         "n",     NA,      "Midwest",   
+  "South",           "n",     NA,      "South",     
+  "West",            "n",     NA,      "West",      
+)
+
+construction |> pivot_longer_spec(spec)
+```
+
+Since there is no overlap between the `units` and `region` data, it would actually be better to place them in two separate tables.
+
+### Theory {#sec-theory}
+The same `spec` is used for `pivot_longer()` and `pivot_wider()`. You can see this through the symmetry of the two functions.
+
+```{r}
+#| label: theory
+construction |> 
+  pivot_longer_spec(spec) |> 
+  pivot_wider_spec(spec)
+```
