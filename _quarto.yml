@@ -19,14 +19,15 @@ book:
         - 01-forcats.qmd
         - 01-tidy-data.qmd
         - 01-tidyr-pivoting.qmd
+        - 01-tidyr-rectangling.qmd
         - 01-purrr.qmd
     - part: "tidy eval"
       chapters:
-        - 02-programming-dplyr-superceded.qmd
-        - 02-programming-dplyr.qmd
-        - 02-metaprogramming.qmd
-        - 02-rlang-tidyeval.qmd
-        - 02-rlang-metaprogramming.qmd
+        - 03-programming-dplyr-superceded.qmd
+        - 03-programming-dplyr.qmd
+        - 03-metaprogramming.qmd
+        - 03-rlang-tidyeval.qmd
+        - 03-rlang-metaprogramming.qmd
   appendices:
     - readr-data.qmd
     - references.qmd

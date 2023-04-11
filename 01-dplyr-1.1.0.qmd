@@ -335,7 +335,7 @@ df |>
   )
 ```
 
-You can also use `pick()` as a bridge between tidy selection and data masking in functions. For instance, it is useful in creating a function with `group_by()`. See [Data masking patters: Bridge patterns](https://rlang.r-lib.org/reference/topic-data-mask-programming.html#bridge-patterns) and the notes on the [vignette](02-rlang-tidyeval.qmd#sec-bridge-pattern).
+You can also use `pick()` as a bridge between tidy selection and data masking in functions. For instance, it is useful in creating a function with `group_by()`. See [Data masking patters: Bridge patterns](https://rlang.r-lib.org/reference/topic-data-mask-programming.html#bridge-patterns) and the notes on the [vignette](03-rlang-tidyeval.qmd#sec-bridge-pattern).
 
 ```{r}
 #| label: my_group_by

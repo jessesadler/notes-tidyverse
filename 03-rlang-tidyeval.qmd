@@ -229,7 +229,7 @@ my_group_by <- function(data, vars) {
 mtcars %>% my_group_by(c("cyl", "am"))
 ```
 
-Use `mutate(.keep = "none")` to bridge data-mask to selection. This pattern is a little trickier and uses `mutate()` as a way to inspect the names passed to `...` and make sure that they are included in the data frame. The column names and any transformation are done with the splice operator (`!!!`) and then the selection can be passed to `pivot_longer()` through `all_of()`. For the output, look to the columns on the right that show name and value. For another way to do this using a symbolize and inject pattern, see [Metaprogramming patterns - Bridge patterns](02-rlang-metaprogramming.qmd#sec-bridge-pattern).
+Use `mutate(.keep = "none")` to bridge data-mask to selection. This pattern is a little trickier and uses `mutate()` as a way to inspect the names passed to `...` and make sure that they are included in the data frame. The column names and any transformation are done with the splice operator (`!!!`) and then the selection can be passed to `pivot_longer()` through `all_of()`. For the output, look to the columns on the right that show name and value. For another way to do this using a symbolize and inject pattern, see [Metaprogramming patterns - Bridge patterns](03-rlang-metaprogramming.qmd#sec-bridge-pattern).
 
 ```{r}
 #| label: my_pivot_longer bridge
@@ -251,7 +251,7 @@ mtcars %>% my_pivot_longer(cyl, am = am * 100)
 
 ### Transformation patterns {#sec-transformation-pattern}
 
-You can transform inputs with `across()` by forwarding `...` to `across()` and performing an action on it. This uses `...` to inherit tidy selection behavior. For another way to do this using a symbolize and inject pattern, see [Metaprogramming patterns - Transformation patterns](02-rlang-metaprogramming.qmd#sec-transformation-pattern).
+You can transform inputs with `across()` by forwarding `...` to `across()` and performing an action on it. This uses `...` to inherit tidy selection behavior. For another way to do this using a symbolize and inject pattern, see [Metaprogramming patterns - Transformation patterns](03-rlang-metaprogramming.qmd#sec-transformation-pattern).
 
 ```{r}
 #| label: my_mean across

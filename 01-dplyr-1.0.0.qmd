@@ -34,7 +34,7 @@ library(dplyr)
 - A new, simpler, approach to column-wise operations: [Column-wise operations](https://dplyr.tidyverse.org/dev/articles/colwise.html)
 - `select()` can select columns based on their type, and has a new syntax that better matches how you describe selections in English.
 - A new `relocate()` verb makes it easier change the position of columns.
-- New way to [program with dplyr](https://dplyr.tidyverse.org/dev/articles/programming.html). See [Programming with dplyr notes](02-programming-dplyr.qmd).
+- New way to [program with dplyr](https://dplyr.tidyverse.org/dev/articles/programming.html). See [Programming with dplyr notes](03-programming-dplyr.qmd).
 - `dplyr` is now based on the [vctrs package](http://vctrs.r-lib.org/).
 
 

@@ -197,7 +197,7 @@ rm(rows, name)
 
 ## Metaprogramming patterns
 
-This vignette is meant to present more theoretical and advanced patterns than those discussed in [Data mask programming patterns](02-rlang-tidyeval.qmd#sec-data-mask-patters).
+This vignette is meant to present more theoretical and advanced patterns than those discussed in [Data mask programming patterns](03-rlang-tidyeval.qmd#sec-data-mask-patters).
 
 ### Forwarding patterns
 
@@ -294,7 +294,7 @@ mtcars %>% my_group_by(vars)
 
 ### Bridge patterns {#sec-bridge-pattern}
 
-`mutate()` as a data-mask to selection bridge that accomplishes the same task as in [Data masking patterns - Bridge patterns](02-rlang-tidyeval.qmd#sec-bridge-pattern) but using `enquos()` to defuse and inspect the names.
+`mutate()` as a data-mask to selection bridge that accomplishes the same task as in [Data masking patterns - Bridge patterns](03-rlang-tidyeval.qmd#sec-bridge-pattern) but using `enquos()` to defuse and inspect the names.
 
 ```{r}
 #| label: my_pivot_longer
@@ -316,7 +316,7 @@ mtcars %>% my_pivot_longer(cyl, am = am * 100)
 
 ### Transformation patterns {#sec-transformation-pattern}
 
-It is also possible to recreate `my_mean()` from [Data masking patterns - Transformation patterns](02-rlang-tidyeval.qmd#sec-transformation-pattern). "The pattern consists in defusing the input expression, building larger calls around them, and finally inject the modified expressions inside the data-masking functions." With `...` to take in multiple arguments, you need to use `purrr::map()` to loop over the arguments to construct the call.
+It is also possible to recreate `my_mean()` from [Data masking patterns - Transformation patterns](03-rlang-tidyeval.qmd#sec-transformation-pattern). "The pattern consists in defusing the input expression, building larger calls around them, and finally inject the modified expressions inside the data-masking functions." With `...` to take in multiple arguments, you need to use `purrr::map()` to loop over the arguments to construct the call.
 
 ```{r}
 #| label: my_mean
@@ -334,7 +334,7 @@ my_mean <- function(.data, ...) {
 mtcars %>% my_mean(cyl, mpg)
 ```
 
-The difference with the [previous version](02-rlang-tidyeval.qmd#sec-transformation-pattern) of `my_mean()` is that the function does not inherit tidy selection helpers and syntax. However, it does gain the ability to create new vectors on the fly as in `summarise()`.
+The difference with the [previous version](03-rlang-tidyeval.qmd#sec-transformation-pattern) of `my_mean()` is that the function does not inherit tidy selection helpers and syntax. However, it does gain the ability to create new vectors on the fly as in `summarise()`.
 
 ```{r}
 #| label: my_mean with calcs

@@ -17,7 +17,7 @@ source("_common.R")
 library(tidyverse)
 ```
 
-*These notes refer to the vignette prior to dplyr 1.0.0, which fundamentally changed how the issue of non-standard evaluation or tidy evaluation is presented. For notes on the updated vignette see [Programming with dplyr](02-programming-dplyr.qmd).*
+*These notes refer to the vignette prior to dplyr 1.0.0, which fundamentally changed how the issue of non-standard evaluation or tidy evaluation is presented. For notes on the updated vignette see [Programming with dplyr](03-programming-dplyr.qmd).*
 
 ## Introduction
 `dplyr` uses non-standard evaluation (NSE)

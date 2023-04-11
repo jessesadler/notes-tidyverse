@@ -21,7 +21,7 @@ library(dplyr)
 
 This vignette covers tidy evaluation. The language used to describe tidy evaluation was changed greatly with the release of [`dplyr 1.0.0` on 29 May 2020](https://dplyr.tidyverse.org/news/index.html#dplyr-100). This coincided with `rlang` changes with [version 0.4.0](https://rlang.r-lib.org/news/index.html#rlang-040) from June 2019 that introduced `{{}}` (curly-curly) and this was confirmed by the rewriting of the `rlang` tidy evaluation and metaprogramming vignettes with `rlang 1.0.0` released 26 January 2022.
 
-This vignette provides a basic overview of the main user-facing features of tidy evaluation and the new nomenclature used for tidy evaluation. For the previous language see [Wickham, *Advanced R* - Metaprogramming](02-metaprogramming.qmd) and the [Programming with `dplyr` vignette](02-programming-dplyr-superceded.qmd) before 1.0.0.
+This vignette provides a basic overview of the main user-facing features of tidy evaluation and the new nomenclature used for tidy evaluation. For the previous language see [Wickham, *Advanced R* - Metaprogramming](03-metaprogramming.qmd) and the [Programming with `dplyr` vignette](03-programming-dplyr-superceded.qmd) before 1.0.0.
 
 The vignette divides the concept of tidy evaluation into two main parts: data masking and tidy selection. **Data masking** allows you to "use data variables as if they were variables in the environment." **tidy selection** makes it "so you can easily choose variables based on their position, name, or type."
 
