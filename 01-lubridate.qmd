@@ -1,0 +1,356 @@
+---
+date: "2023-04-12"
+date-modified: last-modified
+---
+
+# Dates and times with lubridate {#sec-lubridate}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+These notes on [lubridate](https://lubridate.tidyverse.org/) are from the [date and times chapter](https://r4ds.hadley.nz/datetimes.html) in *R for Data Science*.
+
+```{r}
+#| label: setup
+#| message: false
+library(tidyverse)
+library(nycflights13)
+```
+
+## Creating dates and date times {#sec-creating}
+
+### Getting the current date or time
+
+```{r}
+#| label: today
+# lubridate
+today()
+now()
+
+# Base
+Sys.Date()
+Sys.time()
+```
+
+### On import with readr
+If your CSV contains an [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) date or date-time, you do not need to do anything; `readr` will automatically recognize it.
+
+You can also use `col_date()` with date components. Table @tbl-date-formats lists all the options.
+
+| Type  | Code  | Meaning                        | Example         |
+|-------|-------|--------------------------------|-----------------|
+| Year  | `%Y`  | 4 digit year                   | 2021            |
+|       | `%y`  | 2 digit year                   | 21              |
+| Month | `%m`  | Number                         | 2               |
+|       | `%b`  | Abbreviated name               | Feb             |
+|       | `%B`  | Full name                      | February        |
+| Day   | `%d`  | Two digits                     | 02              |
+|       | `%e`  | One or two digits              | 2               |
+| Time  | `%H`  | 24-hour hour                   | 13              |
+|       | `%I`  | 12-hour hour                   | 1               |
+|       | `%p`  | AM/PM                          | pm              |
+|       | `%M`  | Minutes                        | 35              |
+|       | `%S`  | Seconds                        | 45              |
+|       | `%OS` | Seconds with decimal component | 45.35           |
+|       | `%Z`  | Time zone name                 | America/Chicago |
+|       | `%z`  | Offset from UTC                | +0800           |
+| Other | `%.`  | Skip one non-digit             | :               |
+|       | `%*`  | Skip any number of non-digits  |                 |
+
+: All date formats understood by `readr` {#tbl-date-formats}
+
+See the examples in the [chapter on readr](01-readr.qmd#sec-dates).
+
+### From strings
+Using `lubridate` helper functions that use `y` for year, `m` for month, and `d` for day.
+
+```{r}
+#| label: lubridate-date-helpers
+ymd("2023-04-12")
+mdy("April 12th, 2023")
+dmy("12-Apr-2023")
+```
+
+For a date time you add an underscore and `h` for hour, `m` for minute, and `s` for second.
+
+```{r}
+#| label: lubridate-time-helpers
+ymd_hms("2023-04-12 09:32:24")
+mdy_hm("04/12/2023 09:33")
+```
+
+### From individual components
+Use of `make_date()`
+
+```{r}
+#| label: flights-makedate
+flights |> 
+  select(year, month, day, hour, minute)
+
+flights |> 
+  select(year, month, day, hour, minute) |> 
+  mutate(departure = make_datetime(year, month, day, hour, minute))
+```
+
+`flights` lists most of the times in an odd format with hours and minutes combined into a single integer, so that 05:17 is 517. This can be split into hours and minutes with modulus arithmetic: `h = x %/% 100` and `m = x %% 100`. We can create a function to create date times for departure and arrival times.
+
+```{r}
+#| label: datetime100
+make_datetime_100 <- function(year, month, day, time) {
+  make_datetime(year, month, day, time %/% 100, time %% 100)
+}
+
+flights_dt <- flights |> 
+  filter(!is.na(dep_time), !is.na(arr_time)) |> 
+  mutate(
+    dep_time = make_datetime_100(year, month, day, dep_time),
+    arr_time = make_datetime_100(year, month, day, arr_time),
+    sched_dep_time = make_datetime_100(year, month, day, sched_dep_time),
+    sched_arr_time = make_datetime_100(year, month, day, sched_arr_time)
+  ) |> 
+  select(origin, dest, ends_with("delay"), ends_with("time"))
+
+flights_dt
+```
+
+### From other types
+Use of `as_datetime()` and `as_date()` to switch between date-time and date.
+
+```{r}
+#| label: as-date
+as_datetime(today())
+as_date(now())
+```
+
+To convert Unix Epoch to dates use `as_datetime()` if the offset is given in seconds and `as_date()` if it is given in days.
+
+## Date-time components {#sec-components}
+
+### Getting components
+Use of helper functions to get components of a date or date-time:
+
+- `year()`
+- `month()`
+- `mday()` day of the month
+- `yday()` day of the year
+- `wday()` day of the week
+- `hour()`
+- `minute()`
+- `second()`
+
+```{r}
+#| label: get-components
+datetime <- ymd_hms("2023-04-12 09:49:56")
+
+year(datetime)
+month(datetime)
+mday(datetime)
+
+yday(datetime)
+wday(datetime)
+```
+
+For `month()` and `wday()` you can set `label = TRUE` to return the abbreviated name of the month or day of the week. Set `abbr = FALSE` to return the full name.
+
+```{r}
+#| label: day-label
+month(datetime, label = TRUE)
+wday(datetime, label = TRUE, abbr = FALSE)
+```
+
+This can be used to plot flight departures by days of the week.
+
+```{r}
+#| label: wday-plot
+flights_dt |> 
+  mutate(wday = wday(dep_time, label = TRUE)) |> 
+  ggplot(aes(x = wday)) +
+  geom_bar()
+```
+
+### Rounding
+Use of `floor_date()`, `round_date()`, and `ceiling_date()` to round dates to a given unit.
+
+Valid units for rounding: `second`, `minute`, `hour`, `day`, `week`, `month`, `bimonth`, `quarter`, `season`, `halfyear` and `year`, or a `Period` object.
+
+With rounding you can plot the number of flights per week:
+
+```{r}
+#| label: rounding
+flights_dt |> 
+  count(week = floor_date(dep_time, "week")) |> 
+  ggplot(aes(x = week, y = n)) +
+  geom_line() + 
+  geom_point()
+```
+
+### Modifying components
+Modifying individual components:
+
+```{r}
+#| label: modify-components
+datetime
+
+year(datetime) <- 2030
+month(datetime) <- 01
+hour(datetime) <- hour(datetime) + 1
+datetime
+```
+
+Or you can create a new date-time with `update()`:
+
+```{r}
+#| label: update-date
+update(datetime, year = 2023, month = 04, hour = 10, minute = 23)
+```
+
+## Time spans {#sec-spans}
+
+Arithmetic with math leads to the use of three classes that represent time spans.
+
+- `Durations`: represent an exact number of seconds.
+- `Periods`: represent human units like weeks and months.
+- `Intervals`: represent a starting and ending point.
+
+### Durations {#sec-durations}
+Arithmetic with dates in R creates a `difftime` object, which records a time span of seconds, minutes, hours, days, or weeks. This can lead to ambiguity, so `lubridate` provides [`Duration`](https://lubridate.tidyverse.org/reference/index.html#durations), which always records time spans in seconds.
+
+```{r}
+#| label: duration-age
+# Base difftime
+age <- today() - ymd("1983-03-28")
+age
+
+# duration
+as.duration(age)
+```
+
+Durations have a variety of constructors.
+
+```{r}
+#| label: duration-constructors
+dminutes(10)
+ddays(0:5)
+```
+
+Note that because durations are seconds there can be some ambiguity with larger units. Months cannot be calculated and years are set to an average of 365.25 days.
+
+### Periods {#sec-periods}
+To deal with the ambiguities of `Duration` `lubridate` implements the [`Period` type](https://lubridate.tidyverse.org/reference/index.html#periods. Period constructors:
+
+- `seconds()`
+- `minutes()`
+- `hours()`
+- `days()`
+- `weeks()`
+- `months()`
+- `years()`
+
+```{r}
+#| label: period-constructors
+hours(c(12, 24))
+days(7)
+10 * (months(6) + days(1))
+```
+
+Compared to durations, periods are more likely to do what you expect:
+
+```{r}
+#| label: period-math
+# A leap year
+ymd("2024-01-01") + dyears(1)
+ymd("2024-01-01") + years(1)
+
+# Daylight Savings Time
+one_am <- ymd_hms("2026-03-08 01:00:00", tz = "America/New_York")
+one_am + ddays(1)
+one_am + days(1)
+```
+
+Can use periods to fix a problem in the `flights_dt` data. Overnight flights appear to arrive before they depart because the date was calculated on the departure date. This can be fixed by adding `days(1)` to the arrival times of overnight flights using the fact that `TRUE == 1`.
+
+```{r}
+#| label: overnight-flights
+# Number of overnight flights
+flights_dt |> 
+  filter(arr_time < dep_time) |> 
+  nrow()
+
+flights_dt <- flights_dt |> 
+  mutate(
+    overnight = arr_time < dep_time,
+    arr_time = arr_time + days(overnight),
+    sched_arr_time = sched_arr_time + days(overnight)
+  )
+
+# Now fixed
+flights_dt |> 
+  filter(arr_time < dep_time) |> 
+  nrow()
+```
+
+### Intervals {#sec-intervals}
+For accurate measurement between specific dates and date-times you can use [`intervals`](https://lubridate.tidyverse.org/reference/index.html#intervals).
+
+Create an intervalby writing `start %--% end`:
+
+```{r}
+#| label: intervals
+# Periods use estimates of length
+years(1) / days(1)
+
+# Intervals are specific
+y2023 <- ymd("2023-01-01") %--% ymd("2024-01-01")
+y2024 <- ymd("2024-01-01") %--% ymd("2025-01-01")
+
+y2023 / days(1)
+y2024 / days(1)
+```
+
+## Time zones {#sec-zones}
+
+R uses the international standard IANA time zones. These use a consistent naming scheme `{area}/{location}`, typically in the form `{continent}/{city}` or `{ocean}/{city}`. These two pieces of information are useful for recording the history of how time zones might change in different places. You can see this in the [IANA database of time zones](https://www.iana.org/time-zones).
+
+```{r}
+#| label: time-zones
+# Locale time zone
+Sys.timezone()
+
+# List of time zones
+head(OlsonNames())
+```
+
+Time zones only affect printing, not the recording of the actual time.
+
+```{r}
+#| label: label
+x <- ymd_hms("2023-04-12 11:23:00", tz = "America/New_York")
+y <- ymd_hms("2023-04-12 17:23:00", tz = "Europe/Copenhagen")
+
+x - y
+```
+
+`lubridate` uses UTC (Coordinated Universal Time) as a default. UTC is roughly equivalent to GMT (Greenwich Mean Time), but it does not have DST, which makes a convenient representation for computation.
+
+You can change time zones by either changing how it is displayed or altering the underlying instant in time. `c()` drops time zones and displays them in your locale.
+
+```{r}
+#| label: change-tz
+# Convert to local time zone
+z <- c(x, y)
+
+# Change time zone representation
+za <- with_tz(z, tzone = "Australia/Lord_Howe")
+za
+
+z - za
+
+# Change instant and time zone
+zb <- force_tz(z, tzone = "Australia/Lord_Howe")
+zb
+
+z - zb
+```

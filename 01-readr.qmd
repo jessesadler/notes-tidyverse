@@ -79,7 +79,7 @@ spec_csv(readr_example("chickens.csv"), col_types = list(
 
 Notice that the `col_*` functions method is the most explicit and provides the most flexibility to provide additional parameters such as specifying the levels of a factor of a date format.
 
-### Available column specifications
+### Available column specifications {#sec-col-specs}
 
 | Function                      | Abbreviated string |
 |-------------------------------|--------------------|
@@ -125,7 +125,7 @@ read_csv("data/readr-example.csv",
 ))
 ```
 
-### Dealing with dates
+### Dealing with dates {#sec-dates}
 Dealing with dates often requires the use of a date format in `col_date()`, `col_time()`, and `col_datetime()` functions. Columns `i` and `m` are correctly specified as `date` and `datetime` because they follow the formats in `locale()`. See @sec-datetime for details.
 
 ```{r}
