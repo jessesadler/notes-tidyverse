@@ -12,7 +12,9 @@ source("_common.R")
 ```
 
 ## `purrr` resources {#sec-resources}
-[`purrr` website](https://purrr.tidyverse.org/)
+- [`purrr` website](https://purrr.tidyverse.org/)
+- [`purrr` 1.0.0 blog post](https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/)
+- [`purrr` 1.0.0 - Hadley Wickham video](https://youtu.be/EGAs7zuRutY)
 
 ```{r}
 #| label: setup
