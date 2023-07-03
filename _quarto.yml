@@ -11,6 +11,7 @@ book:
 
     - part: "tidyverse"
       chapters:
+        - 01-pipe.qmd
         - 01-readr.qmd
         - 01-dplyr-colwise.qmd
         - 01-dplyr-rowwise.qmd

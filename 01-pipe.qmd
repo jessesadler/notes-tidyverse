@@ -1,0 +1,131 @@
+---
+date: "2023-06-23"
+date-modified: last-modified
+---
+
+# Pipe: magrittr and native {#sec-title}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+## Resources
+- [magrittr package](https://magrittr.tidyverse.org)
+- [Release of R 4.1](https://stat.ethz.ch/pipermail/r-announce/2021/000670.html)
+- [The (updated) history of the pipe operator in R](http://adolfoalvarez.cl/blog/2021-09-16-plumbers-chains-and-famous-painters-the-history-of-the-pipe-operator-in-r/)
+- [Simpler R coding with pipes > the present and future of the magrittr package -- 5 August 2014](https://www.r-statistics.com/2014/08/simpler-r-coding-with-pipes-the-present-and-future-of-the-magrittr-package/)
+- [Differences between the base R and magrittr pipes](https://www.tidyverse.org/blog/2023/04/base-vs-magrittr-pipe/)
+- [Isabella Velásquez - Understanding the native R pipe |>](https://ivelasq.rbind.io/blog/understanding-the-r-pipe/)
+- [Tim Tiefenbach - Why continue to use magrittr pipe -- 17 October 2022](https://threadreaderapp.com/thread/1582118234220007424.html)
+
+```{r}
+#| label: setup
+#| message: false
+library(dplyr)
+library(purrr)
+```
+
+## Native pipe {#sec-native-pipe}
+- The native pipe was introduced in R 4.1 alongside the use of new anonymous function syntax.
+- Pipe the left-hand side into the *first argument* of the right-hand side. In normal usage, it works almost exactly like the `magrittr` pipe.
+- In [R 4.2](https://stat.ethz.ch/pipermail/r-announce/2022/000683.html) the native pipe got the `_` syntax to insert the left-hand side into a named argument of the right-hand side function. However, this functionality is not as powerful as in `%>%`, see @sec-magrittr.
+
+The tidyverse style guidelines are moving over to the usage of the native pipe. The native pipe is used for all examples in the [Second Edition of R for Data Science](https://r4ds.hadley.nz). Hadley discusses the move to the native pipe in Documentation in the release notes for [purrr 1.0.0](https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/#documentation). There, he notes the advantages of the greater simplicity of the native pipe and the clarity provided by anonymous functions, see @sec-anonymous.
+
+### Usage {#sec-usage}
+
+The pipe operator is implemented as a syntax transformation.
+
+```{r}
+#| label: syntax-transformation
+quote(mtcars |> subset(cyl == 4) |> nrow())
+```
+
+Like the `magrittr` pipe, the native pipe places the left-hand side into the first argument of the right hand side.
+
+```{r}
+#| label: native-pipe
+mtcars |> filter(cyl == 4) |> head()
+```
+
+There are two ways to place the left-hand side elsewhere in the right-hand side function: anonymous functions and `_` placeholder
+
+### The pipe and the anonymous function {#sec-anonymous}
+
+The pipe and the new shorthand syntax for the anonymous function both debuted with [R 4.1](https://stat.ethz.ch/pipermail/r-announce/2021/000670.html).
+
+```{r}
+#| label: anonymous
+mtcars |> subset(cyl == 4) |> (\(x) lm(mpg ~ disp, data = x))()
+```
+
+Example of using anonymous function to make code more clear taken from [purrr 1.0.0 release](https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/#documentation). This is part of the move away from formula notation (`~`) to anonymous function.
+
+```{r}
+#| label: clarity
+# Previously
+1:5 %>%
+  map(~ rnorm(10, .x)) %>%
+  map_dbl(mean)
+
+# Use of anonymous function
+1:5 |>
+  map(\(x) rnorm(10, x)) |>
+  map_dbl(mean) 
+```
+
+### Underscore placeholder {#sec-underscore}
+
+The `_` placeholder is similar to `magrittr` `.` placeholder. However, the `_` placeholder can only be used *once* and must be used with a *named argument*. See @sec-magrittr for examples of these limitations. Nevertheless, the `_` placeholder does cover most use cases.
+
+```{r}
+#| label: underscore
+mtcars |> subset(cyl == 4) |> lm(mpg ~ disp, data = _)
+```
+
+In [R 4.3](https://stat.ethz.ch/pipermail/r-announce/2023/000691.html) the `_` placeholder can be used with extraction functions `$`, or as the head of a chain of extractions `[`, `[[`, or `@`. However, it cannot be used with `[[` to start the extraction as in case 4 of the magrittr pipe below.
+
+```{r}
+#| label: extraction
+mtcars |> _$cyl
+mtcars |> subset(cyl == 4) |> lm(mpg ~ disp, data = _) |> _$coef[[2]]
+```
+
+## The magrittr pipe {#sec-magrittr}
+
+Uses of the `magrittr` `.` notation that are easier or not possible with the native pipe.
+
+1. Use of `.` in unnamed arguments
+
+```{r}
+#| label: unnamed-args
+c(1:3) %>% paste("No", .)
+```
+
+2. Use of multiple `.` in right-hand side
+
+```{r}
+#| label: multiple-args
+c(1:3) %>% paste(., "No", .)
+
+# Need anonymous function with native pipe
+c(1:3) |> (\(x) paste(x, "No", x))()
+```
+
+3. Use of `.` in nested functions
+
+```{r}
+#| label: nested
+iris %>% 
+  bind_rows(mutate(., Species = "all")) %>% 
+  count(Species)
+```
+
+4. Use of `.` with infix operators on left- and right-hand side
+
+```{r}
+#| label: infix
+mtcars %>% `[[`("cyl")
+```
