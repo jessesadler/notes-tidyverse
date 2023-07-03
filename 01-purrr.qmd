@@ -15,6 +15,7 @@ source("_common.R")
 - [`purrr` website](https://purrr.tidyverse.org/)
 - [`purrr` 1.0.0 blog post](https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/)
 - [`purrr` 1.0.0 - Hadley Wickham video](https://youtu.be/EGAs7zuRutY)
+- [purrr::walk() this way](https://www.tidyverse.org/blog/2023/05/purrr-walk-this-way/)
 
 ```{r}
 #| label: setup

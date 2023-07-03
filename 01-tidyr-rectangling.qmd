@@ -19,7 +19,7 @@ source("_common.R")
 
 A very large number of data rectangling problems can be solved by combining `jsonlite::read_json()` with these functions and a splash of `dplyr`.
 
-The vignette uses the [repurrrsive](https://jennybc.github.io/repurrrsive/) package, which provides a number deeply nested lists originally mostly captured from web APIs.
+The vignette uses the [repurrrsive](https://jennybc.github.io/repurrrsive/) package, which provides a number of deeply nested lists originally mostly captured from web APIs.
 
 ```{r}
 #| label: setup

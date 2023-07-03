@@ -20,6 +20,10 @@ source("_common.R")
 - [The power of vctrs](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-vctrs/)
 - [`pick()`, `reframe()`, and `arrange()`](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-pick-reframe-arrange/)
 
+## Resources
+- [Mine Çetinkaya-Rundel, What's new in the tidyverse in 2023](https://mine.quarto.pub/tidyverse-2023)
+  - Good overview of the changes in dplyr and tidyverse discussed here.
+
 ```{r}
 #| label: setup
 #| message: false
@@ -48,11 +52,15 @@ companies <- tibble(
 
 ### `join_by()`
 
-Instead of the syntax: `by = c(company = "id")` use function `join_by()`: `by = join_by(company == id)`
+Instead of the syntax: `by = c("company" = "id")` use function `join_by()`: `by = join_by(company == id)`
 
 ```{r}
 #| label: use of join_by()
+# Previously
+transactions |> 
+  inner_join(companies, by = c("company" = "id"))
 
+# With join_by()
 transactions |> 
   inner_join(companies, by = join_by(company == id))
 ```
@@ -173,11 +181,11 @@ transactions |>
   summarise(total = sum(revenue), .by = c(company, year))
 ```
 
-The results are always ungrouped, and tidyselect is used to group multiple columns.
-
 ### `group_by()` vs `.by`
 
-Difference in how the two ways deal with ordering rows from `arrange()`.
+- The results are always ungrouped, (e.g. ) and tidyselect is used to group multiple columns.
+- You cannot create variables on the fly in `.by`, you must create them earlier in your pipeline, e.g., unlike `df |> group_by(month = floor_date(date, "month"))`.
+- Difference in how the two ways deal with ordering rows from `arrange()`.
 
 ```{r}
 #| label: ordering
