@@ -23,6 +23,10 @@ book:
         - 01-tidyr-pivoting.qmd
         - 01-tidyr-rectangling.qmd
         - 01-purrr.qmd
+    - part: "ggplot2"
+      chapters:
+        - 02-ggplot2-rstudioconf-2022.qmd
+        - 02-patchwork.qmd
     - part: "tidy eval"
       chapters:
         - 03-programming-dplyr-superceded.qmd
