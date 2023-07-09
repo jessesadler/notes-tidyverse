@@ -1,0 +1,436 @@
+---
+date: "2023-07-07"
+date-modified: last-modified
+---
+
+# Themes {#sec-themes}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+Themes affect the aesthetics of non-data components of plots: i.e. titles, labels, fonts, background, grid lines, and legends.
+
+## Resources {#sec-theme-resources}
+- [theme() documentation](https://ggplot2.tidyverse.org/reference/theme.html)
+- [theme() code](https://github.com/tidyverse/ggplot2/blob/main/R/theme-defaults.R)
+- [Theme elements functions](https://ggplot2.tidyverse.org/reference/element.html)
+- [Wickham, ggplot2 book: Themes](https://ggplot2-book.org/themes.html)
+- [Scherer, ggplot2 Tutorial: Themes](https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/#themes)
+- [Thomas Mock - Creating and using custom ggplot2 themes](https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/)
+
+## Base plot {#sec-theme-baseplot}
+
+```{r}
+#| label: setup
+#| message: false
+library(ggplot2)
+library(dplyr)
+library(palmerpenguins)
+# Base plot
+p <- penguins |> 
+  filter(!is.na(flipper_length_mm),
+         !is.na(sex)) |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             color = species,
+             shape = sex)) + 
+  geom_point() + 
+  labs(title = "Penguin Size",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Penguin species",
+       shape = "Sex")
+```
+
+Default plot uses `theme_grey()`
+
+```{r}
+#| label: default-theme
+#| echo: false
+p
+```
+
+## Theme inheritance {#sec-theme-inheritance}
+Theme elements inherit properties from other theme elements hierarchically. For example, `axis.title.x.bottom` inherits from `axis.title.x` which inherits from `axis.title`, which in turn inherits from `text`. All text elements inherit directly or indirectly from `text`; all lines inherit from `line`, and all rectangular objects inherit from `rect.` This means that you can modify the appearance of multiple elements by setting a single high-level component.
+
+## Theme elements {#sec-theme-elements}
+[Theme elements documentation](https://ggplot2.tidyverse.org/reference/element.html): These functions are used to modify arguments in `theme()`.
+
+- `element_blank()`: draws nothing, and assigns no space.
+- `element_rect()`: borders and backgrounds.
+  - Arguments: fill, color, linewidth, linetype
+- `element_line()`: lines.
+  - Arguments: fill, color, linewidth, linetype, lineend, arrow
+- `element_text()`: text.
+  - Arguments: family, face, color, size, hjust, vjust, angle, lineheight, margin
+- `rel()`: Specify sizes relative to the parent
+	- e.g. `plot.title = element_text(size = rel(2))` to make size of plot title twice as big.
+- `margin(t = 0, r = 0, b = 0, l = 0, unit = "pt")`
+
+## Components of a theme {#sec-theme-components}
+Arguments in `theme()`. Not all levels of the argument hierarchy are presented here.
+
+### General {#sec-theme-components-general}
+High level arguments in the theme hierarchy:
+
+- `rect`: `element_rect()`
+- `line`: `element_line()`
+- `text`: `element_text()`
+- `title`: `element_text()` all title elements: plot, axes, legends
+- `aspect.ratio`: aspect ratio of the panel
+
+### Axes {#sec-theme-axes}
+- axis.title: labels of axes
+- axis.text: tick labels along axes
+- axis.ticks: tick marks `element_line()`
+- axis.line: lines along axes
+
+```{r}
+#| label: axes
+p + 
+  theme(axis.title = element_text(face = "bold"),
+        axis.text = element_text(color = "orange"),
+        axis.text.x = element_text(angle = -90, vjust = 0.5,
+                                   margin = margin(t = 3)),
+        axis.ticks = element_line(color = "red"),
+        axis.ticks.length.y = unit(0.25, "cm"),
+        axis.ticks.length.x = unit(-0.25, "cm"),
+        axis.line = element_line(linewidth = 3, colour = "grey80")
+        )
+```
+
+### Legend {#sec-theme-legend}
+
+Remove legend
+```{r}
+#| label: remove-legend
+p + 
+  theme(legend.position = "none")
+```
+
+- legend.background
+- legend.margin: the margin around each legend
+- legend.spacing: spacing between legends if there are multiple legends
+- legend.key: background underneath legend keys (symbols of geoms)
+- legend.text: legend item labels
+- legend.title: legend title
+	- legend.title.align: alignment of legend title (number from 0 (left) to 1 (right))
+- legend.position: the position of legends
+	- "none", "left", "right", "bottom", "top", or two-element character or numeric vector
+- legend.direction: "horizontal" or "vertical"
+- legend.justification: anchor point for positioning legend
+- legend.box: arrangement of multiple legends ("horizontal" or "vertical")
+
+```{r}
+#| label: legend
+p + 
+  theme(legend.background = element_rect(color = "orange"),
+        legend.box.background = element_rect(linetype = "dashed"),
+        legend.box.margin = margin(6, 6, 6, 6),
+        legend.key = element_rect(fill = "white", colour = "black"),
+        legend.title = element_text(size = rel(1.5)),
+        legend.text = element_text(color = "firebrick"),
+        legend.position = "bottom",
+        legend.direction = "vertical",
+        legend.justification = "left"
+        )
+```
+
+Place legend in plot by positioning it at the bottom-right of the plot with legends justified to the right.
+
+```{r}
+#| label: legend-plot
+p + 
+  theme(legend.position = c(1, 0), # position on bottom, right
+        legend.justification = c("right", "bottom"), # anchor point
+        # same as legend.justification = c(1, 0),
+        legend.box.just = "right", # justification of legends in box
+        legend.spacing = unit(0, unit = "lines")
+        )
+```
+
+### Panel: Plotting area {#sec-theme-panel}
+- panel.background: background of plotting area, drawn underneath plot
+- panel.border: border around plotting area, drawn on top of plot so that it covers tick marks and grid lines.
+  - Therefore you need to assign `fill = NA` when overriding `panel.border`.
+- panel.spacing: spacing between facet panels
+- panel.grid: `element_line()`
+	- panel.grid.major
+	- panel.grid.minor
+- panel.ontop: `logical` option to place the panel (background, gridlines) over the data layers.
+
+Note the difference between the **panel**, which has a fill of "lightsteelblue" and outlined in a dotted line, and the **plot**, which is outlined in "forestgreen".
+
+```{r}
+#| label: panel
+p + 
+  theme(panel.background = element_rect(fill = "lightsteelblue"),
+        panel.border = element_rect(linetype = "dashed", fill = NA),
+        panel.grid.major = element_line(color = "firebrick"),
+        panel.grid.major.x = element_line(linewidth = 0.2),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(color = "forestgreen", linewidth = 2)
+        )
+```
+
+### Plot: Whole area of the plot {#sec-theme-plot}
+- plot.background: background of the entire plot
+- plot.title
+	- plot.title.position: Applies to both title and subtitle
+		- "panel" (default): Aligns to plotting region
+		- "plot": Aligns to entire plot
+- plot.subtitle
+- plot.caption: caption below the plot
+- plot.tag: upper-left label to identify a plot
+  - plot.tag.position: "topleft", "top", "topright", "left", "right", "bottomleft", "bottom", "bottomright", or a coordinate
+- plot.margin: margin around entire plot
+
+As above, notice the difference between the **panel** and the **plot**. The panel fill is "transparent" (can also use `NA`) to show plot.background covers the whole plot area.
+
+```{r}
+#| label: plot
+p + 
+  labs(subtitle = "Flipper length and body mass of penguins",
+       caption = "Palmer Station LTER",
+       tag = "ex. plot") + 
+  theme(panel.background = element_rect(fill = "transparent",
+                                        color = "forestgreen", linewidth = 2),
+        plot.background = element_rect(fill = "lightsteelblue",
+                                       color = "black", linetype = "dashed"),
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 1, color = "firebrick", family = "mono"),
+        plot.subtitle = element_text(hjust = 1, color = "orchid", family = "serif"),
+        plot.caption = element_text(color = "salmon", size = 16),
+        plot.caption.position = "panel", # the default
+        plot.tag = element_text(family = "mono"),
+        plot.tag.position = "bottomleft",
+        plot.margin = margin(t = 0.5, r = 1, b = 0.5, l = 1, unit = "cm")
+        )
+```
+
+### Facets: Strip {#sec-theme-facets}
+- strip.background
+- strip.clip
+- strip.placement
+- strip.text
+- strip.switch
+
+```{r}
+#| label: strip-default
+p + 
+  facet_wrap(~ sex)
+```
+
+```{r}
+#| label: strip
+p + 
+  facet_wrap(~ sex) + 
+  theme(strip.background = element_rect(fill = "ivory", color = "salmon"),
+        strip.text = element_text(color = "firebrick"),
+        panel.spacing = unit(1, "lines")
+        )
+```
+
+## Complete themes {#sec-complete-themes}
+[Documentation for complete themes](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+
+- `theme_gray()`: default
+- `theme_bw()`
+- `theme_linedraw()`
+- `theme_light()`
+- `theme_dark()`
+- `theme_minimal()`
+- `theme_classic()`
+- `theme_void()`
+
+A good way to explore aspects of themes is to look at the code of the theme functions. Use `theme_grey` to explore all aspects of the default themes. See also the code for themes on [GitHub](https://github.com/tidyverse/ggplot2/blob/main/R/theme-defaults.R).
+
+Theme arguments: Changes to text size, text font, lines, and rects.
+
+- `base_size = 11`
+- `base_family`
+- `base_line_size = base_size/22`
+- `base_rect_size = base_size/22`
+
+```{r}
+#| label: explore-theme-functions
+theme_bw
+```
+
+### Light themes {#sec-light-themes}
+The light themes are all very similar. `theme_bw()` and `theme_linedraw()` have a black border around the plot panel. The other differences are in the width and color of the grid lines.
+
+```{r}
+#| label: theme-bw
+#| code-fold: true
+p + 
+  ggtitle("theme_bw()") + 
+  theme_bw()
+```
+
+```{r}
+#| label: theme-linedraw
+#| code-fold: true
+p + 
+  ggtitle("theme_linedraw()") + 
+  theme_linedraw()
+```
+
+```{r}
+#| label: theme-light
+#| code-fold: true
+p + 
+  ggtitle("theme_light()") + 
+  theme_light()
+```
+
+### Minimal themes {#sec-minimal-themes}
+
+None of these themes have a panel border. `theme_minimal()` has grid lines. `theme_classic()` does not have grid lines and has x- and y-axis lines. `theme_void()` is completely empty.
+
+```{r}
+#| label: theme-minimal
+#| code-fold: true
+p + 
+  ggtitle("theme_minimal()") + 
+  theme_minimal()
+```
+
+```{r}
+#| label: theme-classic
+#| code-fold: true
+p + 
+  ggtitle("theme_classic()") + 
+  theme_classic()
+```
+
+```{r}
+#| label: theme-void
+#| code-fold: true
+p + 
+  ggtitle("theme_void()") + 
+  theme_void()
+```
+
+## Setting themes {#sec-set-theme}
+
+- `theme_set()`: completely overrides the current theme.
+- `theme_update()`: Update individual elements of a plot. Any unspecified values in the theme element will default to the values they are set in the theme.
+- `theme_replace()`: Modifies a particular element of the current theme using the `%+replace%` operator to completely replace the element, so any unspecified values will overwrite the current value in the theme with `NULL`.
+
+`theme_update()` also returns the previous theme parameters, so you can easily restore the original parameters once you’re done.
+
+```{r}
+#| label: set-theme
+
+# Set theme for remaining plots 
+theme_set(theme_light())
+
+# Update theme
+og_theme <- theme_update(
+  panel.grid.minor = element_blank(),
+  plot.title = element_text(face = "bold"),
+  legend.position = "top",
+  plot.title.position = "plot"
+)
+p
+```
+
+Return to old theme.
+
+```{r}
+#| label: reset-theme
+theme_set(og_theme)
+p
+```
+
+### Reusing themes {#sec-reuse-themes}
+Since `update_theme()` essentially uses `+`, they can be used somewhat interchangeably. This opens up the ability to save a theme layer and reuse it just as you would with any other plot layer.
+
+```{r}
+#| label: reuse-theme
+# Save theme layer
+my_theme <- theme_light() + 
+  theme(panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold"),
+        legend.position = "bottom",
+        plot.title.position = "plot")
+
+p + my_theme
+```
+
+## Theme packages {#sec-theme-pkgs}
+- [ggthemes](https://github.com/jrnold/ggthemes)
+- [hrbrthemes](https://cinc.rud.is/web/packages/hrbrthemes/)
+
+## Fonts {#sec-fonts}
+- [systemfonts](https://systemfonts.r-lib.org/)
+- [ragg](https://ragg.r-lib.org)
+- [Modern Text Features in R](https://www.tidyverse.org/blog/2021/02/modern-text-features/)
+- [June Choe - Setting up and debugging custom fonts](https://yjunechoe.github.io/posts/2021-06-24-setting-up-and-debugging-custom-fonts/)
+
+The packages `systemfonts` and `ragg` from Posit work together to give RStudio access to the fonts on your system and use them within plots. This works seemlessly for the most part once you install the packages and tell RStudio to use AGG as its graphic device. This is done in Settings -> General -> Graphics -> Backend. To use `ragg` in `knitr` and `quarto` set `knitr::opts_chunk$set(dev = "ragg_png")`.
+
+Use `system_fonts()` to list all fonts available on your system.
+
+```{r}
+#| label: systemfonts
+library(systemfonts)
+system_fonts() |> 
+  filter(stringr::str_detect(family, "Garamond")) |> 
+  select(-path)
+```
+
+::: {layout-ncol="2"}
+```{r}
+#| label: fonts-garamond
+p + 
+  theme_light(
+    base_family = "EB Garamond")
+```
+
+```{r}
+#| label: fonts-roboto
+p + 
+  theme_light(
+    base_family = "Roboto Condensed")
+```
+:::
+
+### Registering font variants {#sec-register-fonts}
+There may be times when you want to use a certain variant of a font. You can do this with either `register_font()` or `register_variant()`. For instance, you can get access to the Black variant of Source Code Pro. You first need to find the font with `system_fonts()` and then register it with a new name, here "Source Code Black". You can then use that name as the `base_family`.
+
+```{r}
+#| label: fonts-register
+#| warning: false
+system_fonts() |> 
+  filter(family == "Source Code Pro") |> 
+  select(name, weight)
+
+register_variant(
+    name = "Source Code Black", 
+    family = "Source Code Pro", 
+    weight = "heavy")
+
+registry_fonts() |> 
+  select(family, style)
+```
+
+::: {layout-ncol="2"}
+```{r}
+#| label: fonts-source-code-pro
+p + 
+  theme_light(
+    base_family = "Source Code Pro")
+```
+
+```{r}
+#| label: fonts-source-code-black
+p + 
+  theme_light(
+    base_family = "Source Code Black")
+```
+:::

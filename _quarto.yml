@@ -26,6 +26,7 @@ book:
     - part: "ggplot2"
       chapters:
         - 02-ggplot2-rstudioconf-2022.qmd
+        - 02-themes.qmd
         - 02-patchwork.qmd
     - part: "tidy eval"
       chapters:

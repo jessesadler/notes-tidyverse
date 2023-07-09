@@ -35,7 +35,7 @@ bikes$season <- forcats::fct_inorder(bikes$season)
 
 | Component         | Function              | Explanation                                                 |
 |-------------------|-----------------------|--------------------------------------|
-| Data              | `ggplot(data)`        | The raw data that you want to visualise.                    |
+| Data              | `ggplot(data)`        | The raw data that you want to visualize.                    |
 | Aesthetics        | `aes()`               | Aesthetic mappings between variables and visual properties. |
 | Geometries        | `geom_*()`            | The geometric shapes representing the data.                 |
 | Statistics        | `stat_*()`            | The statistical transformations applied to the data.        |
@@ -211,6 +211,7 @@ g <- last_plot()
 ```
 
 ## Theme
+See [notes on themes](02-themes.qmd) for more information.
 
 ### Theme functions
 - `theme()`: modify components of a theme.
@@ -933,6 +934,8 @@ ggplot(
 ```
 
 ### Annotations example: Palmer penguins {#sec-annotations-ex}
+
+See also Cédric's [The Evolution of a ggplot](https://www.cedricscherer.com/2019/05/17/the-evolution-of-a-ggplot/) for another example of building a similar plot
 
 ```{r}
 #| label: example-annotations

@@ -7,5 +7,6 @@ knitr::opts_chunk$set(
   fig.retina = 2,
   fig.width = 6,
   fig.asp = 2/3,
-  fig.show = "hold"
+  fig.show = "hold",
+  dev = "ragg_png"
 )
