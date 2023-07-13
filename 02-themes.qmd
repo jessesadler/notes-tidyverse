@@ -18,8 +18,14 @@ Themes affect the aesthetics of non-data components of plots: i.e. titles, label
 - [theme() code](https://github.com/tidyverse/ggplot2/blob/main/R/theme-defaults.R)
 - [Theme elements functions](https://ggplot2.tidyverse.org/reference/element.html)
 - [Wickham, ggplot2 book: Themes](https://ggplot2-book.org/themes.html)
+- [R for Data Science: Communication, Themes](https://r4ds.hadley.nz/communication.html#sec-themes)
 - [Scherer, ggplot2 Tutorial: Themes](https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/#themes)
 - [Thomas Mock - Creating and using custom ggplot2 themes](https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/)
+- [ggplot2 Theme Elements Reference Sheet](https://isabella-b.com/blog/ggplot2-theme-elements-reference/)
+
+### ggplot2 Theme Elements {.unnumbered}
+
+![Isabella Benabaye - ggplot2 Theme Elements Reference Sheet](img/ggplot2-theme-elements-reference-v2.png)
 
 ## Base plot {#sec-theme-baseplot}
 
