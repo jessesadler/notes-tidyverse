@@ -1,0 +1,716 @@
+---
+date: "2023-07-09"
+date-modified: last-modified
+---
+
+# Scales {#sec-scales}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+Scales control the details of how data values are mapped to aesthetic visual properties. Scales are applied to aesthetics (`aes()`) to determine how they look, such as size, color, position or shape. Scales are the basis for **guides** used to interpret the plot: axes and legends.
+
+The scale functions all begin with `scale_` then the name of the *aesthetic*, followed by the *scale*. E.g. `scale_x_continuous()` uses the continuous scale for the x-axis.
+
+## Resources {#sec-scale-resources}
+- [Scales documentation](https://ggplot2.tidyverse.org/reference/index.html#scales)
+- [ggplot2 Cheatsheet: Scales](https://rstudio.github.io/cheatsheets/html/data-visualization.html#scales)
+- [scales package](https://scales.r-lib.org)
+- [Wickham, ggplot2 Book: Scales](https://ggplot2-book.org/scales.html)
+- [R for Data Science: Communication, Scales](https://r4ds.hadley.nz/communication.html#scales)
+
+```{r}
+#| label: setup
+#| message: false
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(palmerpenguins)
+
+# Data
+penguins <- penguins |> 
+  filter(!is.na(flipper_length_mm),
+         !is.na(sex))
+
+bikes <- read_csv(
+  here::here("data", "london-bikes-custom.csv"),
+  col_types = "Dcfffilllddddc"
+)
+
+bikes$season <- forcats::fct_inorder(bikes$season)
+```
+
+## Types of scales {#sec-scale-types}
+- Continuous: Map continuous values to visual ones - `scale_*_continuous()`
+- Discrete: Map a finite number of discrete categories to visual ones - `scale_*_discrete()`
+- Binned: Map continuous values into discrete bind or categories - `scale_*_binned()`
+- Identity: Use data values directly as visual ones - `scale_*_identity()`
+- Manual: Map discrete values to manually chosen visual ones - `scale_*_manual(values = c())`
+- Dates: Treat data values as dates or datetimes - `scale_*_date(date_labels = "%m/%d", date_breaks = "2 weeks")`
+
+## Aesthetics {#sec-scale-aesthetics}
+- Positions: `scale_x_*()` and `scale_y_*()`
+- Sizes: `scale_size_*()` and `scale_radius()`
+- Shapes: `scale_shape_*()`
+- Linetype: `scale_linetype_*()`
+- Linewidth: `scale_linewidth_*()`
+- Transparency: `scale_alpha_*()`
+- Colors: `scale_color_*()` and `scale_fill_*()`
+
+## Scale positions {#sec-scale-positions}
+
+```{r}
+#| label: penguin-base-plot
+# Base plot
+p <- penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_point(aes(color = species)) + 
+  theme(legend.position = "none")
+```
+
+### Scale position functions {#sec-scale-pos-funcs}
+
+#### Scale position continuous {#sec-scale-pos-cont}
+`scale_x/y_continuous()` is often the default for plots and usually does not need to be specified. Transformation of scales can be done in two ways within `scales_` functions: `trans` argument or with transformation functions. See [ggplot2 Book: Transformations](https://ggplot2-book.org/scales-position.html#sec-scale-transformation) for available transformations through `trans` argument provided by the [scales package](https://scales.r-lib.org/reference/index.html#transformations).
+
+- `scale_x_continuous()`
+- `scale_x_log10()`
+- `scale_x_reverse()`
+- `scale_x_sqrt()`
+
+::: {layout-ncol="2"}
+```{r}
+#| label: transform-scale
+p + 
+  scale_y_continuous(trans = "log10")
+```
+
+```{r}
+#| label: log10-scale
+p + 
+  scale_y_log10()
+```
+:::
+
+#### Scale position discrete {#sec-scale-pos-disc}
+- `scale_x_discrete()`
+- `scale_x_binned()`
+
+`scale_x/y_discrete()` is the default for discrete values with discrete geoms like `geom_bar()`. It is useful when using geoms usually used for continuous values, such as `geom_jitter()` to show individual values for discrete variables.
+
+```{r}
+#| label: position-discrete
+penguins |> 
+ggplot(aes(x = sex,
+           y = body_mass_g,
+           color = species)) + 
+  geom_jitter()
+```
+
+`scale_x/y_binned()` transforms continuous position data into discrete data. Use these to transform continuous data into bins for use with discrete geoms.
+
+```{r}
+#| label: position-binned
+penguins |> 
+ggplot(aes(x = flipper_length_mm,
+           fill = species)) + 
+  geom_bar() + 
+  scale_x_binned()
+```
+
+#### Scale position date {#sec-scale-pos-date}
+- `scale_x_date()`
+- `scale_x_datetime()`
+
+### Scale position arguments {#sec-pos-args}
+- `name`: name used for the axis or legend title. If `NULL` the name will be omitted.
+- `breaks`: axis breaks for grid lines
+  - `NULL`: no breaks, labels, or grids
+  - A vector of positions: `breaks = c(2, 4, 6)` or `breaks = 1:3*2`
+  - A breaks function such as `scales::extended_breaks(n)`
+- `labels`: labels used for axis breaks.
+  - `NULL`: no labels
+  - A character vector of labels: `labels = c("two", "four", "six")`
+  - An anonymous function to transform labels `labels = paste0(1:3*2, "k")`
+  - A function from the scales package: `labels = scales::label_comma()`
+- `limits`: range of `x` and/or `y`
+  - `NULL`: use the default scale range
+  - Numeric vector providing minimum and maximum with `NA` to refer to the existing minimum or maximum.
+  - A function that accepts the existing (automatic) limits and returns new limits.
+- `expand`: Used to add or reduce padding around data along an axis.
+  - Use the convenience function `expansion()` to generate the values for the expand argument: `expand = expansion(add = 2)`
+- `na.value`: value used to replace missing values.
+- `trans`: A transformation object bundles together a transform, its inverse, and methods for generating breaks and labels.
+- `guide`: Specify, add, or remove guides.
+- `position`: The position of the axis.
+  - `"left"` or `"right"` for `y` axes, `"top"` or `"bottom"` for `x` axes.
+
+### Axes breaks {#sec-scale-breaks}
+There are three arguments controlling breaks: `breaks`, `minor_breaks`, and `n.breaks`. Breaks control the axis tick marks and the major and minor grid lines on plots.
+
+#### Remove breaks
+Remove axis breaks, labels, and grids with `NULL`.
+
+```{r}
+#| label: remove-breaks
+p + 
+  scale_y_continuous(breaks = NULL)
+```
+
+#### Breaks: Vector of positions
+Use of `c()`, `seq()`, or integer sequence (`:`) to create vector of positions.
+
+```{r}
+#| label: breaks-vector
+p +  
+  scale_x_continuous(breaks = seq(170, 230, by = 20),
+                     minor_breaks = seq(170, 230, by = 5)) + 
+  scale_y_continuous(breaks = 5:13*500,
+                     minor_breaks = NULL)
+```
+
+Can combine the different ways to create a vector to make unequal breaks.
+
+```{r}
+#| label: breaks-vector-unequal
+p +  
+  scale_y_continuous(
+    breaks = c(seq(2600, 4000, by = 200), 5000, 6000))
+```
+
+Use external data such as the summary of `body_mass_g` to make breaks. This is the strategy used in the plot from R for Data Science showing presidential terms.
+
+```{r}
+#| label: breaks-vectors-data
+p + 
+  scale_y_continuous(breaks = 
+    penguins$body_mass_g |> 
+      summary() |> 
+      as.vector() |> 
+      round()
+    )
+```
+
+#### Breaks: `extended_breaks()`
+Choose the number of breaks with `extended_breaks()` or with `n.breaks` argument.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: breaks-scales
+p + 
+  scale_x_continuous(breaks = 
+    scales::breaks_extended(n = 4))
+```
+
+```{r}
+#| label: breaks-nbreaks
+p + 
+  scale_x_continuous(
+    n.breaks = 4)
+```
+:::
+
+### Axes labels {#sec-scale-labels}
+Axes labels and legends are collectively known as **guides**. The `labels` argument works very similar to `breaks`, but the data is character vectors rather than numeric. In addition to the `labels`, the axis labels can be altered through the `guide` argument. See [Axis labels: guides](02-scales.qmd#sec-scale-guides) for more on the use of the `guide` argument.
+
+#### Axis title {#sec-scale-label-title}
+The first argument of `scale_` functions is `name`, which provides the axis or legend title. This can also be achieved with `labs()` or `xlab()`, `ylab()` functions. Remove axis title with `NULL`.
+
+```{r}
+#| label: axis-title
+p + 
+  scale_x_continuous("Flipper Length (mm)") + 
+  scale_y_continuous(name = NULL)
+```
+
+#### Remove axis labels {#sec-scale-label-remove}
+Remove axis labels with `NULL` or set `guide = "none"`. The former maintains tick marks; the latter removes ticks, which are part of the guide. Unlike with breaks, this maintains grid lines.
+
+```{r}
+#| label: remove-axis-labels
+p + 
+  scale_x_continuous(labels = NULL) +
+  scale_y_continuous(guide = "none")
+```
+
+#### Axis labels position {#sec-scale-label-pos}
+You can also move the labels and ticks with the `position` argument from the default of bottom and left.
+
+```{r}
+#| label: axis-label-position
+p + 
+  scale_x_continuous(position = "top") +
+  scale_y_continuous(position = "right")
+```
+
+#### Axis labels: Character vector {#sec-scale-label-chr}
+Provide a character vector that is the same lengths as `breaks`.
+
+```{r}
+#| label: label-chr-vector
+p + 
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(
+    name = "Body Mass",
+    labels = c("3kg", "4kg", "5kg", "6kg")
+  )
+```
+
+#### Axis labels: Anonymous function {#sec-scale-label-func}
+```{r}
+#| label: label-anon-func
+p + 
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(
+    name = "Body Mass",
+    labels = (\(x) paste0(x / 1000, "kg"))
+  )
+```
+
+#### Axis labels: scales package {#sec-scale-label-scalespkg}
+`label_number()` and `label_comma()` from the scales package provide a nice way to force decimal display of numbers (no scientific notion). `label_comma()` is the same as `label_number()` but is a convenience function to insert a comma every three digits.
+
+Arguments:
+
+- `scale`: Ability to transform labels through multiplication to change units.
+- `prefix` and `sufix`: Additional text to display before and after the number label that removes the need to use `paste()`.
+
+```{r}
+#| label: label-scales-pkg
+p + 
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(
+    name = "Body Mass",
+    labels = scales::label_number(
+      scale = 0.001,
+      suffix = "kg")
+  )
+```
+
+Other scales formats
+
+- `label_bytes()`: formats numbers as kilobytes, megabytes etc.
+- `label_comma()`: formats numbers as decimals with commas added.
+- `label_dollar()`: formats numbers as currency.
+- `label_ordinal()`: formats numbers in rank order: 1st, 2nd, 3rd etc.
+- `label_percent()`: formats numbers as percentages.
+- `label_pvalue()`: formats numbers as p-values: <.05, <.01, .34, etc.
+
+#### Axis labels: Dates {#sec-scale-label-date}
+
+```{r}
+#| label: dates-base-plot
+#| code-fold: true
+# Dates base plot
+b <- bikes |> 
+  ggplot(aes(x = date, y = count,
+             color = season)) + 
+  geom_point()  + 
+  scale_y_continuous(breaks = NULL) + 
+  labs(x = NULL, y = NULL) + 
+  theme(legend.position = "none")
+```
+
+Dates provides its own difficulties for a continuous scale and this is why `scale_x_date()` and `scale_x_datetime()` are provided. The date scales have special arguments for `date_breaks` and `date_labels`.
+
+- `date_breaks`: A string giving the distance between breaks like `"2 weeks"`, or `"10 years"`.
+- `date_labels`: A string giving the formatting specification for the labels using POSIX codes used by `strftime()`.
+
+```{r}
+#| label: label-dates
+b + 
+  scale_x_date(
+    date_breaks = "3 months",
+    date_minor_breaks = "1 month",
+    date_labels = "%b %y")
+```
+
+You can create more complex date breaks and labels with the helper function `scales::breaks_width()`. For instance, if you want to have the breaks on the 15th of the month, use `breaks_width(offset = 14)` or `"14 days"`. `breaks_width()` and `offset` can also be used with non-date axis breaks and labels to create breaks that do not end in 0 or 5 such as `breaks_width(20, 4)`.
+
+```{r}
+#| label: breaks-width
+b + 
+  scale_x_date(
+    breaks = scales::breaks_width(
+      "3 months", offset = 14),
+    date_labels = "%d %b")
+```
+
+Another convenience function from the `scales` package for dates is `label_date_short()`, which automatically constructs a short format string sufficient to uniquely identify labels.
+
+```{r}
+#| label: label-date-short
+b + 
+  scale_x_date(
+    labels = scales::label_date_short())
+```
+
+#### Axis labels: guides {#sec-scale-guides}
+The `guide` argument can be used to affect axis labels in many of the same ways as the `labels` argument. Axis guides are set with `guide_axis()` either in the general `guides()` convenience function or in the `guide` argument.
+
+```{r}
+#| label: guide-guides-func
+p + 
+  scale_x_continuous(guide = guide_axis("Flipper length")) + 
+  guides(y = guide_axis("Body mass"))
+```
+
+What `guide` and `guide_axis()` add is the ability to change the `angle` of the labels or stack labe. Changes to label angle can also be done with themes, see [Chapter -@sec-theme-axes].
+
+```{r}
+#| label: guide-angle-dodge
+p +  
+  scale_x_continuous(n.breaks = 20,
+                     guide = guide_axis(n.dodge = 3)) + 
+  scale_y_continuous(guide = guide_axis(angle = 45))
+```
+
+You can also change the `position` of the labels with `guide_axis()`, replicating the functionality of the `position` argument in `scale_x/y_*()`.
+
+### Scale limits {#sec-scale-limits}
+
+#### Limit convenience functions {#sec-scale-limits-func}
+There are three convenience functions for setting plot limits:
+
+- `lims()`:  Like `labs()`, `lims()` is a more general convenience function that can set limits to any scale such as size or color.
+- `xlim()` and `ylim()`: provide quick means to set limits to position scales.
+
+#### Scale limits vs coordinates {#sec-scale-limits-coords}
+There are three basic reasons to scale the limits of plots:
+
+1. Set consistent x/y limits for multiple plots.
+2. Zoom in on plots.
+3. Alter the default padding added to the x/y limits.
+
+Each of these can be achieved either through `scale_x/y_*()` functions or `coord_*()` functions. However, the scale and coord functions work very differently and have slightly different capabilities.
+
+- `scale_x_continuous(limits = c(180, 220))`: Subsets data, all values outside the range become `NA`. This will lead to changes in the data for lines or polygons.
+- `coord_cartesian(xlim = c(180, 220))`: Visual zoom on the data, maintaining the same structure of the data.
+
+#### Setting consistent limits {#sec-scale-limits-consistent}
+Setting x/y limits is a good way to ensure consistent scales across different plots as is done in faceted plots. `scale_x/y_*(limits)` provides a good way to expand the limits of certain plots to ensure consistent scales. We can see this in the penguin plot.
+
+Notice the very different x and y scales in the plots without setting limits...
+
+```{r}
+#| label: inconsistent-limits
+#| layout-ncol: 2
+col_scale <- scale_color_discrete(limits = levels(penguins$species))
+
+adelie <- penguins |> 
+  filter(species == "Adelie") |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             color = species)) + 
+  geom_point() + 
+  col_scale + 
+  theme(legend.position = "none")
+
+gentoo <- penguins |> 
+  filter(species == "Gentoo") |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             color = species)) + 
+  geom_point() + 
+  col_scale + 
+  theme(legend.position = "none")
+adelie
+gentoo
+```
+
+...compared to plots where consistent limits are set.
+
+```{r}
+#| label: x-y-scales
+# Find default scale with all data
+x_scale <- range(penguins$flipper_length_mm)
+y_scale <- range(penguins$body_mass_g)
+```
+
+::: {layout-ncol="2"}
+```{r}
+#| label: consistent-limits-adelie
+adelie + 
+  lims(x = x_scale,
+       y = y_scale)
+```
+
+```{r}
+#| label: consistent-limits-gentoo
+gentoo + 
+  xlim(x_scale) + 
+  ylim(y_scale)
+```
+:::
+
+#### Zooming {#sec-scale-limits-zoom}
+The preferred method for zooming in on a plot is to use `coord_cartesian(xlim, ylim)` because it does not subset the data. This can be seen by adding a model line. `scale_x/y_*(limits)` changes the data and, therefore, the model line.
+
+```{r}
+#| label: zoom-plot
+#| message: false
+#| layout-ncol: 2
+# Left: Zoomed
+p + 
+  geom_smooth() + 
+  coord_cartesian(
+    xlim = c(190, 210))
+
+# Right: Filtered
+p + 
+  geom_smooth() + 
+  scale_x_continuous(
+    limits = c(190, 210))
+```
+
+#### Padding {#sec-scale-limits-padding}
+`scale_x/y_*()` and `coord_*()` are both useful for altering the padding added to the scale of plots, but they do different things.
+
+- `scale_x/y_*(expand)`: Alter padding on x and y axes.
+- `coord_*(expand)`: Logical to turn on (default) or off padding.
+
+`scale_x/y_*()` with the `expand` argument and the `expansion()` convenience function changes the padding around the data through a percentage or addition. The defaults are to expand the scale by 5% on each side for continuous variables, and by 0.6 units on each side for discrete variables.
+
+**Remove padding**:
+
+Padding can be removed by setting `scale_x/y_*(expand = expansion(0)` or `coord_cartesian(expand = FALSE)`. When removing padding completely, it may be beneficial to turn `clip = "off"` to allow points plotted outside the panel region so they are not cut in half.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: remove-padding-scale
+p + 
+  scale_x_continuous(
+    expand = expansion(0)) + 
+  scale_y_continuous(
+    expand = expansion(0))
+```
+
+```{r}
+#| label: remove-padding-coord
+p + 
+  coord_cartesian(
+    expand = FALSE,
+    clip = "off"
+    )
+```
+:::
+
+**Altering padding**:
+
+`expansion()` takes vectors of either length 1 or 2 to either multiply (`mult`) or add (`add`) to the lower and upper limits of the scale. The below code adds one unit to the lower and upper bounds of the x scale and removes all padding from the lower bound of the y scale (multiplies by 0) and expands the upper bound of the y scale by 10%.
+
+```{r}
+#| label: expand
+p + 
+  scale_x_continuous(expand = expansion(add = 10)) + 
+  scale_y_continuous(expand = expansion(mult = (c(0, 0.1))))
+```
+
+## Other scales {#sec-other-scales}
+
+### Scale size {#sec-scale-size}
+The main reason to change the default scale for size is to affect the upper and lower bounds of the size of the geoms. This is done with the `range` argument. The defaults for size are `range = c(1, 6)`.
+
+**Size base plot**
+```{r}
+#| label: scale-size-base-plot
+#| code-fold: true
+psize <- penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             size = bill_depth_mm)) + 
+  geom_point(alpha = 0.4)
+```
+
+```{r}
+#| label: scale-size
+psize + 
+  scale_size(range = c(0.5, 4),
+             breaks = scales::breaks_extended(8))
+```
+
+You can also change the guides with `scale_size()`, providing a title for the legend, the breaks for the legend, and the labels for the legend. These types of changes to `breaks` and `labels` are also available with other scales.
+
+```{r}
+#| label: scale-size-guides
+psize + 
+  scale_size("Bill depth",
+             range = c(0.5, 4),
+             breaks = c(15, 17, 19, 21),
+             labels = c("Fifteen", "Seventeen",
+                        "Nineteen", "Twenty-one")
+             )
+```
+
+The number of breaks in the size legend can be changed with `scales::extended_breaks(n)`, which provides access to an `n.breaks` argument in a continuous scale.
+
+```{r}
+#| label: scale-size-breaks
+psize + 
+  scale_size("Bill depth",
+             range = c(0.5, 4),
+             breaks = scales::extended_breaks(8)
+             )
+```
+
+A similar can be achieved with `scale_size_binned()`, which has an argument for `n.breaks`. Like binned position and color scales, `scale_size_binned()` makes a continuous variable into a discrete variable. The main difference is the legend style, which uses `guide_bins()`.
+
+```{r}
+#| label: scale-size-binned
+psize + 
+  scale_size_binned("Bill depth",
+             range = c(0.5, 4),
+             n.breaks = 6)
+```
+
+### Scale transparency {#sec-scale-alpha}
+Scaling transparency is very similar to scaling size. The default alpha range is `range = c(0.1, 1)`.
+
+**Alpha base plot**
+```{r}
+#| label: scale-alpha-base-plot
+#| code-fold: true
+palpha <- penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             alpha = bill_depth_mm)) + 
+  geom_point()
+```
+
+Compare `scale_alpha()` and `scale_alpha_binned()`
+
+::: {layout-ncol="2"}
+```{r}
+#| label: scale-alpha
+palpha + 
+  scale_alpha("Bill depth",
+              range = c(0.2, 0.5)
+              )
+```
+
+```{r}
+#| label: scale-alpha-binned
+palpha + 
+  scale_alpha_binned("Bill depth",
+              range = c(0.2, 0.5),
+              n.breaks = 6)
+```
+:::
+
+It is also possible to map alpha to discrete values.
+
+```{r}
+#| label: scale-alpha-discrete
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             alpha = species)) + 
+  geom_point() + 
+  scale_alpha_discrete("Species")
+```
+
+### Scale shape {#sec-scale-shape}
+Mapping values to shapes can be useful when you have a small number of discrete values or continuous values with `scale_shape_binned()`. The only different argument for `scale_shape()` is whether shapes should be solid or not, default is `solid = TRUE`.
+
+```{r}
+#| label: scale-shape
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             shape = species)) + 
+  geom_point() + 
+  scale_shape("Species",
+              solid = FALSE)
+```
+
+There are 25 different shapes that are associated with each integer. Use `scale_shape_manual()` to choose the shapes.
+
+### Scale lines {#sec-scale-lines}
+There are two scales that can be aplied to lines: `linewidth` and `linetype`. These are analogous to scaling `size` and `shape`. 
+
+#### Line width {#sec-scale-linewidth}
+Line width used to be controlled with `size`, but now `linewidth` is preferred. Like size, you can scale line width with `scale_linewidth()` or `scale_linewidth_binned()`.
+
+```{r}
+#| label: scale-linewidth
+#| layout-ncol: 2
+# Base plot
+plw <- bikes |> 
+  summarise(count = sum(count), .by = c(month, day_night)) |> 
+  ggplot(aes(x = month, y = count, group = day_night,
+             linewidth = count)) + 
+  geom_line(lineend = "round") + 
+  scale_y_continuous(guide = "none")
+
+# linewidth
+  plw + 
+    scale_linewidth("Count",
+                    range = c(0.1, 4))
+
+# linewidth_binned
+    plw + 
+    scale_linewidth_binned("Count",
+                           range = c(0.1, 4),
+                           n.breaks = 10,
+                           labels = scales::label_comma())
+```
+
+#### Line type {#sec-scale-linetype}
+
+`linetype` is like `shape` in that there is little to do with the scale other than choose among the thirteen line types with `scale_linetype_manual()`. You can access the default linetype palette with `scales::linetype_pal()`.
+
+```{r}
+#| label: scale_linetype
+bikes |> 
+  summarise(count = sum(count), .by = c(month, day_night)) |> 
+  ggplot(aes(x = month, y = count, group = day_night,
+             linetype = day_night)) + 
+  geom_line() + 
+  scale_y_continuous(guide = "none")
+```
+
+### Manual scales {#sec-scale-manual}
+Manual scales are created within the `scale_*_manual()` function through the `values` argument. `values` accepts a vector or a named vector to match to the values. See the [Aesthetic specifications](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html) vignette for valid aesthetic values for the different geom scales.
+
+```{r}
+#| label: scale-manual-shape
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             shape = species)) + 
+  geom_point() + 
+  scale_shape_manual("Species",
+                     values = c(8, 9, 13))
+```
+
+A named vector makes the mapping clearer:
+```{r}
+#| label: scale-manual-size
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             size = species)) + 
+  geom_point(alpha = 0.4) + 
+  scale_size_manual("Species",
+    values = c("Adelie" = 0.5, "Chinstrap" = 3, "Gentoo" = 5)
+    )
+```
+
+### Identity scales {#sec-scale-identity}
+Identity scales are similar to manual scales, but are used when the data is already scaled. For instance, you might add a scale within the data wrangling process. By default no guide/legend is produced.
+
+```{r}
+#| label: scale-identity
+penguins |> 
+  mutate(bill_depth_cm = bill_depth_mm / 10) |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             size = bill_depth_cm)) + 
+  geom_point(alpha = 0.4) + 
+  scale_size_identity("Bill depth\n(cm)",
+                      guide = "legend")
+```
