@@ -3,7 +3,7 @@ date: "2023-07-03"
 date-modified: last-modified
 ---
 
-# RStudio conf 2022 ggplot2 workshop
+# RStudio conf 2022 ggplot2 workshop {#sec-rs22-gd}
 
 Source: [Cédric Scherer, Graphic Design with ggplot2 at RStudio conf 2022](https://rstudio-conf-2022.github.io/ggplot2-graphic-design/). All examples are derived from this workshop.
 
@@ -31,7 +31,7 @@ bikes <- readr::read_csv(
 bikes$season <- forcats::fct_inorder(bikes$season)
 ```
 
-## The Grammar of Graphics
+## The Grammar of Graphics {#sec-rs22-gd-grammar}
 
 | Component         | Function              | Explanation                                                 |
 |-------------------|-----------------------|--------------------------------------|
@@ -44,7 +44,7 @@ bikes$season <- forcats::fct_inorder(bikes$season)
 | Facets            | `facet_*()`           | The arrangement of the data into a grid of plots.           |
 | Visual themes     | `theme()`/`theme_*()` | The overall visual defaults of a plot.                      |
 
-## Aesthetic mappings
+## Aesthetic mappings {#sec-rs22-gd-aesthetic-mappings}
 - positions: `x, y`
 - colors: `color`, `fill`
 - shapes: `shape`, `linetype`
@@ -52,7 +52,7 @@ bikes$season <- forcats::fct_inorder(bikes$season)
 - transparency: `alpha`
 - groupings: `group`
 
-### Setting vs Mapping of visual properties
+### Setting vs Mapping of visual properties {#sec-rs22-gd-setting-mapping}
 
 Aesthetics are **set** within `geom_*()` and are **mapped** within `aes()`. See *line 6* in the examples below. 
 
@@ -102,7 +102,7 @@ ggplot(
 ```
 
 
-### Local vs Global encoding
+### Local vs Global encoding {#sec-rs22-gd-local-global}
 
 - **Local encoding**: aesthetic properties only correspond to the specified geom.
 - **Global encoding** aesthetic properties correspond to all geoms. This results in adding a `group` aesthetic to geoms such as `geom_smooth()`
@@ -156,9 +156,9 @@ ggplot(
     method = "lm")
 ```
 
-## Label basics {#sec-label-basics}
+## Label basics {#sec-rs22-gd-label-basics}
 
-For more detailed info on labels, see @sec-labels.
+For more detailed info on labels, see @sec-rs22-gd-labels.
 
 **Create base plot**
 ```{r}
@@ -181,7 +181,7 @@ g <-
   )
 ```
 
-### labs `labs()`
+### labs `labs()` {#sec-rs22-gd-labs}
 - Aesthetic name-value pairs: `x = "Date"`, `color = "Season"`
 - `title`
 - `subtitle`
@@ -189,7 +189,7 @@ g <-
 - `tag`: Displayed at the top-left of the plot by default.
 - `alt`: Text used for the generation of alt-text for the plot.
 
-### Specific functions
+### Specific functions {#sec-rs22-gd-labs-fns}
 - `xlab()`
 - `ylab()`
 - `ggtitle()`
@@ -210,10 +210,10 @@ g +
 g <- last_plot()
 ```
 
-## Theme
+## Themes {#sec-rs22-gd-theme}
 See [notes on themes](02-themes.qmd) for more information.
 
-### Theme functions
+### Theme functions {#sec-rs22-gd-theme-fns}
 - `theme()`: modify components of a theme.
 - `theme_set()`: completely overrides the current theme.
 - `theme_update()`: Update individual elements of a plot.
@@ -236,7 +236,7 @@ theme_update(
 g
 ```
 
-## Scales
+## Scales {#sec-rs22-gd-scales}
 
 The `scale_*()` components control the properties of all the aesthetic dimensions mapped to the data.
 
@@ -256,13 +256,13 @@ Continuous vs discrete
 - Continuous: quantitative or numerical data -- can have infinite values within given range.
 - Discrete: qualitative or categorical data -- observations can only exist at limited values, often counts.
 
-### Position arguments {#sec-position-args}
+### Position arguments {#sec-rs22-gd-pos-args}
 
 - `name`: name used for the axis or legend title. If `NULL` the name will be omitted.
 - `breaks`: numeric vector or function that takes the limits of the input and returns breaks.
 - `labels`: labels used for axis breaks.
 - `limits`: numeric vector of length two providing minimum and maximum with `NA` to refer to the existing minimum or maximum. Or a function that accepts the existing (automatic) limits and returns new limits.
-  - Setting limits with scales removes data outside of the limits. If you want to zoom, use the `limit` argument in the coordinate system, see @sec-coord-limit.
+  - Setting limits with scales removes data outside of the limits. If you want to zoom, use the `limit` argument in the coordinate system, see @sec-rs22-gd-plot-limits.
 - `expand`: Used to add or reduce padding around data along an axis.
   - Use the convenience function `expansion()` to generate the values for the expand argument.
 - `na.value`: value used to replace missing values.
@@ -291,7 +291,7 @@ g <- ggplot(
 g
 ```
 
-### Color scales {#sec-color-scales}
+### Color scales {#sec-rs22-gd-color-scales}
 ```{r}
 #| label: discrete-colors
 g + 
@@ -329,7 +329,7 @@ g +
 ```
 :::
 
-## Coordinate systems
+## Coordinate systems {#sec-rs22-gd-coords}
 
 - linear coordinate systems: preserve the geometrical shapes
   - `coord_cartesian()`
@@ -340,8 +340,8 @@ g +
   - `coord_map()` and `coord_sf()`
   - `coord_trans()`
 
-### Plot limits {#sec-coord-limit}
-You can set plot limits with the coordinate functions. This zooms into the plot instead of removing data that falls outside of those limits as is done with the `scale_*()` functions, see @sec-scale-arguments.
+### Plot limits {#sec-rs22-gd-plot-limits}
+You can set plot limits with the coordinate functions. This zooms into the plot instead of removing data that falls outside of those limits as is done with the `scale_*()` functions, see @sec-rs22-gd-pos-args.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -391,7 +391,7 @@ ggplot(
   )
 ```
 
-### Flipped coordinate system {#sec-coord-flip}
+### Flipped coordinate system {#sec-rs22-gd-coord-flip}
 `coord_flip()` is often used with bar plots to make them sideways. This can also be done by placing the variable to be counted on the y axis.
 
 ```{r}
@@ -405,7 +405,7 @@ ggplot(
   labs(x = "Weather type")
 ```
 
-### Circular coordinate system {#sec-coord-polar}
+### Circular coordinate system {#sec-rs22-gd-coord-polar}
 Use `coord_polar()` for a circular coordinate system.
 
 ```{r}
@@ -445,7 +445,7 @@ ggplot(
   coord_polar(theta = "y") 
 ```
 
-### Example: lillipop plot {#sec-lollipop}
+### Example: lillipop plot {#sec-rs22-gd-lollipop}
 
 ```{r}
 #| label: lollipop
@@ -481,7 +481,7 @@ group_by(season) |>
   theme(plot.margin = margin(rep(-100, 4)))
 ```
 
-### Transform a coordinate system {#sec-coord-trans}
+### Transform a coordinate system {#sec-rs22-gd-coord-trans}
 `coord_trans()` is different to scale transformations in that it occurs after statistical transformation and will affect the visual appearance of geoms; there is no guarantee that straight lines will continue to be straight.
 
 ::: {layout-ncol="2"}
@@ -522,10 +522,10 @@ ggplot(
 ```
 :::
 
-## Labels in plot elements {#sec-labels}
-See @sec-label-basics for basic discussion of labels.
+## Labels in plot elements {#sec-rs22-gd-labels}
+See @sec-rs22-gd-label-basics for basic discussion of labels.
 
-Create labels with `labs()` as shown in @sec-label-basics
+Create labels with `labs()` as shown in @sec-rs22-gd-label-basics.
 
 ```{r}
 #| label: labels-baseplot
@@ -550,7 +550,7 @@ g <- ggplot(
 g
 ```
 
-### Labels and theme {#sec-labels-theme}
+### Labels and theme {#sec-rs22-gd-labels-theme}
 Change other labels and elements of the plot via `theme()`.
 
 ```{r}
@@ -575,7 +575,7 @@ g + theme(
 )
 ```
 
-### Labels and scales {#sec-labels-scales}
+### Labels and scales {#sec-rs22-gd-labels-scales}
 
 Different ways to change the labels of the scales using the [scales package](https://scales.r-lib.org) or just the `labels` argument.
 
@@ -599,7 +599,7 @@ g +
   )
 ```
 
-### Labels and markdown {#sec-labels-ggtext}
+### Labels and markdown {#sec-rs22-gd-labels-ggtext}
 Styling labels with [ggtext](https://wilkelab.org/ggtext) and `element_markdown()`.
 
 ```{r}
@@ -611,7 +611,7 @@ g +
   )
 ```
 
-### Labels and facets {#sec-labels-facets}
+### Labels and facets {#sec-rs22-gd-labels-facets}
 ```{r}
 #| label: labels-facet
 codes <- c(
@@ -631,7 +631,7 @@ g +
   )
 ```
 
-### Handling long labels
+### Handling long labels {#sec-rs22-gd-labels-long}
 
 **`stringr`**
 
@@ -666,9 +666,9 @@ g +
   )
 ```
 
-## Annotations {#sec-annotations}
+## Annotations {#sec-rs22-gd-annotations}
 
-### Annotation basics {#sec-anootation-basics}
+### Annotation basics {#sec-rs22-gd-annotation-basics}
 Adding text annotations with `annotate()` and selecting the `geom` used for the annotation.
 
 ```{r}
@@ -720,7 +720,7 @@ ggplot(bikes, aes(humidity, temp)) +
   geom_point(size = 2, color = "grey")
 ```
 
-### Highlighting aspects with annotations {#sec-ann-highlights}
+### Highlighting aspects with annotations {#sec-rs22-gd-annotation-hl}
 
 Adding a straight line or a curved line between annotated text and aspects of the plot you want to highlight. See `geom_segment()` and `geom_curve()` for arguments to use in `annotate()`, particularly in working with curvature. 
 
@@ -792,7 +792,7 @@ ggplot(bikes, aes(humidity, temp)) +
   )
 ```
 
-### Annotations with geoms {#sec-annotation-geoms}
+### Annotations with geoms {#sec-rs22-gd-annotation-geoms}
 
 You can highlight specific points on a plot by giving them different aesthetics, for instance, highlighting hot periods by using filtered data for highlighted points in a second `geom_point()` function.
 
@@ -809,7 +809,7 @@ ggplot(
   geom_point(size = 2.5)
 ```
 
-### Text annotations {#sec-text-annotations}
+### Text annotations {#sec-rs22-gd-text-annotations}
 You can use `geom_text()` and `geom_label()` to label points, but `ggrepel` helps to make these annotations clearer.
 
 ```{r}
@@ -881,7 +881,7 @@ ggplot(
   xlim(25, NA) # Expand x min to give space for annotations
 ```
 
-### Annotations with `ggforce` {#sec-ggforce}
+### Annotations with `ggforce` {#sec-rs22-gd-ggforce}
 
 Use of [ggforce](https://ggforce.data-imaginist.com) to highlight aspects of a plot.
 
@@ -933,7 +933,7 @@ ggplot(
   )
 ```
 
-### Annotations example: Palmer penguins {#sec-annotations-ex}
+### Annotations example: Palmer penguins {#sec-rs22-gd-annotations-ex}
 
 See also Cédric's [The Evolution of a ggplot](https://www.cedricscherer.com/2019/05/17/the-evolution-of-a-ggplot/) for another example of building a similar plot
 
@@ -1025,7 +1025,7 @@ ggplot(
 )
 ```
 
-## Adding Images {#sec-images}
+## Adding Images {#sec-rs22-gd-images}
 
 Load the image
 
@@ -1087,9 +1087,9 @@ ggplot(bikes, aes(date, temp_feel)) +
 ```
 
 
-## Color {#sec-color}
+## Color {#sec-rs22-gd-color}
 
-### Predefined color palettes
+### Predefined color palettes {#sec-rs22-gd-color-pals}
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -1123,7 +1123,7 @@ ggplot(
 ```
 :::
 
-### Color palette packages
+### Color palette packages {#sec-rs22-gd-color-pkgs}
 - [rcartocolor](https://jakubnowosad.com/rcartocolor/)
 - [scico](https://github.com/thomasp85/scico)
 - [ggsci](https://nanx.me/ggsci/)
@@ -1131,7 +1131,7 @@ ggplot(
 - [nord](https://cran.r-project.org/web/packages/nord/index.html)
 - [MetBrewer](https://cran.r-project.org/web/packages/MetBrewer/index.html)
 
-### Customizing existing palettes
+### Customizing existing palettes {#sec-rs22-gd-color-custom-pals}
 
 Choose specific colors from a discrete color palette.
 
@@ -1242,7 +1242,7 @@ ggplot(
   )
 ```
 
-### Creating new palettes
+### Creating new palettes {#sec-rs22-gd-color-new-pals}
 
 Create sequential palettes
 
@@ -1295,7 +1295,7 @@ ggplot(
   )
 ```
 
-### Build your own palettes: discrete palette
+### Build your own palettes: discrete palette {#sec-rs22-gd-color-pal-discrete}
 
 1. Create a function that accesses a named vector of colors as hex values.
 
@@ -1381,7 +1381,7 @@ ggplot(
   scale_fill_dubois_d(palette = "light")
 ```
 
-### Build your own palettes: continuous palette
+### Build your own palettes: continuous palette {#sec-rs22-gd-color-pal-cont}
 
 Use named color palette from above
 
@@ -1444,7 +1444,7 @@ ggplot(
 ```
 
 
-## Legend placement and styling {#sec-legend}
+## Legend placement and styling {#sec-rs22-gd-legend}
 
 **Guides** are the collective name for axes and legends. Legend position is set within `theme()`, while many aspects of the styling of the legend can be set within `guide` argument of `scale_*()` functions. See `guides()` function for details.
 
@@ -1461,7 +1461,7 @@ There are three types of quantitative guides:
 - `guide_colourbar()`
 - `guide_coloursteps()`
 
-### Legend position
+### Legend position {#sec-rs22-gd-legend-pos}
 ```{r}
 #| label: legend-position
 ggplot(
@@ -1512,7 +1512,7 @@ ggplot(
   )
 ```
 
-### Legend and color example: color shading
+### Legend and color example: color shading {#sec-rs22-gd-legend-ex}
 
 Create a legend that uses color shading, taking a palette and using lighter and darker shades to show similarity between groups.
 
