@@ -388,8 +388,8 @@ There are three basic reasons to scale the limits of plots:
 
 Each of these can be achieved either through `scale_x/y_*()` functions or `coord_*()` functions. However, the scale and coord functions work very differently and have slightly different capabilities.
 
-- `scale_x_continuous(limits = c(180, 220))`: Subsets data, all values outside the range become `NA`. This will lead to changes in the data for lines or polygons.
-- `coord_cartesian(xlim = c(180, 220))`: Visual zoom on the data, maintaining the same structure of the data.
+- `scale_x_continuous(limits = c(180, 220))`: **Subsets data**, all values outside the range become `NA`. This will lead to changes in the data for lines or polygons.
+- `coord_cartesian(xlim = c(180, 220))`: **Visual zoom** on the data, maintaining the same structure of the data.
 
 #### Setting consistent limits {#sec-scale-limits-consistent}
 Setting x/y limits is a good way to ensure consistent scales across different plots as is done in faceted plots. `scale_x/y_*(limits)` provides a good way to expand the limits of certain plots to ensure consistent scales. We can see this in the penguin plot.
