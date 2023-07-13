@@ -241,25 +241,25 @@ g
 The `scale_*()` components control the properties of all the aesthetic dimensions mapped to the data.
 
 - Positions: `scale_x_*()` and `scale_y_*()`
-  - `continuous()`, `discrete()`, `reverse()`, `log10()`, `sqrt()`, `date()`
+  - `continuous()`, `discrete()`, `reverse()`, `identity()`, `log10()`, `sqrt()`, `date()`
 - Colors: `scale_color_*()` and `scale_fill_*()`
-  - `continuous()`, `discrete()`, `manual()`, `gradient()`, `gradient2()`, `brewer()`
+  - `continuous()`, `discrete()`, `manual()`, `identity()`, `gradient()`, `gradient2()`, `brewer()`
 - Sizes: `scale_size_*()` and `scale_radius_*()`
-  - `continuous()`,` discrete()`, `manual()`, `ordinal()`, `area()`, `date()`
+  - `continuous()`,` discrete()`, `manual()`, `identity()` `ordinal()`, `area()`, `date()`
 - Shapes: `scale_shape_*()` and `scale_linetype_*()`
-  - `continuous()`, `discrete()`, `manual()`, `ordinal()`
+  - `continuous()`, `discrete()`, `manual()`, `identity()`, `ordinal()`
 - Transparency: `scale_alpha_*()`
-  - `continuous()`,` discrete()`, `manual()`, `ordinal()`, `date()`
+  - `continuous()`,` discrete()`, `manual()`, `identity()`, `ordinal()`, `date()`
 
 Continuous vs discrete
  
-- Continuous: quantitative or numerical data
-- Discrete: qualitative or categorical data
+- Continuous: quantitative or numerical data -- can have infinite values within given range.
+- Discrete: qualitative or categorical data -- observations can only exist at limited values, often counts.
 
-### Arguments {#sec-scale-arguments}
+### Position arguments {#sec-position-args}
 
 - `name`: name used for the axis or legend title. If `NULL` the name will be omitted.
-- `breaks`: numeric vector or function that takes the limits if the input and returns breaks.
+- `breaks`: numeric vector or function that takes the limits of the input and returns breaks.
 - `labels`: labels used for axis breaks.
 - `limits`: numeric vector of length two providing minimum and maximum with `NA` to refer to the existing minimum or maximum. Or a function that accepts the existing (automatic) limits and returns new limits.
   - Setting limits with scales removes data outside of the limits. If you want to zoom, use the `limit` argument in the coordinate system, see @sec-coord-limit.
@@ -588,7 +588,7 @@ g +
   ) + 
   scale_y_continuous(
     breaks = 0:4*15000,
-    labels = scales::comma_format(
+    labels = scales::label_number(
       scale = .001,
       suffix = "k"),
     name = "Reported bike shares in thousands"
@@ -1446,7 +1446,7 @@ ggplot(
 
 ## Legend placement and styling {#sec-legend}
 
-**Guides** are the combination of scales and legends. Legend position is set within `theme()`, while many aspects of the styling of the legend can be set within `guide` argument of `scale_*()` functions. See `guides()` function for details.
+**Guides** are the collective name for axes and legends. Legend position is set within `theme()`, while many aspects of the styling of the legend can be set within `guide` argument of `scale_*()` functions. See `guides()` function for details.
 
 Removing a legend from a plot:
 
@@ -1550,7 +1550,7 @@ bikes |>
     labels = str_to_title # Capitalize labels
   ) +
   scale_y_continuous(
-    labels = scales::comma_format(),
+    labels = scales::label_comma(),
     expand = c(0, 0),
     limits = c(NA, 4500000)
   ) +
