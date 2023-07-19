@@ -1450,10 +1450,10 @@ ggplot(
 
 Removing a legend from a plot:
 
-- In `geom_*()`:`show.legend = FALSE`
-- In `scale_*()`: `guide = "none"`
-- In `guides()`: setting aesthetic to "none": `color = "none"`
-- In `theme()` and `theme_()`: `legend.position = "none"`
+1. `geom_*(show.legend = FALSE)`
+2. `scale_*(guide = "none")`
+3. `guides(color = "none")`: setting aesthetic to "none"
+4. `theme(legend.position = "none")`
 
 There are three types of quantitative guides:
 
@@ -1474,7 +1474,11 @@ ggplot(
     # Styling of legend with guide
     guide = guide_colorsteps(
       title.position = "top",
-      title.hjust = .5
+      title.hjust = 0.5, # center title
+      show.limits = TRUE, # labels for low and high values
+      frame.colour = "black",
+      frame.linewidth = 1,
+      barwidth = unit(8, "lines") # width of whole colorbar
     )
   ) +
   theme(

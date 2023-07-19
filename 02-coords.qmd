@@ -30,13 +30,6 @@ library(palmerpenguins)
 penguins <- penguins |> 
   filter(!is.na(flipper_length_mm),
          !is.na(sex))
-
-bikes <- read_csv(
-  here::here("data", "london-bikes-custom.csv"),
-  col_types = "Dcfffilllddddc"
-)
-
-bikes$season <- forcats::fct_inorder(bikes$season)
 ```
 
 ## Plot limits {#sec-coords-limits}

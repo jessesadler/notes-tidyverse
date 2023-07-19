@@ -89,10 +89,10 @@ High level arguments in the theme hierarchy:
 - `aspect.ratio`: aspect ratio of the panel
 
 ### Axes {#sec-theme-axes}
-- axis.title: labels of axes
-- axis.text: tick labels along axes
-- axis.ticks: tick marks `element_line()`
-- axis.line: lines along axes
+- `axis.title`: labels of axes
+- `axis.text`: tick labels along axes
+- `axis.ticks`: tick marks `element_line()`
+- `axis.line`: lines along axes
 
 ```{r}
 #| label: axes
@@ -109,39 +109,51 @@ p +
 ```
 
 ### Legend {#sec-theme-legend}
+For a full discussion of legends see @sec-guides and specifically @sec-guide-theme.
 
-Remove legend
+#### Remove legend
 ```{r}
 #| label: remove-legend
 p + 
   theme(legend.position = "none")
 ```
 
-- legend.background
-- legend.margin: the margin around each legend
-- legend.spacing: spacing between legends if there are multiple legends
-- legend.key: background underneath legend keys (symbols of geoms)
-- legend.text: legend item labels
-- legend.title: legend title
-	- legend.title.align: alignment of legend title (number from 0 (left) to 1 (right))
-- legend.position: the position of legends
-	- "none", "left", "right", "bottom", "top", or two-element character or numeric vector
-- legend.direction: "horizontal" or "vertical"
-- legend.justification: anchor point for positioning legend
-- legend.box: arrangement of multiple legends ("horizontal" or "vertical")
+#### Legend arguments
+- Legend layout: see @sec-guide-layout
+  - `legend.position`: the position of legends -- "none", "left", "right", "bottom", "top", or two-element character or numeric vector
+  - `legend.direction`: "horizontal" or "vertical"
+  - `legend.justification`: anchor point for positioning legend
+- Bounding box of all legends
+  - `legend.box`: arrangement of multiple legends ("horizontal" or "vertical")
+  - `legend.box.background`: background of full legend area
+  - `legend.box.just`: justification of each legend within the overall bounding box
+  - `legend.box.margin`: margins around the full legend bounding box
+  - `legend.box.spacing`: The spacing between the plotting area and the full legend bounding box
+- Bounding box of each legend
+  - `legend.background`
+  - `legend.margin`: the margin around each legend
+  - `legend.spacing`: spacing between legends if there are multiple legends
+- Legend keys: see @sec-guide-key-spacing
+  - `legend.key`: background underneath legend keys (symbols of geoms)
+  - `legend.key.size`, `legend.key.height`, and `legend.key.width`
+- Legend text
+  - `legend.text`: legend item labels
+  - `legend.text.align`: alignment of legend labels (number from 0 (left) to 1 (right))
+  - `legend.title`: legend title
+	- `legend.title.align`: alignment of legend title
 
 ```{r}
 #| label: legend
 p + 
-  theme(legend.background = element_rect(color = "orange"),
+  theme(legend.position = "bottom",
+        legend.direction = "vertical",
+        legend.justification = "left",
         legend.box.background = element_rect(linetype = "dashed"),
         legend.box.margin = margin(6, 6, 6, 6),
-        legend.key = element_rect(fill = "white", colour = "black"),
+        legend.background = element_rect(color = "orange", fill = "lightgrey"),
+        legend.key = element_rect(fill = "lightblue", color = "black"),
         legend.title = element_text(size = rel(1.5)),
-        legend.text = element_text(color = "firebrick"),
-        legend.position = "bottom",
-        legend.direction = "vertical",
-        legend.justification = "left"
+        legend.text = element_text(color = "firebrick")
         )
 ```
 
@@ -150,7 +162,7 @@ Place legend in plot by positioning it at the bottom-right of the plot with lege
 ```{r}
 #| label: legend-plot
 p + 
-  theme(legend.position = c(1, 0), # position on bottom, right
+  theme(legend.position = c(1, 0), # position on right, bottom
         legend.justification = c("right", "bottom"), # anchor point
         # same as legend.justification = c(1, 0),
         legend.box.just = "right", # justification of legends in box

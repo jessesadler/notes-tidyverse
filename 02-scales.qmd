@@ -11,7 +11,7 @@ date-modified: last-modified
 source("_common.R")
 ```
 
-Scales control the details of how data values are mapped to aesthetic visual properties. Scales are applied to aesthetics (`aes()`) to determine how they look, such as size, color, position or shape. Scales are the basis for **guides** used to interpret the plot: axes and legends.
+Scales control the details of how data values are mapped to aesthetic visual properties. Scales are applied to aesthetics (`aes()`) to determine how they look. They directly affect the size, color, position or shape of geoms. Scales are the basis for **guides** used to interpret the plot: axes and legends.
 
 The scale functions all begin with `scale_` then the name of the *aesthetic*, followed by the *scale*. E.g. `scale_x_continuous()` uses the continuous scale for the x-axis.
 
@@ -43,7 +43,9 @@ bikes <- read_csv(
 bikes$season <- forcats::fct_inorder(bikes$season)
 ```
 
-## Types of scales {#sec-scale-types}
+## Scale functions {#sec-scale-fns}
+
+### Types of scales {#sec-scale-types}
 - Continuous: Map continuous values to visual ones - `scale_*_continuous()`
 - Discrete: Map a finite number of discrete categories to visual ones - `scale_*_discrete()`
 - Binned: Map continuous values into discrete bind or categories - `scale_*_binned()`
@@ -51,13 +53,13 @@ bikes$season <- forcats::fct_inorder(bikes$season)
 - Manual: Map discrete values to manually chosen visual ones - `scale_*_manual(values = c())`
 - Dates: Treat data values as dates or datetimes - `scale_*_date(date_labels = "%m/%d", date_breaks = "2 weeks")`
 
-## Aesthetics {#sec-scale-aesthetics}
-- Positions: `scale_x_*()` and `scale_y_*()`
-- Sizes: `scale_size_*()` and `scale_radius()`
-- Shapes: `scale_shape_*()`
-- Linetype: `scale_linetype_*()`
-- Linewidth: `scale_linewidth_*()`
-- Transparency: `scale_alpha_*()`
+### Aesthetics {#sec-scale-aesthetics}
+- Positions: `scale_x_*()` and `scale_y_*()` (@sec-scale-positions)
+- Sizes: `scale_size_*()` and `scale_radius()` (@sec-scale-size)
+- Shapes: `scale_shape_*()` (@sec-scale-shape)
+- Linewidth: `scale_linewidth_*()` (@sec-scale-linewidth)
+- Linetype: `scale_linetype_*()` (@sec-scale-linetype)
+- Transparency: `scale_alpha_*()` (@sec-scale-alpha)
 - Colors: `scale_color_*()` and `scale_fill_*()`
 
 ## Scale positions {#sec-scale-positions}
@@ -359,7 +361,7 @@ p +
   guides(y = guide_axis("Body mass"))
 ```
 
-What `guide` and `guide_axis()` add is the ability to change the `angle` of the labels or stack labe. Changes to label angle can also be done with themes, see [Chapter -@sec-theme-axes].
+What `guide` and `guide_axis()` add is the ability to change the `angle` of the labels or stack label. Changes to label angle can also be done with themes, see [Chapter -@sec-theme-axes].
 
 ```{r}
 #| label: guide-angle-dodge
@@ -510,7 +512,8 @@ p +
   scale_y_continuous(expand = expansion(mult = (c(0, 0.1))))
 ```
 
-## Other scales {#sec-other-scales}
+## Aesthetic scales {#sec-aesthetic-scales}
+There are five main types of aesthetic scales (@sec-scale-types): continuous, binned, discrete, manual, and identity. The differences between them are largely self-explanatory. The exception is continuous and binned. Binning a continuous variable with `scale_*_binned()` changes the actual scale drawn on the plot and uses a binned legend style. This can be seen with `scale_size_binned()` below..
 
 ### Scale size {#sec-scale-size}
 The main reason to change the default scale for size is to affect the upper and lower bounds of the size of the geoms. This is done with the `range` argument. The defaults for size are `range = c(1, 6)`.
@@ -529,8 +532,7 @@ psize <- penguins |>
 ```{r}
 #| label: scale-size
 psize + 
-  scale_size(range = c(0.5, 4),
-             breaks = scales::breaks_extended(8))
+  scale_size(range = c(0.5, 4))
 ```
 
 You can also change the guides with `scale_size()`, providing a title for the legend, the breaks for the legend, and the labels for the legend. These types of changes to `breaks` and `labels` are also available with other scales.
@@ -557,14 +559,14 @@ psize +
              )
 ```
 
-A similar can be achieved with `scale_size_binned()`, which has an argument for `n.breaks`. Like binned position and color scales, `scale_size_binned()` makes a continuous variable into a discrete variable. The main difference is the legend style, which uses `guide_bins()`.
+A similar effect can be achieved with `scale_size_binned()`, which has an argument for `n.breaks`. Like binned position and color scales, `scale_size_binned()` makes a continuous variable into a discrete variable. Using a binned scale changes the legend style to `guide_bins()`, but it directly affects the scale used in the plot. This can be seen by choosing a smaller number of bins. To keep a continuous scale for the plot but use a binned legend use `guide_bins()`, see @sec-guide-bins.
 
 ```{r}
 #| label: scale-size-binned
 psize + 
   scale_size_binned("Bill depth",
              range = c(0.5, 4),
-             n.breaks = 6)
+             n.breaks = 4)
 ```
 
 ### Scale transparency {#sec-scale-alpha}
@@ -614,7 +616,7 @@ penguins |>
 ```
 
 ### Scale shape {#sec-scale-shape}
-Mapping values to shapes can be useful when you have a small number of discrete values or continuous values with `scale_shape_binned()`. The only different argument for `scale_shape()` is whether shapes should be solid or not, default is `solid = TRUE`.
+Mapping values to shapes can be useful when you have a small number of discrete values. The only different argument for `scale_shape()` is whether shapes should be solid or not, default is `solid = TRUE`.
 
 ```{r}
 #| label: scale-shape
@@ -625,6 +627,19 @@ penguins |>
   geom_point() + 
   scale_shape("Species",
               solid = FALSE)
+```
+
+Though it is probably not useful too often, it is also possible to map a continuous variable to shapes using `scale_shape_binned()`.
+
+```{r}
+#| label: scale-shape-binned
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             shape = bill_depth_mm)) + 
+  geom_point() + 
+  scale_shape_binned("Bill depth",
+                     solid = FALSE)
 ```
 
 There are 25 different shapes that are associated with each integer. Use `scale_shape_manual()` to choose the shapes.
