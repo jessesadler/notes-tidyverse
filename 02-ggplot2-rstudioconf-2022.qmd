@@ -1242,9 +1242,9 @@ ggplot(
   )
 ```
 
-### Creating new palettes {#sec-rs22-gd-color-new-pals}
+### Gradient palettes {#sec-rs22-gd-gradient-pals}
 
-Create sequential palettes
+#### Sequential palettes: `scale_color_gradient()`
 
 ```{r}
 #| label: sequential-palettes
@@ -1260,7 +1260,7 @@ ggplot(
   )
 ```
 
-Create diverging palettes
+#### Diverging palettes: `scale_color_gradient2()`
 
 ```{r}
 #| label: diverging-palettes
@@ -1279,7 +1279,7 @@ ggplot(
   )
 ```
 
-Create multi-colored sequential palettes
+#### Multi-colored sequential palettes: `scale_color_gradientn()`
 
 ```{r}
 #| label: multi-color-palettes
