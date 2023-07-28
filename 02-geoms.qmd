@@ -16,6 +16,7 @@ source("_common.R")
   - [geoms](https://ggplot2.tidyverse.org/reference/index.html#geoms)
   - [stats](https://ggplot2.tidyverse.org/reference/index.html#stats)
   - [position](https://ggplot2.tidyverse.org/reference/index.html#position-adjustment)
+- [Wickham, ggplot2 Book: Layers](https://ggplot2-book.org/layers.html)
 - [ggplot2 Cheatsheet: Geoms](https://rstudio.github.io/cheatsheets/html/data-visualization.html#geoms)
 - [R for Data Science: Communication, Data visualization](https://r4ds.hadley.nz/data-visualize.html)
 - [R for Data Science: Communication, Layers](https://r4ds.hadley.nz/layers.html)
@@ -37,7 +38,7 @@ penguins <- penguins |>
 ```
 
 ## Introduction {#sec-geom-intro}
-The geometric layers that make up the data aspects of a plot are typically added through a **geom** that may be altered by **position** and **stat**, or statistical transformation if necessary. Each geom necessitates certain **aesthetics**, particularly positional aesthetics. Other aesthetics can be added to map additional variables to the plot.
+The geometric layers that make up the data aspects of a plot are typically added through a **geom** that may be altered by **position** and **stat**, or statistical transformation if necessary. Each geom necessitates certain **aesthetics**, particularly positional aesthetics. Other aesthetics can be added to map or set additional variables to the plot.
 
 - **geom**: Geometric object drawn on a plot to represent data.
 - **stat**: The statistical transformations applied to the data.
@@ -45,7 +46,7 @@ The geometric layers that make up the data aspects of a plot are typically added
 
 There is usually a one-to-one relationship between geoms and stats: geoms are created through specific statistical transformations. The relationship between `geom_bar()` and `stat_count()` as discussed in @sec-geom-stat is a particularly simple and clear example. Geoms, stats, and positions all have their functional forms (`geom_*()`, `stat_*()`, and `position_*()`) as well as their form as a string without the functional prefix (`geom = "point"`, `stat = "identity"`, `position = "stack"`). The relationship between these three aspects of a geometric layer is discussed in some length in @sec-geom-bar. Otherwise the relationship between geoms and stats are noted throughout. An overview of the possible position adjustments is in @sec-geom-position
 
-The documentation for each geom provides the aesthetics that can be used with the geom. Aesthetics are not discussed in detail here. See @sec-geom-aes for an overview of aesthetic specifications from the `ggplot2` vignette.
+The documentation for each geom provides the aesthetics that can be used with it. See @sec-aes for an overview of aesthetics.
 
 ## Bar plots {#sec-geom-bar}
 
@@ -72,7 +73,7 @@ penguins |>
 :::
 
 #### `geom_col()` {#sec-geom-col}
-Instead of using the default count stat, you can use `stat_identity()` which counts already provided in the data. `stat_identity()` requires both `x` and `y` positional aesthetics because it needs to know which variable is the count data.
+Instead of using the default count stat, you can use `stat_identity()` which counts already provided in the data. `stat_identity()` requires both `x` and `y` positional aesthetics because it needs to know which variable to use for the height of the bar.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -92,7 +93,7 @@ penguins |>
 ```
 :::
 
-`geom_col()` provides a shortcut for creating a bar plot using `stat_identity()`.
+`geom_col()` provides a shortcut for creating a bar plot using `stat_identity()`. In other words, the height of the bar is scaled to the `y` aesthetic, which can measure whatever you want, not just counts.
 
 ```{r}
 #| label: geom-col
@@ -175,8 +176,7 @@ penguins |>
   ggplot(aes(x = island,
              fill = species)) + 
   geom_bar(position = position_dodge2(
-    preserve = "single"
-  ))
+    preserve = "single"))
 ```
 :::
 
@@ -264,6 +264,16 @@ penguins |>
 ggplot(aes(x = body_mass_g, color = species, fill = species)) +
   geom_density(alpha = 0.5) + 
   scale_y_continuous(labels = scales::label_number())
+```
+
+The [ggridges](https://wilkelab.org/ggridges/) package makes it easy to do what are essentially faceted density plots
+
+```{r}
+#| label: ggridges
+library(ggridges)
+penguins |> 
+  ggplot(aes(x = body_mass_g, y = species, color = species, fill = species)) +
+  geom_density_ridges(alpha = 0.5, show.legend = FALSE)
 ```
 
 ### Dot plots {#sec-geom-dotplot}
@@ -687,6 +697,8 @@ penguins |>
 ```
 
 ## Lines {#sec-geom-line}
+
+### Line plots {#sec-geom-line-plots}
 `ggplot2` has three main geoms to draw lines to connect observations:
 
 - `geom_line()`: Connect observations in order of the variable on the `x` axis.
@@ -702,7 +714,7 @@ penguins_line <- penguins |>
             .by = c(species_sex, year))
 ```
 
-The `group` aesthetic determines which cases are connected together. Thus, when you want to draw multiple lines in a plot, you need to use `group` or another aesthetic such as `color` or `linetype` to create the groups. The difference between `geom_line()` and `geom_path()` can be shown by not including the `group` aesthetic. When you see a plot like the first one, you know that you are missing a `group` aesthetic.
+The `group` aesthetic determines which cases are connected together. Thus, when you want to draw multiple lines in a plot, you need to use `group` or another aesthetic such as `color` or `linetype` to create the groups, See @sec-aes-groups. The difference between `geom_line()` and `geom_path()` can be shown by not including a `group` aesthetic. When you see a plot like the first one, you know that you are missing a `group` aesthetic.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -722,7 +734,7 @@ penguins_line |>
 ```
 :::
 
-Alongside `group` `color`, and `linetype` are the most important aesthetics for line plots. It is also worth noting that the width of the lines is altered with `linewidth` and not `size`.
+Mapping a `color` or `linetype` aesthetic leads the correct grouping.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -744,7 +756,7 @@ penguins_line |>
 ```
 :::
 
-`geom_step()` is good for highlighting exactly when changes occur, for instance with financial data where credits and debits are made on specific days not over a continuous period or at a constant pace. It is thus good for more discrete forms of time data. Think of the difference between accounting data vs stock market prices taken at regular intervals of days or even hours. For the `penguin` data using `geom_step()` highlights that the data was collected at three specific point (at least according to the data we have) and does not represent continuous data over time. The changes can be further highlighte by adding points.
+`geom_step()` is good for highlighting exactly when changes occur, for instance with financial data where credits and debits are made on specific days not over a continuous period or at a constant pace. It is thus good for more discrete forms of time data. Think of the difference between accounting data vs stock market prices taken at regular intervals of days or even hours. For the `penguin` data using `geom_step()` highlights that the data was collected at three specific point (at least according to the data we have) and does not represent continuous data over time. The changes can be further highlighted by adding points.
 
 ```{r}
 #| label: geom-step
@@ -756,10 +768,60 @@ penguins_line |>
   geom_point()
 ```
 
-## Ribbons and areas {#sec-geom-ribbon}
-`geom_ribbon()` is similar to `geom_line` but they create a polygon between a `ymin` and a `ymax`. `geom_area()` is a special case of `geom_ribbon()`, where the `ymin` is fixed to 0 and `y` is used instead of `ymax.`
+### Line segments and curves {#sec-line-seg}
+`geom_segment()` and `geom_curve()` provide means to draw straight and curved lines with data. These geoms are often used as annotations to a plot and are similar to using "segment" and "curve" geom in `annotate()`. They differ in that they need data from a data frame. The geoms use the positional aesthetics of `x`, `y`, `xend`, and `yend`. `geom_curve()` has arguments for `curvature` and `angle` to specify the curve.
 
-A simple example is to subtract from and add to the `y` variable to create a buffer around `geom_line()`. You possibility would be to calculate quantiles to do this, though using `geom_smooth()` would be better. 
+```{r}
+#| label: segments
+# Data frame for where to begin and end segment and curve
+df <- data.frame(x1 = 184, x2 = 209, y1 = 4650, y2 = 5500)
+
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_point() + 
+  geom_curve(data = df,
+             aes(x = x1, y = y1,
+                 xend = x2, yend = y2,
+                 color = "curve"),
+             curvature = -0.5) +
+  geom_segment(data = df,
+              aes(x = x1, y = y1,
+                  xend = x2, yend = y2,
+                  color = "segment")) + 
+  labs(color = "Geom type")
+```
+
+### Reference lines {#sec-geom-line-ref}
+Reference line geoms draw horizontal (`geom_hline()`), vertical (`geom_vline()`), or angled (`geom_abline()`) across the plot panel. These geoms are drawn using `geom_line()` so they support the same aesthetics: `alpha`, `color`, `linetype`, and `linewidth`. The argumebts for the geoms are very simple and the placement aesthetics are usually provided manually instead of in the data. If you want the lines to vary across facets, you need to construct a data frame and then use them within aesthetics.
+
+- `geom_vline()`: `xintercept`
+- `geom_hline()`: `yintercept`
+- `geom_abline()`: `slope` and `intercept`
+  - `intercept`: Where line intercepts x-axis.
+  - `slope`: Slope of the line
+
+```{r}
+#| label: reference-lines
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_vline(xintercept = median(penguins$flipper_length_mm),
+             color = "orchid",
+             linewidth = 1.5) + 
+  geom_hline(yintercept = median(penguins$body_mass_g),
+             color = "tomato",
+             linewidth = 1.5) + 
+  geom_abline(intercept = 0, slope = 20,
+              color = "slateblue",
+             linewidth = 1.5) + 
+  geom_point(alpha = 0.5)
+```
+
+## Ribbons and areas {#sec-geom-ribbon}
+`geom_ribbon()` is similar to `geom_line` but it creates a polygon between a `ymin` and a `ymax`. `geom_area()` is a special case of `geom_ribbon()`, where the `ymin` is fixed to 0 and `y` is used instead of `ymax.`
+
+A simple example is to subtract from and add to the `y` variable to create a buffer around `geom_line()`. You could calculate quantiles to do this, though using `geom_smooth()` would be better. 
 
 ```{r}
 #| label: ribbon
@@ -795,80 +857,6 @@ penguins_line |>
   geom_area(position = "identity", alpha = 0.2) + 
   geom_line(aes(color = species_sex))
 ```
-
-## Reference lines {#sec-geom-reference}
-Reference line geoms draw horizontal (`geom_hline()`), vertical (`geom_vline()`), or angled (`geom_abline()`) across the plot panel. These geoms are drawn using `geom_line()` so they support the same aesthetics: `alpha`, `color`, `linetype`, and `linewidth`. The argumebts for the geoms are very simple and the placement aesthetics are usually provided manually instead of in the data. If you want the lines to vary across facets, you need to construct a data frame and then use them within aesthetics.
-
-- `geom_vline()`: `xintercept`
-- `geom_hline()`: `yintercept`
-- `geom_abline()`: `slope` and `intercept`
-  - `intercept`: Where line intercepts x-axis.
-  - `slope`: Slope of the line
-
-```{r}
-#| label: reference-lines
-penguins |> 
-  ggplot(aes(x = flipper_length_mm,
-             y = body_mass_g)) + 
-  geom_vline(xintercept = median(penguins$flipper_length_mm),
-             color = "orchid",
-             linewidth = 1.5) + 
-  geom_hline(yintercept = median(penguins$body_mass_g),
-             color = "tomato",
-             linewidth = 1.5) + 
-  geom_abline(intercept = 0, slope = 20,
-              color = "slateblue",
-             linewidth = 1.5) + 
-  geom_point(alpha = 0.5)
-```
-
-## Aesthetics {#sec-geom-aes}
-See [Aesthetic specifications](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html) for types of aesthetics and changes that can be made to those types.
-
-### Color, fill, and alpha {#sec-geom-aes-color}
-Add color to the geom with either `color` or `fill` aesthetics. See [Color related aesthetics](https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html) for more.
-
-- `color` is used with `geom_point()`, lines, and the outline of polygon geoms.
-- `fill` "fills" in the color of all polygon geoms.
-
-Colors can be specified with either **rbg** hex string, color name listed under `colors()`, or `NA` for transparent.
-
-`alpha`: Values of `alpha` range from 0 to 1, with lower values corresponding to more transparent colors.
-
-### Lines {#sec-geom-aes-lines}
-The appearance of a line is affected by `linewidth`, `linetype`, `lineend`, `linejoin`.
-
-`linewidth` is used to control the width or size of the line. 
-
-`linetype` can be specified with an integer of 0 to 6 or by name: 
-
-- 0 = blank
-- 1 = solid
-- 2 = dashed
-- 3 = dotted
-- 4 = dotdash
-- 5 = longdash
-- 6 = twodash
-
-Alternatively, `linetype` can be created with a string containing 2, 4, 6, or 8 hexadecimal digits that provide lengths of on and off. Thus, `"3313"` specifies three units on followed by three off followed by one on and finally three off.
-
-`lineend` can be one of `"butt"` (the default), `"round"`, or `"square"`.
-
-`linejoin` can be one of `"round"` (the default), `"mitre"`, or `"bevel"`.
-
-### Points {#sec-geom-aes-points}
-Points can be chosen in 5 ways:
-
-- An integer: 0 to 25
-- Name of the shape
-- Single character to use that character as a plotting symbol.
-- `.` to draw the smallest rectangle that is visible, usually 1 pixel.
-- `NA` to draw nothing
-
-### Grouping {#sec-geom-aes-groups}
-The group aesthetic is by default set to the interaction of all discrete variables in the plot. This default is often enough, but when it does not work or when there is no discrete variable, you need to explicitly map `group` to a variable that has a different value for each group. See [Aesthetics: grouping](https://ggplot2.tidyverse.org/reference/aes_group_order.html)
-
-For most applications the grouping is set implicitly by mapping one or more discrete variables to `x`, `y`, `color`, `fill`, `alpha`, `shape`, `size`, and/or `linetype`. The typical case where grouping does not work by default is with `geom_line()` when only positional aesthetics are set. See @sec-geom-line for examples.
 
 ## Positions {#sec-geom-position}
 All geoms have a `position` adjustment argument that resolves overlapping geoms. Override the default by using the `position` argument in the `geom_*()` or `stat_*()` function. The argument can either be one of the below functions or a string without the `position_` prefix. See in particular @sec-geom-bar-position for examples.

@@ -669,7 +669,7 @@ g +
 ## Annotations {#sec-rs22-gd-annotations}
 
 ### Annotation basics {#sec-rs22-gd-annotation-basics}
-Adding text annotations with `annotate()` and selecting the `geom` used for the annotation.
+Add annotations with `annotate()` and selecting the `geom` used for the annotation.
 
 ```{r}
 #| label: single-text-ann
@@ -935,7 +935,7 @@ ggplot(
 
 ### Annotations example: Palmer penguins {#sec-rs22-gd-annotations-ex}
 
-See also Cédric's [The Evolution of a ggplot](https://www.cedricscherer.com/2019/05/17/the-evolution-of-a-ggplot/) for another example of building a similar plot
+See also Cédric's [The Evolution of a ggplot](https://www.cedricscherer.com/2019/05/17/the-evolution-of-a-ggplot/) for another example of building a similar plot.
 
 ```{r}
 #| label: example-annotations
