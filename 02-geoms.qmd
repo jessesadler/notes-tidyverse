@@ -1,0 +1,883 @@
+---
+date: "2023-07-26"
+date-modified: last-modified
+---
+
+# Geoms {#sec-geom}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+## Resources {#sec-geom-resources}
+- [Layers documentation](https://ggplot2.tidyverse.org/reference/index.html#layers)
+  - [geoms](https://ggplot2.tidyverse.org/reference/index.html#geoms)
+  - [stats](https://ggplot2.tidyverse.org/reference/index.html#stats)
+  - [position](https://ggplot2.tidyverse.org/reference/index.html#position-adjustment)
+- [ggplot2 Cheatsheet: Geoms](https://rstudio.github.io/cheatsheets/html/data-visualization.html#geoms)
+- [R for Data Science: Communication, Data visualization](https://r4ds.hadley.nz/data-visualize.html)
+- [R for Data Science: Communication, Layers](https://r4ds.hadley.nz/layers.html)
+
+```{r}
+#| label: setup
+#| message: false
+library(ggplot2)
+library(dplyr)
+library(palmerpenguins)
+
+# Data
+penguins <- penguins |> 
+  filter(!is.na(flipper_length_mm),
+         !is.na(sex)) |> 
+  # Add factor data that has more levels
+  mutate(species_sex = as.factor(
+    paste(species, sex)))
+```
+
+## Introduction {#sec-geom-intro}
+The geometric layers that make up the data aspects of a plot are typically added through a **geom** that may be altered by **position** and **stat**, or statistical transformation if necessary. Each geom necessitates certain **aesthetics**, particularly positional aesthetics. Other aesthetics can be added to map additional variables to the plot.
+
+- **geom**: Geometric object drawn on a plot to represent data.
+- **stat**: The statistical transformations applied to the data.
+- **position**: Adjustments to position of geoms to resolve overlapping.
+
+There is usually a one-to-one relationship between geoms and stats: geoms are created through specific statistical transformations. The relationship between `geom_bar()` and `stat_count()` as discussed in @sec-geom-stat is a particularly simple and clear example. Geoms, stats, and positions all have their functional forms (`geom_*()`, `stat_*()`, and `position_*()`) as well as their form as a string without the functional prefix (`geom = "point"`, `stat = "identity"`, `position = "stack"`). The relationship between these three aspects of a geometric layer is discussed in some length in @sec-geom-bar. Otherwise the relationship between geoms and stats are noted throughout. An overview of the possible position adjustments is in @sec-geom-position
+
+The documentation for each geom provides the aesthetics that can be used with the geom. Aesthetics are not discussed in detail here. See @sec-geom-aes for an overview of aesthetic specifications from the `ggplot2` vignette.
+
+## Bar plots {#sec-geom-bar}
+
+### Geoms and stats {#sec-geom-stat}
+`geom_bar()` is a good place to start with geoms because it is easy to show the relationship between **geoms**, **stats**, and **position**.
+
+#### `geom_bar()`
+By default `geom_bar()` performs a statistical transformation by counting the number of observations in the variable provided in the single positional aesthetic: `x` for upright bar plot, `y` for horizontal bar plot. Therefore, you can create a bar plot with either `geom_bar()` or `geom_bar()` or `stat_count(geom = "bar")`:
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-bar
+penguins |> 
+  ggplot(aes(x = species)) + 
+  geom_bar()
+```
+
+```{r}
+#| label: stat-count
+penguins |> 
+  ggplot(aes(x = species)) + 
+  stat_count(geom = "bar")
+```
+:::
+
+#### `geom_col()` {#sec-geom-col}
+Instead of using the default count stat, you can use `stat_identity()` which counts already provided in the data. `stat_identity()` requires both `x` and `y` positional aesthetics because it needs to know which variable is the count data.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-bar-identity
+penguins |> 
+  count(species) |> 
+  ggplot(aes(x = species, y = n)) + 
+  geom_bar(stat = "identity")
+```
+
+```{r}
+#| label: stat-identity
+penguins |> 
+  count(species) |> 
+  ggplot(aes(x = species, y = n)) + 
+  stat_identity(geom = "bar")
+```
+:::
+
+`geom_col()` provides a shortcut for creating a bar plot using `stat_identity()`.
+
+```{r}
+#| label: geom-col
+penguins |> 
+  count(species) |> 
+  ggplot(aes(x = species, y = n)) + 
+  geom_col()
+```
+
+### Aesthetics {#sec-geom-bar-aes}
+Add color to the geom with either `color` or `fill` aesthetics. As with other polygon geoms, `fill` provides the color for the area of the geom and `color` affects the outline of the polygon.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: bar-fill
+# Fill
+penguins |> 
+  ggplot(aes(x = species)) + 
+  geom_bar(aes(fill = species))
+```
+
+```{r}
+#| label: bar-color
+# Color
+penguins |> 
+  ggplot(aes(x = species)) + 
+  geom_bar(aes(color = species))
+```
+:::
+
+### Position {#sec-geom-bar-position}
+Each geom has a `position` argument that takes either `"identity"`, `"stack"`, `"dodge"`, `"dodge2"`, or `"fill"`, or, alternatively, the corresponding `position_*()` functions if you want to tweak other aspects of the position. See @sec-geom-position for an overview.
+
+The default `position` for `geom_bar()` is `position_stack()`. This can be seen by mapping `color` or `fill` to a non-positional variable. With `position_stack()` each group is stacked on top of each other.
+
+```{r}
+#| label: bar-position-stack
+penguins |> 
+  ggplot(aes(x = species, fill = sex)) + 
+  geom_bar(color = "black")
+```
+
+`position_identity()` is the default for most geoms, but it does not work well with bar plots. Compare the default `position_stack()` to `position_identity()` in which each group starts from 0. Note the difference in the limit of the y-axis.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: position-stack
+# Default stack position
+penguins |> 
+  ggplot(aes(x = island, 
+             color = species)) + 
+  geom_bar(fill = NA)
+```
+
+```{r}
+#| label: position-identity
+# Position identity
+penguins |> 
+  ggplot(aes(x = island, 
+             color = species)) + 
+  geom_bar(fill = NA,
+           position = "identity")
+```
+:::
+
+A more useful positional adjustment with bar plots is to `"dodge"` the groups, placing them alongside each other instead of stacking them on top of each other. `position_dodge2()` provides space between the two groups. Note that using the `position_*()` function allows aspects to other arguments to tweak the position.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: position-dodge
+penguins |> 
+  ggplot(aes(x = island,
+             fill = species)) + 
+  geom_bar(position = "dodge")
+```
+
+```{r}
+#| label: position-dodge2
+penguins |> 
+  ggplot(aes(x = island,
+             fill = species)) + 
+  geom_bar(position = position_dodge2(
+    preserve = "single"
+  ))
+```
+:::
+
+Finally, `position_fill()` standardizes the height of the bars to create a ratio or relative frequency plot.
+
+```{r}
+#| label: position-fill
+penguins |> 
+  ggplot(aes(x = island, fill = species)) + 
+  geom_bar(position = "fill")
+```
+
+## Continuous distributions {#sec-geom-cont-distributions}
+Like `geom_bar()`, geoms that visualize continuous distributions count the frequency of data and therefore only needs one positional aesthetic. However, because the data is continuous it needs to be placed into *bins* before being counted.
+
+### Histograms and frequency polygons {#sec-geom-hist}
+`geom_histogram()` and `geom_freqpoly()` use `stat_bin()` to count frequency. The nature of the visualization is determined by the width of the bins with these geoms. This can be changed with either `bins` (number of bins) or `binwidth` (width of bins in scale).
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-histogram-binwidth
+# binwidth
+penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+```
+
+```{r}
+#| label: geom-histogram-bins
+# bins
+penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(bins = 50)
+```
+:::
+
+`geom_freqpoly()` displays the same counts with lines instead of bars.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-freq-binwidth
+# binwidth
+penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_freqpoly(binwidth = 200)
+```
+
+```{r}
+#| label: geom-freq-bins
+# bins
+penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_freqpoly(bins = 50)
+```
+:::
+
+Add `color` or `fill` to group the frequency plots.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-histogram-color
+# binwidth
+penguins |> 
+  ggplot(aes(x = body_mass_g,
+             fill = species)) +
+  geom_histogram(binwidth = 200)
+```
+
+```{r}
+#| label: geom-freqpoly-color
+# bins
+penguins |> 
+  ggplot(aes(x = body_mass_g,
+             color = species)) +
+  geom_freqpoly(binwidth = 200)
+```
+:::
+
+### Density estimates {#sec-geom-density}
+`geom_density()` provides another way to group continuous data, but it does so by smoothing out the frequency plots. The area of each density is standardized to one so that you lose information about the relative size of each group. Note that the y-axis is density not count.
+
+```{r}
+#| label: density
+penguins |> 
+ggplot(aes(x = body_mass_g, color = species, fill = species)) +
+  geom_density(alpha = 0.5) + 
+  scale_y_continuous(labels = scales::label_number())
+```
+
+### Dot plots {#sec-geom-dotplot}
+Another way to represent a binned continuous data is with a dot plot in which dots representing one observation are stacked. `geom_dotplot()` has two different `method`s for binning: `"dotdensity"` and `"histodot"`. `"histodot"` uses fixed-width bins, whereas `"dotdensity"` calculates binwidth based on the data.
+
+```{r}
+#| label: dotplot
+penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_dotplot(binwidth = 100)
+```
+
+The labels used on the y-axis are not meaningful with `geom_dotplot()`. You can either hide the y-axis or manually scale it.
+
+`geom_dotplot()` works differently in stacking groups. It has a `stackgroups` argument and this goes together with the `method` to use for binning and whether `binpositions` should be calculated `"bygroup"` or for `"all"` the data.
+
+Without stacking you can see that each group has its own binning position by default.
+
+```{r}
+#| label: dotplot-groups
+penguins |> 
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_dotplot(binwidth = 100,
+               alpha = 0.7)
+```
+
+There are two slightly different ways to stack the dots with either `method = "histodot"` or `binpositions = "all"`:
+
+::: {layout-ncol="2"}
+```{r}
+#| label: dotplot-stack1
+# method = "histodot"
+penguins |> 
+  ggplot(aes(x = body_mass_g,
+             fill = species)) +
+  geom_dotplot(binwidth = 100,
+               stackgroups = TRUE,
+               method = "histodot")
+```
+
+```{r}
+#| label: dotplot-stack2
+# binpositions = "all"
+penguins |> 
+  ggplot(aes(x = body_mass_g,
+             fill = species)) +
+  geom_dotplot(binwidth = 100,
+               stackgroups = TRUE,
+               binpositions = "all")
+```
+:::
+
+Mapping an `x` and `y` aesthetic makes it possible to create a beeswarm plot with occurrences stacking from the center and bins on the y-axis.
+
+```{r}
+#| label: dotplot-beeswarm
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g, fill = species)) +
+  geom_dotplot(binwidth = 100,
+               binaxis = "y",
+               stackdir = "center",
+               binpositions = "all")
+```
+
+## Statistical distributions {#sec-geom-stat-distributions}
+
+### `geom_boxplot()` {#sec-geom-boxplot}
+A box plot displays the distribution of a continuous variable, showing the median, 25th, and 75th percentile whiskers to farthest non-outlier point, and outliers.
+
+```{r}
+#| label: boxplot
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_boxplot()
+```
+
+The orientation of the plot follows the discrete axis.
+
+```{r}
+#| label: boxplot-orientation
+penguins |> 
+  ggplot(aes(x = body_mass_g, y = species)) +
+  geom_boxplot()
+```
+
+Box plots are automatically dodged when any aesthetic is a factor. By default, `geom_boxplot()` uses `position_dodge2()` to add space between the boxes.
+
+```{r}
+#| label: boxplot-dodge
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g, fill = sex)) +
+  geom_boxplot()
+```
+
+`geom_jitter()` is particularly useful with `geom_boxplot()` to show the actual points. `geom_jitter()` is a shortcut for `geom_point(position = "jitter")`. Control the `width` and `height` of the jitter with the corresponding arguments. `geom_jitter()` also has a `position` argument in case you want to make further changes. For instance, with a dodged box plot you need to use `position = position_jitterdodge()`. Finally, when adding the points with `geom_jitter()`, the outlier points from `geom_boxplot()` should be removed with `outlier.shape = NA`.
+
+```{r}
+#| label: boxplot-jitter
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g, color = sex)) +
+  geom_boxplot(outlier.shape = NA) + 
+  geom_jitter(alpha = 0.8,
+              position = position_jitterdodge())
+```
+
+It is possible to use a boxplot with a continuous variable by binning the data with one of the helper functions: `cut_width()`, `cut_interval()`, or `cut_number()`.
+
+```{r}
+#| label: boxplot-continuous
+penguins |> 
+  ggplot(aes(x = bill_depth_mm, body_mass_g)) + 
+  geom_boxplot(aes(group = cut_width(bill_depth_mm, 1)))
+```
+
+### `geom_violin()` {#sec-geom-violin}
+`geom_violin()` is similar to `geom_boxplot()` but it adds a density measurement. `geom_violin()` behaves very similarly to `geom_boxplot()` but it does not show statistical quantiles.
+
+```{r}
+#| label: violin
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin()
+```
+
+To show the quantiles use the `draw_quantiles` argument with a vector of quantiles to draw.
+
+```{r}
+#| label: violin-quantiles
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75))
+```
+
+Like box plots, `geom_violin()` automatically dodges when any aesthetic is a factor.
+
+```{r}
+#| label: violin-dodge
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g, fill = sex)) +
+  geom_violin()
+```
+
+And `geom_violin()` works well with `geom_jitter()`.
+
+```{r}
+#| label: violin-jitter
+penguins |> 
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin() + 
+  geom_jitter(aes(color = sex),
+    width = 0.25, height = 0,
+    alpha = 0.6)
+```
+
+### `geom_linerange()` and `geom_pointrange()` {#sec-geom-range}
+Another way to show statistical aspects of data is with either a line or point range that draws a vertical line from `ymin` to `ymax`. There needs to be variables in the data with `ymin` and `ymax` data for each group. This is done by grouping the data and then mutating:
+
+```{r}
+#| label: penguins-range
+penguins_range <- penguins |> 
+  group_by(species) |> 
+  mutate(lower = min(body_mass_g),
+         upper = max(body_mass_g))
+```
+
+`geom_pointrange()` is the same as `geom_linerange()` but it adds the points along the line.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: linerange
+penguins_range |> 
+  ggplot(aes(x = species,
+             y = body_mass_g)) + 
+  geom_linerange(aes(ymin = lower,
+                     ymax = upper))
+```
+
+```{r}
+#| label: pointrange
+penguins_range |> 
+  ggplot(aes(x = species,
+             y = body_mass_g)) + 
+  geom_pointrange(aes(ymin = lower,
+                      ymax = upper))
+```
+:::
+
+In this case, it is probably more useful to put points at specific statistical quantiles by calculating these and using `geom_point()`.
+
+```{r}
+#| label: linerange-point
+penguins |> 
+  group_by(species) |> 
+  mutate(lower = min(body_mass_g),
+         upper = max(body_mass_g),
+         med = median(body_mass_g)) |> 
+  ggplot(aes(x = species,
+             y = body_mass_g)) + 
+  geom_linerange(aes(ymin = lower,
+                     ymax = upper)) + 
+  geom_point(aes(x = species, y = med))
+```
+
+Or, you can recreate this plot more easily with `stat_summary()`:
+
+```{r}
+#| label: stat-summary
+penguins |> 
+  ggplot(aes(x = species,
+             y = body_mass_g)) + 
+  stat_summary(fun = median, fun.min = min, fun.max = max)
+```
+
+One useful point to note is that you can, of course, place a numeric value in either `ymin` or `ymax` such as beginning the line at 0.
+
+```{r}
+#| label: linerange-0
+penguins_range |> 
+  ggplot(aes(x = species,
+             y = body_mass_g)) + 
+  geom_linerange(aes(ymin = 0,
+                     ymax = upper)) + 
+  geom_point(aes(y = upper), size = 4)
+```
+
+## Scatter plots {#sec-geom-point}
+Scatter plots are best used to display the relationship between two continuous variables.
+
+```{r}
+#| label: geom-point
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             color = species_sex)) + 
+  geom_point()
+```
+
+A complementary geom to go along with `geom_point()` is `geom_rug()`, which create a compact visualizations of observations along the x- and y-axis of a plot. The documentation notes that they are best used with smaller data sets.
+
+```{r}
+#| label: geom-rug
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             color = species_sex)) + 
+  geom_point() + 
+  geom_rug()
+```
+
+The above plot shows one of the potential issues with `geom_rug()` in that many observations occur at the same `x` or `y` value. You can see that this is particularly true for flipper length where the scale of the variable is much smaller. You can choose where to place `geom_rug()` and thus which axes to measure with the `sides` argument that takes a string containing any of `"trbl"`, for top, right, bottom, and left.
+
+```{r}
+#| label: geom-rug-l
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             color = species_sex)) + 
+  geom_point() + 
+  geom_rug(sides = "l")
+```
+
+### Overplotting {#sec-geom-overplotting}
+The easiest way to deal with overplotting, having multiple points drawn in the same or nearly the same place, is to use transparency. The more overplotting there is the lower the transparency can be.
+
+```{r}
+#| label: geom-point-alpha
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_point(alpha = 0.5)
+```
+
+The use of `geom_jitter()` has already been shown in @sec-geom-boxplot for spreading out points along a discrete variable, but it can also be helpful if there are multiple points at specific coordinates.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-no-jitter
+penguins |> 
+  ggplot(aes(x = species_sex,
+             y = body_mass_g)) + 
+  geom_point()
+```
+
+```{r}
+#| label: geom-jitter
+penguins |> 
+  ggplot(aes(x = species_sex,
+             y = body_mass_g)) + 
+  geom_jitter(width = 0.2, height = 0)
+```
+:::
+
+`ggplot2` also includes a number of geoms to deal with overplotting. The most specific is `geom_count()`, which counts the number of observations at each location, then maps the count to point area. `geom_count()` is a shortcut for `geom_point(stat = "sum")`. This can be used with two continuous variables, but the documentation specifically notes that it is most useful with discrete data.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-count1
+# Continuous x continuous
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_count(alpha = 0.8)
+```
+
+```{r}
+#| label: geom-count2
+# Discrete x continuous
+penguins |> 
+  ggplot(aes(x = species_sex,
+             y = body_mass_g)) + 
+  geom_count(alpha = 0.8)
+```
+:::
+
+Adding an aesthetic that maps to a factor creates groups for the "sum" statistical transformation. Compare the scales with and without color.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-count-nocolor
+penguins |> 
+  ggplot(aes(x = species,
+             y = body_mass_g)
+         ) + 
+  geom_count(alpha = 0.8)
+```
+
+```{r}
+#| label: geom-count-color
+penguins |> 
+  ggplot(aes(x = species,
+             y = body_mass_g,
+             color = sex)) + 
+  geom_count(alpha = 0.8)
+```
+:::
+
+### Heat maps {#sec-geom-heatmap}
+Another way to deal with overplotting is to create heat maps with either `geom_bin2d()` or `geom_hex()`. `geom_bin2d()` creates rectangular bins; `geom_hex()` creates hexagonal bins. Like other binning geoms such as `geom_histogram()`, see @sec-geom-hist, the heat map geoms have arguments for number of `bins` and `binwidth`. One difference is that `binwidth` takes a numeric vector of length 2 for vertical and horizontal size of the bins.
+
+```{r}
+#| label: geom-bin2d
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_bin2d()
+```
+
+```{r}
+#| label: geom-hex
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_hex()
+```
+
+Both geoms map a continuous color scale to counts within the bin. Thus, using `color` or `fill` to map another aesthetic is not really useful here except for showing presence and absence.
+
+```{r}
+#| label: geom-hex-fill
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             fill = species)) + 
+  geom_hex(alpha = 0.7)
+```
+
+### Contours {#sec-geom-density2d}
+Another way to deal with overplotting and to visualize density along two continuous variables is with contour plots that are a 2D version of `geom_density()`, see @sec-geom-density.
+
+- `geom_density_2d()`: draw contour lines
+- `geom_density_2d_filled()`: draw filled contour bands
+
+```{r}
+#| label: contour
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_density2d_filled() + 
+  geom_density2d() + 
+  geom_point(alpha = 0.4)
+```
+
+If you map an aesthetic to a categorical variable, you will get a set of contours for each group.
+
+```{r}
+#| label: contour-lines
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_density2d(aes(color = species))
+```
+
+Using `geom_density2d_filled()` with multiple groups does not work well, and so it seems best to use facets. You can change the way that the contour is created across the facets with `contour_var` choosing one of `"density"`, `"ndensity"`, or `"count"`.
+
+- `"density"` uses the same scale across the facets.
+- `"ndensity"` keeps the peak intensity stable across the facets.
+- `"count"` scales by the number of observations.
+
+```{r}
+#| label: contour-fill
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_density2d_filled() + 
+  facet_wrap(vars(species)) + 
+  scale_x_continuous(breaks = c(180, 200, 220))
+```
+
+You can also use `stat_density2d()` to use the density2d statistical transformation with a different geom such as raster to create density tiles instead of contours.
+
+```{r}
+#| label: stat-density2
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  stat_density2d(
+    geom = "raster",
+    aes(fill = after_stat(density)),
+    contour = FALSE) + 
+  scale_fill_viridis_c()
+```
+
+## Lines {#sec-geom-line}
+`ggplot2` has three main geoms to draw lines to connect observations:
+
+- `geom_line()`: Connect observations in order of the variable on the `x` axis.
+- `geom_path()`: Connects the observations in the order in which they appear in the data.
+- `geom_step()`: Creates a stairstep plot, changes in `y` are at 90 degree angles, highlighting exactly when changes occur.
+
+**Line data**: mean body mass per year
+```{r}
+#| label: line-data
+#| code-fold: true
+penguins_line <- penguins |> 
+  summarise(body_mass_g = mean(body_mass_g), n = n(),
+            .by = c(species_sex, year))
+```
+
+The `group` aesthetic determines which cases are connected together. Thus, when you want to draw multiple lines in a plot, you need to use `group` or another aesthetic such as `color` or `linetype` to create the groups. The difference between `geom_line()` and `geom_path()` can be shown by not including the `group` aesthetic. When you see a plot like the first one, you know that you are missing a `group` aesthetic.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: geom-line
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g)) + 
+  geom_line()
+```
+
+```{r}
+#| label: geom-path
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g)) + 
+  geom_path()
+```
+:::
+
+Alongside `group` `color`, and `linetype` are the most important aesthetics for line plots. It is also worth noting that the width of the lines is altered with `linewidth` and not `size`.
+
+::: {layout-ncol="2"}
+```{r}
+#| label: line-color
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g,
+             color = species_sex)) +
+  geom_line(linewidth = 1.5)
+```
+
+```{r}
+#| label: linetype
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g,
+             linetype = species_sex)) +
+  geom_line(linewidth = 1.5)
+```
+:::
+
+`geom_step()` is good for highlighting exactly when changes occur, for instance with financial data where credits and debits are made on specific days not over a continuous period or at a constant pace. It is thus good for more discrete forms of time data. Think of the difference between accounting data vs stock market prices taken at regular intervals of days or even hours. For the `penguin` data using `geom_step()` highlights that the data was collected at three specific point (at least according to the data we have) and does not represent continuous data over time. The changes can be further highlighte by adding points.
+
+```{r}
+#| label: geom-step
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g,
+             color = species_sex)) +
+  geom_step() + 
+  geom_point()
+```
+
+## Ribbons and areas {#sec-geom-ribbon}
+`geom_ribbon()` is similar to `geom_line` but they create a polygon between a `ymin` and a `ymax`. `geom_area()` is a special case of `geom_ribbon()`, where the `ymin` is fixed to 0 and `y` is used instead of `ymax.`
+
+A simple example is to subtract from and add to the `y` variable to create a buffer around `geom_line()`. You possibility would be to calculate quantiles to do this, though using `geom_smooth()` would be better. 
+
+```{r}
+#| label: ribbon
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g,
+             group = species_sex)) +
+  geom_ribbon(aes(ymin = body_mass_g - 50,
+                  ymax = body_mass_g + 50),
+              fill = "gray80") + 
+  geom_line(aes(color = species_sex))
+```
+
+By default, `geom_area()` uses `position = "stack"` with a special stat (`stat_align()`) to align the values so that they can be stacked when groups overlap on the x-axis. Thus, with the `penguin_line` data the areas just stack on top of each other, creating a measure of the total weight of penguins with heights of the areas representing the ratio of weight per `species_sex`. Note the very different scale on the y-axis.
+
+```{r}
+#| label: area
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g,
+             fill = species_sex)) + 
+  geom_area()
+```
+
+Using `position = "identity"` places one polygon over another.
+
+```{r}
+#| label: area-identity
+penguins_line |> 
+  ggplot(aes(x = year,
+             y = body_mass_g,
+             fill = species_sex)) + 
+  geom_area(position = "identity", alpha = 0.2) + 
+  geom_line(aes(color = species_sex))
+```
+
+## Reference lines {#sec-geom-reference}
+Reference line geoms draw horizontal (`geom_hline()`), vertical (`geom_vline()`), or angled (`geom_abline()`) across the plot panel. These geoms are drawn using `geom_line()` so they support the same aesthetics: `alpha`, `color`, `linetype`, and `linewidth`. The argumebts for the geoms are very simple and the placement aesthetics are usually provided manually instead of in the data. If you want the lines to vary across facets, you need to construct a data frame and then use them within aesthetics.
+
+- `geom_vline()`: `xintercept`
+- `geom_hline()`: `yintercept`
+- `geom_abline()`: `slope` and `intercept`
+  - `intercept`: Where line intercepts x-axis.
+  - `slope`: Slope of the line
+
+```{r}
+#| label: reference-lines
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_vline(xintercept = median(penguins$flipper_length_mm),
+             color = "orchid",
+             linewidth = 1.5) + 
+  geom_hline(yintercept = median(penguins$body_mass_g),
+             color = "tomato",
+             linewidth = 1.5) + 
+  geom_abline(intercept = 0, slope = 20,
+              color = "slateblue",
+             linewidth = 1.5) + 
+  geom_point(alpha = 0.5)
+```
+
+## Aesthetics {#sec-geom-aes}
+See [Aesthetic specifications](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html) for types of aesthetics and changes that can be made to those types.
+
+### Color, fill, and alpha {#sec-geom-aes-color}
+Add color to the geom with either `color` or `fill` aesthetics. See [Color related aesthetics](https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html) for more.
+
+- `color` is used with `geom_point()`, lines, and the outline of polygon geoms.
+- `fill` "fills" in the color of all polygon geoms.
+
+Colors can be specified with either **rbg** hex string, color name listed under `colors()`, or `NA` for transparent.
+
+`alpha`: Values of `alpha` range from 0 to 1, with lower values corresponding to more transparent colors.
+
+### Lines {#sec-geom-aes-lines}
+The appearance of a line is affected by `linewidth`, `linetype`, `lineend`, `linejoin`.
+
+`linewidth` is used to control the width or size of the line. 
+
+`linetype` can be specified with an integer of 0 to 6 or by name: 
+
+- 0 = blank
+- 1 = solid
+- 2 = dashed
+- 3 = dotted
+- 4 = dotdash
+- 5 = longdash
+- 6 = twodash
+
+Alternatively, `linetype` can be created with a string containing 2, 4, 6, or 8 hexadecimal digits that provide lengths of on and off. Thus, `"3313"` specifies three units on followed by three off followed by one on and finally three off.
+
+`lineend` can be one of `"butt"` (the default), `"round"`, or `"square"`.
+
+`linejoin` can be one of `"round"` (the default), `"mitre"`, or `"bevel"`.
+
+### Points {#sec-geom-aes-points}
+Points can be chosen in 5 ways:
+
+- An integer: 0 to 25
+- Name of the shape
+- Single character to use that character as a plotting symbol.
+- `.` to draw the smallest rectangle that is visible, usually 1 pixel.
+- `NA` to draw nothing
+
+### Grouping {#sec-geom-aes-groups}
+The group aesthetic is by default set to the interaction of all discrete variables in the plot. This default is often enough, but when it does not work or when there is no discrete variable, you need to explicitly map `group` to a variable that has a different value for each group. See [Aesthetics: grouping](https://ggplot2.tidyverse.org/reference/aes_group_order.html)
+
+For most applications the grouping is set implicitly by mapping one or more discrete variables to `x`, `y`, `color`, `fill`, `alpha`, `shape`, `size`, and/or `linetype`. The typical case where grouping does not work by default is with `geom_line()` when only positional aesthetics are set. See @sec-geom-line for examples.
+
+## Positions {#sec-geom-position}
+All geoms have a `position` adjustment argument that resolves overlapping geoms. Override the default by using the `position` argument in the `geom_*()` or `stat_*()` function. The argument can either be one of the below functions or a string without the `position_` prefix. See in particular @sec-geom-bar-position for examples.
+
+- `position_identity()`: Do not adjust position
+- `position_dodge()`: Dodge overlapping objects side-to-side; useful with `geom_bar()`.
+- `position_dodge2()`: Dodge overlapping objects side-to-side with a gap; used with `geom_boxplot()`.
+- `position_jitter()`: Add random `width` and `height` adjustments to data; default for `geom_jitter()`.
+- `position_jitterdodge()`: Dodge and jitter; primarily useful for jittering points within dodged box plots.
+- `position_nudge()`: Add manual adjustments to `x` or `y`; built into `geom_text()` to move labels away from points.
+- `position_stack()`: Stacks bars on top of each other; default in `geom_bar()` to stack groups within a discrete variable.
+- `position_fill()`: Stacks bars and standardizes each stack to have constant height to show ratios.
