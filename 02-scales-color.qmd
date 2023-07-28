@@ -505,6 +505,7 @@ pdisc +
 ```
 
 ## Color palette packages {#sec-color-pkgs}
+- [palettes](https://mccarthy-m-g.github.io/palettes)
 - [colorspace](http://colorspace.r-forge.r-project.org)
 - [scico](https://github.com/thomasp85/scico)
 - [ggsci](https://nanx.me/ggsci/)
@@ -524,12 +525,23 @@ library(ggthemes)
 library(rcartocolor)
 library(MetBrewer)
 library(paletteer)
+library(palettes)
 ```
 
 ### Overview {#sec-color-pkgs-overview}
 Most color palette packages have two main types of functions: **scale** functions that are usually named `scale_color_*()` and are meant to replace the `ggplot2` scale functions and **pal** functions that provide access to the hex values of palettes that can then be used with `scale_color_manual()`. The API for accessing these functions differs. This has led to the creation of `paletteer` (@sec-color-paletteer) to try to create a common interface for palettes.
 
-Most of the color packages have functions to list the name of the available palettes and to view the palettes as a plot. A particularly useful way to view of palette before using it is with `scales::show_col()`. Many of the packages also use the same structure as `scales` in creating/accessing palettes, and so it makes sense to show how this is done.
+Most of the color packages have functions to list the name of the available palettes and to view the palettes as a plot. A particularly useful way to view of palette before using it is with `scales::show_col()`.
+
+### palettes pkg {#sec-solor-palettes-pkg}
+A fun, quick alternative to `scales::show_col()` is to use the `palettes` package, which uses `vctrs` to print vectors of colors as hex rbg values with a color preview. `palettes` has its own way to access color palettes in `ggplot2`, but it is particularly useful for printing out a vector of colors with `pal_colour()`.
+
+```{r}
+#| label: palettes-pkg
+pal_colour(
+  c("#a00e00", "#d04e00", "#f6c200", "#0086a8", "#132b69")
+)
+```
 
 ### Scales pkg {#sec-color-scales-pkg}
 `scales` provides a number of functions to [specify palettes and perform color mapping](https://scales.r-lib.org/reference/index.html#colour-palettes-colour-mapping) that provide the basis for the color scale functions in `ggplot2`. The `*_pal()` functions have consistent APIs with their associated `scale_color_*()` variants in `ggplot2`. The `*_pal()` functions all return a function. Thus, to access the hex color values you need to add another set of parentheses: **discrete** palettes take an `n`, while **continuous** palettes take a vector of values from 0 to 1 that produce `length(x)` colors.
