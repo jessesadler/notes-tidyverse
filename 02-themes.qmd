@@ -195,16 +195,16 @@ p +
 ```
 
 ### Plot: Whole area of the plot {#sec-theme-plot}
-- plot.background: background of the entire plot
-- plot.title
-	- plot.title.position: Applies to both title and subtitle
-		- "panel" (default): Aligns to plotting region
-		- "plot": Aligns to entire plot
-- plot.subtitle
-- plot.caption: caption below the plot
-- plot.tag: upper-left label to identify a plot
-  - plot.tag.position: "topleft", "top", "topright", "left", "right", "bottomleft", "bottom", "bottomright", or a coordinate
-- plot.margin: margin around entire plot
+- `plot.background`: background of the entire plot
+- `plot.title`
+	- `plot.title.position`: Applies to both title and subtitle
+		- `"panel"` (default): Aligns to plotting region
+		- `"plot"`: Aligns to entire plot
+- `plot.subtitle`
+- `plot.caption`: caption below the plot
+- `plot.tag`: upper-left label to identify a plot
+  - `plot.tag.position`: `"topleft"`, `"top"`, `"topright"`, `"left"`, `"right"`, `"bottomleft"`, `"bottom"`, `"bottomright"`, or a coordinate
+- `plot.margin`: margin around entire plot
 
 As above, notice the difference between the **panel** and the **plot**. The panel fill is "transparent" (can also use `NA`) to show plot.background covers the whole plot area.
 
@@ -230,11 +230,11 @@ p +
 ```
 
 ### Facets: Strip {#sec-theme-facets}
-- strip.background
-- strip.clip
-- strip.placement
-- strip.text
-- strip.switch
+- `strip.background`
+- `strip.clip`
+- `strip.placement`
+- `strip.text`
+- `strip.switch`
 
 ```{r}
 #| label: strip-default
