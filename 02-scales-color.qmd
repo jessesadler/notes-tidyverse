@@ -335,6 +335,15 @@ pdisc +
   scale_color_hue()
 ```
 
+Use `scales::hue_pal()` to recreate or access the discrete color palette used for a plot, making sure to use the length of the discrete colors.
+
+```{r}
+#| label: find-discrete-pal
+# Palette used for pdisc
+scales::hue_pal()(6)
+show_col(scales::hue_pal()(6))
+```
+
 #### HCL color scale
 `scale_color_hue()` provides access to HCL colors directly within `ggplot2`. The default color scheme picks evenly spaced hues around the HCL color wheel. The functions do not produce color blind compatible palettes.
 
