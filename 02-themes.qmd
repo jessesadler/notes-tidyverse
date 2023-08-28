@@ -35,6 +35,9 @@ Themes affect the aesthetics of non-data components of plots: i.e. titles, label
 library(ggplot2)
 library(dplyr)
 library(palmerpenguins)
+library(systemfonts)
+library(ggtext)
+library(glue)
 # Base plot
 p <- penguins |> 
   filter(!is.na(flipper_length_mm),
@@ -120,11 +123,11 @@ p +
 
 #### Legend arguments
 - Legend layout: see @sec-guide-layout
-  - `legend.position`: the position of legends -- "none", "left", "right", "bottom", "top", or two-element character or numeric vector
-  - `legend.direction`: "horizontal" or "vertical"
+  - `legend.position`: the position of legends -- `"none"`, `"left"`, `"right"`, `"bottom"`, `"top"`, or two-element character or numeric vector
+  - `legend.direction`: `"horizontal"` or `"vertical"`
   - `legend.justification`: anchor point for positioning legend
 - Bounding box of all legends
-  - `legend.box`: arrangement of multiple legends ("horizontal" or "vertical")
+  - `legend.box`: arrangement of multiple legends (`"horizontal"` or `"vertical"`)
   - `legend.box.background`: background of full legend area
   - `legend.box.just`: justification of each legend within the overall bounding box
   - `legend.box.margin`: margins around the full legend bounding box
@@ -171,14 +174,14 @@ p +
 ```
 
 ### Panel: Plotting area {#sec-theme-panel}
-- panel.background: background of plotting area, drawn underneath plot
-- panel.border: border around plotting area, drawn on top of plot so that it covers tick marks and grid lines.
+- `panel.background`: background of plotting area, drawn underneath plot
+- `panel.border`: border around plotting area, drawn on top of plot so that it covers tick marks and grid lines.
   - Therefore you need to assign `fill = NA` when overriding `panel.border`.
-- panel.spacing: spacing between facet panels
-- panel.grid: `element_line()`
-	- panel.grid.major
-	- panel.grid.minor
-- panel.ontop: `logical` option to place the panel (background, gridlines) over the data layers.
+- `panel.spacing`: spacing between facet panels
+- `panel.grid`: `element_line()`
+	- `panel.grid.major`
+	- `panel.grid.minor`
+- `panel.ontop`: `logical` option to place the panel (background, gridlines) over the data layers.
 
 Note the difference between the **panel**, which has a fill of "lightsteelblue" and outlined in a dotted line, and the **plot**, which is outlined in "forestgreen".
 
@@ -333,6 +336,10 @@ p +
   theme_void()
 ```
 
+### Theme packages {#sec-theme-pkgs}
+- [ggthemes](https://github.com/jrnold/ggthemes)
+- [hrbrthemes](https://cinc.rud.is/web/packages/hrbrthemes/)
+
 ## Setting themes {#sec-set-theme}
 
 - `theme_set()`: completely overrides the current theme.
@@ -380,10 +387,6 @@ my_theme <- theme_light() +
 p + my_theme
 ```
 
-## Theme packages {#sec-theme-pkgs}
-- [ggthemes](https://github.com/jrnold/ggthemes)
-- [hrbrthemes](https://cinc.rud.is/web/packages/hrbrthemes/)
-
 ## Fonts {#sec-fonts}
 - [systemfonts](https://systemfonts.r-lib.org/)
 - [ragg](https://ragg.r-lib.org)
@@ -396,7 +399,6 @@ Use `system_fonts()` to list all fonts available on your system.
 
 ```{r}
 #| label: systemfonts
-library(systemfonts)
 system_fonts() |> 
   filter(stringr::str_detect(family, "Garamond")) |> 
   select(-path)
@@ -452,3 +454,155 @@ p +
     base_family = "Source Code Black")
 ```
 :::
+
+## ggtext {#sec-theme-ggtext}
+The [ggtext](https://wilkelab.org/ggtext) package provides two theme elements functions to render markdown and HTML in plot guides. They are alternatives to `element_text()`. In addition, the package provides two geoms that replace `geom_label()`, see @sec-ann-ggtext. In both the geoms and the theme elements `ggtext` provides two alternatives: markdown text labels and markdown text boxes with word wrapping.
+
+### Supported HTML {#sec-theme-html-support}
+
+- Bold and italic fonts
+  - Bold: `**bold text**`
+  - Italic: `*italic text*`
+- Change fonts
+  - `<span style = 'font-size:14pt; font-family:Helvetica;'>font and size</span>`
+- Font color and size:
+  - color: `<span style='color:blue'>colored text</span>`
+  - size: `<span style='font-size:18pt'>larger text</span>`
+- Super and subscript text
+  - `<sup>super</sup>`
+  - `<sub>2</sub>`
+- Line breaks: `<br>`
+- Some image support
+  - `<img src="image-source.jpg" />`
+
+### `element_markdown()` {#sec-theme-element-markdown}
+`ggtext` provides two theme elements that can replace `element_text()`: `element_markdown()` and `element_textbox()` with a third option to use `element_textbox_simple()` that provides common defaults for `element_textbox()`. The functions differ in whether they provide word wrapping or not.
+
+These theme elements will mostly be used for labeling x and y axes and for adding information to titles of plots. They work by providing these labels with marked up text and then adding `element_markdown()` or `element_textbox_simple()` to the corresponding theme element.
+
+For instance, simple Markdown can be added to the labels used in the base plot by adding the Markdown in `labs()` and then adding `element_markdown()`.
+
+```{r}
+#| label: element-markdown
+p1 <- penguins |> 
+  filter(!is.na(flipper_length_mm),
+         !is.na(sex)) |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             color = species,
+             shape = sex)) + 
+  geom_point()
+
+p1 + 
+  labs(title = "**Penguin Size**",
+       x = "Flipper length (*mm*)",
+       y = "Body mass (*g*)",
+       color = "**Penguin species**",
+       shape = "**Sex**") + 
+  theme(plot.title = element_markdown(),
+        axis.title.x = element_markdown(),
+        axis.title.y = element_markdown(),
+        legend.title = element_markdown())
+```
+
+A common use for `ggtext` is to include colored text that matches the colors used within the plot as an alternative to using a legend. A good workflow to do this is to extract the color palette used in the plot and use the [glue package](https://glue.tidyverse.org) to specify the colors to be used. An example is to remove the Species legend and place this information in the plot title. This example creates a title and subtitle in one string. It uses CSS to define a larger font size, while setting a smaller font size for the subtitle in `element_markdown()`. The expanded line height gives more room for both the title and subtitle. Because `element_markdown()` does not use word wrapping, it may be necessary to insert line breaks.
+
+```{r}
+#| label: element-markdown-title
+hex <- scales::hue_pal()(3)
+styled_title <- glue(
+  "<span style = 'font-size:14pt'>Penguin size</span><br>
+  The body mass (*g*) compared to flipper length (*mm*) of<br>
+  <span style='color:{hex[[1]]};'>Adelie</span>,
+  <span style='color:{hex[[2]]};'>Chinstrap</span>, and
+  <span style='color:{hex[[3]]};'>Gentoo</span> penguins."
+)
+
+p1 + 
+  guides(color = "none") + 
+  labs(title = styled_title,
+       x = "Flipper length (*mm*)",
+       y = "Body mass (*g*)",
+       shape = "**Sex**") + 
+  theme(plot.title = element_markdown(size = 11, lineheight = 1.2),
+        axis.title.x = element_markdown(),
+        axis.title.y = element_markdown(),
+        legend.title = element_markdown())
+```
+
+Another option is to color the axis text on a bar plot by modifying the group names, in this case the species, with markup using `glue()`. There are a couple of tricks here. Using `sort = TRUE` in `count()` helps to keep the sequence of the palette colors consistent. Placing the colors in a column and using `scale_fill_identity()` ensures that the colors of the axis text are correctly aligned with the fill of the bars. `fct_reorder()` places the bars in descending order and reconverts the species column to a factor; `glue()` casts the column to class `glue`.
+
+```{r}
+#| label: axis-text-color
+library(forcats)
+penguins |> 
+  count(species, sort = TRUE) |> 
+  mutate(color = scales::hue_pal()(3),
+         species = glue(
+           "<span style='color:{color};'>**{species}**</span>"),
+         species = fct_reorder(species, n, .desc = TRUE)) |> 
+  ggplot(aes(x = species, y = n,
+             fill = color)) + 
+  geom_col() + 
+  scale_fill_identity() +
+  guides(fill = "none") + 
+  theme(axis.text.x = element_markdown())
+```
+
+### `element_textbox()` {#sec-theme-element-textbox}
+
+`element_markdown()` will likely accomplish what you need, but you can use `element_textbox()` or `element_textbox_simple()` to create text boxes that have a specific width and use word wrapping. This is useful for longer labels. For example, we can expand on the above title to include more information. If the subtitle gets long, it may be necessary to add padding to the title. This example adds 10 points to the bottom margin.
+
+```{r}
+#| label: element-textbox-1
+longer_styled_title <- glue(
+  "<span style = 'font-size:14pt'>Penguin size</span><br>
+  The body mass (*g*) compared to flipper length (*mm*) of
+  <span style='color:{hex[[1]]};'>Adelie</span>,
+  <span style='color:{hex[[2]]};'>Chinstrap</span>, and
+  <span style='color:{hex[[3]]};'>Gentoo</span> penguins
+  on the islands of Biscoe, Dream, and Torgersen off the
+  coast of Antartica."
+)
+
+p1 + 
+  guides(color = "none") + 
+  labs(title = longer_styled_title,
+       x = "Flipper length (*mm*)",
+       y = "Body mass (*g*)",
+       shape = "**Sex**") + 
+  theme(
+    plot.title = element_textbox_simple(size = 11, lineheight = 1,
+                                        padding = margin(0, 0, 10, 0)),
+    axis.title.x = element_markdown(),
+    axis.title.y = element_markdown(),
+    legend.title = element_markdown()
+    )
+```
+
+Text boxes can also have a background color and border. Because `element_textbox()` has word wrapping, the width of the box can also be restricted.
+
+```{r}
+#| label: element-textbox-2
+p1 + 
+  guides(color = "none") + 
+  labs(title = longer_styled_title,
+       x = "Flipper length (*mm*)",
+       y = "Body mass (*g*)",
+       shape = "**Sex**") + 
+  theme(
+    plot.title = element_textbox_simple(
+      size = 11, lineheight = 1,
+      width = grid::unit(3, "in"), # fixed width
+      hjust = 1, # alignment of box relative to plot
+      linetype = 1, # turn on border
+      fill = "darkseagreen1", # background fill color
+      r = grid::unit(3, "pt"), # radius for rounded corners
+      padding = margin(5, 5, 5, 5), # padding around text inside the box
+      margin = margin(0, 0, 10, 0) # margin outside the box
+    ),
+    axis.title.x = element_markdown(),
+    axis.title.y = element_markdown(),
+    legend.title = element_markdown()
+    )
+```
