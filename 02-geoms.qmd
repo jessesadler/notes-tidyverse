@@ -769,7 +769,7 @@ penguins_line |>
 ```
 
 ### Line segments and curves {#sec-line-seg}
-`geom_segment()` and `geom_curve()` provide means to draw straight and curved lines with data. These geoms are often used as annotations to a plot and are similar to using "segment" and "curve" geom in `annotate()`. They differ in that they need data from a data frame. The geoms use the positional aesthetics of `x`, `y`, `xend`, and `yend`. `geom_curve()` has arguments for `curvature` and `angle` to specify the curve.
+`geom_segment()` and `geom_curve()` provide means to draw straight and curved lines with data. These geoms are often used as annotations to a plot and are similar to using "segment" and "curve" geom in `annotate()`, see @sec-ann-custom-lines. They differ in that they need data from a data frame. The geoms use the positional aesthetics of `x`, `y`, `xend`, and `yend`. `geom_curve()` has arguments for `curvature` and `angle` to specify the curve. See `grid::curveGrob()` for more control on the details of the curve.
 
 ```{r}
 #| label: segments

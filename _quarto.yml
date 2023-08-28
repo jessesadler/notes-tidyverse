@@ -28,6 +28,7 @@ book:
         - 02-ggplot2-rstudioconf-2022.qmd
         - 02-geoms.qmd
         - 02-aesthetics.qmd
+        - 02-annotations.qmd
         - 02-scales.qmd
         - 02-scales-color.qmd
         - 02-coords.qmd
