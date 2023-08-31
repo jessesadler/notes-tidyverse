@@ -38,7 +38,7 @@ penguins <- penguins |>
 ```
 
 ## Introduction {#sec-geom-intro}
-The geometric layers that make up the data aspects of a plot are typically added through a **geom** that may be altered by **position** and **stat**, or statistical transformation if necessary. Each geom necessitates certain **aesthetics**, particularly positional aesthetics. Other aesthetics can be added to map or set additional variables to the plot.
+The geometric layers that make up the data aspects of a plot are typically added through a **geom** that may be altered by **position** and **stat**, or statistical transformation if necessary. Each geom necessitates certain **aesthetics**, particularly positional aesthetics. Other aesthetics can be added to map variables to the plot or to alter the visual representation of the geoms.
 
 - **geom**: Geometric object drawn on a plot to represent data.
 - **stat**: The statistical transformations applied to the data.
@@ -54,7 +54,7 @@ The documentation for each geom provides the aesthetics that can be used with it
 `geom_bar()` is a good place to start with geoms because it is easy to show the relationship between **geoms**, **stats**, and **position**.
 
 #### `geom_bar()`
-By default `geom_bar()` performs a statistical transformation by counting the number of observations in the variable provided in the single positional aesthetic: `x` for upright bar plot, `y` for horizontal bar plot. Therefore, you can create a bar plot with either `geom_bar()` or `geom_bar()` or `stat_count(geom = "bar")`:
+By default `geom_bar()` performs a statistical transformation by counting the number of observations in the variable provided in the single positional aesthetic: `x` for upright bar plot, `y` for horizontal bar plot. Therefore, you can create a bar plot with either `geom_bar()` or `stat_count(geom = "bar")`:
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -72,15 +72,16 @@ penguins |>
 ```
 :::
 
-#### `geom_col()` {#sec-geom-col}
-Instead of using the default count stat, you can use `stat_identity()` which counts already provided in the data. `stat_identity()` requires both `x` and `y` positional aesthetics because it needs to know which variable to use for the height of the bar.
+#### `stat_identity()` {#sec-stat-id}
+Instead of using the default count stat, you can use `stat_identity()` which gets the height of the bars directly from the data. `stat_identity()` requires both `x` and `y` positional aesthetics because it needs to know which variable to use for the height of the bar.
 
 ::: {layout-ncol="2"}
 ```{r}
 #| label: geom-bar-identity
 penguins |> 
   count(species) |> 
-  ggplot(aes(x = species, y = n)) + 
+  ggplot(aes(x = species,
+             y = n)) + 
   geom_bar(stat = "identity")
 ```
 
@@ -88,12 +89,14 @@ penguins |>
 #| label: stat-identity
 penguins |> 
   count(species) |> 
-  ggplot(aes(x = species, y = n)) + 
+  ggplot(aes(x = species,
+             y = n)) + 
   stat_identity(geom = "bar")
 ```
 :::
 
-`geom_col()` provides a shortcut for creating a bar plot using `stat_identity()`. In other words, the height of the bar is scaled to the `y` aesthetic, which can measure whatever you want, not just counts.
+#### `geom_col()` {#sec-geom-col}
+`geom_col()` provides a shortcut for creating a bar plot using `stat_identity()`. The height of the bar is scaled to the `y` aesthetic, which does not need to be a count.
 
 ```{r}
 #| label: geom-col
@@ -125,7 +128,7 @@ penguins |>
 :::
 
 ### Position {#sec-geom-bar-position}
-Each geom has a `position` argument that takes either `"identity"`, `"stack"`, `"dodge"`, `"dodge2"`, or `"fill"`, or, alternatively, the corresponding `position_*()` functions if you want to tweak other aspects of the position. See @sec-geom-position for an overview.
+Each geom has a `position` argument that takes either `"identity"`, `"stack"`, `"dodge"`, `"dodge2"`, or `"fill"`, or, alternatively, the corresponding `position_*()` functions that allow more freedom in tweaking aspects of the position. See @sec-geom-position for an overview.
 
 The default `position` for `geom_bar()` is `position_stack()`. This can be seen by mapping `color` or `fill` to a non-positional variable. With `position_stack()` each group is stacked on top of each other.
 
@@ -159,7 +162,7 @@ penguins |>
 ```
 :::
 
-A more useful positional adjustment with bar plots is to `"dodge"` the groups, placing them alongside each other instead of stacking them on top of each other. `position_dodge2()` provides space between the two groups. Note that using the `position_*()` function allows aspects to other arguments to tweak the position.
+A more useful positional adjustment with bar plots is to `"dodge"` the groups, placing them alongside each other instead of stacking them on top of each other. `position_dodge2()` provides space between the two groups. Note that using the `position_*()` function makes it possible to better control the behavior such as maintaining the same width for all bars.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -191,6 +194,13 @@ penguins |>
 
 ## Continuous distributions {#sec-geom-cont-distributions}
 Like `geom_bar()`, geoms that visualize continuous distributions count the frequency of data and therefore only needs one positional aesthetic. However, because the data is continuous it needs to be placed into *bins* before being counted.
+
+#### Geoms
+- `geom_histogram()`
+- `geom_freqpoly()`
+- `geom_density()`
+- `ggridges::geom_density_ridges()`
+- `geom_dotplot()`
 
 ### Histograms and frequency polygons {#sec-geom-hist}
 `geom_histogram()` and `geom_freqpoly()` use `stat_bin()` to count frequency. The nature of the visualization is determined by the width of the bins with these geoms. This can be changed with either `bins` (number of bins) or `binwidth` (width of bins in scale).
@@ -277,7 +287,7 @@ penguins |>
 ```
 
 ### Dot plots {#sec-geom-dotplot}
-Another way to represent a binned continuous data is with a dot plot in which dots representing one observation are stacked. `geom_dotplot()` has two different `method`s for binning: `"dotdensity"` and `"histodot"`. `"histodot"` uses fixed-width bins, whereas `"dotdensity"` calculates binwidth based on the data.
+Another way to represent a binned continuous data is with a dot plot in which dots representing one observation are stacked. `geom_dotplot()` has two different `method`s for binning: `"dotdensity"` and `"histodot"`. `"histodot"` uses fixed-width bins, whereas `"dotdensity"`, the default, calculates binwidth based on the data.
 
 ```{r}
 #| label: dotplot
@@ -340,8 +350,18 @@ penguins |>
 
 ## Statistical distributions {#sec-geom-stat-distributions}
 
+There are a variety of geoms intended to show the statistical distribution of a variable in the data.
+
+#### Geoms
+- `geom_boxplot()`
+- `geom_jitter()`
+- `geom_violin()`
+- `geom_linerange()`
+- `geom_pointrange()`
+- `stat_summary()`
+
 ### `geom_boxplot()` {#sec-geom-boxplot}
-A box plot displays the distribution of a continuous variable, showing the median, 25th, and 75th percentile whiskers to farthest non-outlier point, and outliers.
+A box plot displays the distribution of a continuous variable, showing the median, 25th, and 75th percentile, whiskers to farthest non-outlier point, and outliers.
 
 ```{r}
 #| label: boxplot
@@ -499,8 +519,20 @@ penguins_range |>
   geom_point(aes(y = upper), size = 4)
 ```
 
-## Scatter plots {#sec-geom-point}
+## Scatter plots {#sec-geom-scatter}
 Scatter plots are best used to display the relationship between two continuous variables.
+
+#### Geoms
+- `geom_point()`
+- `geom_rug()`
+- `geom_jitter()`
+- `geom_count()`
+- `geom_bin2d()`
+- `geom_hex()`
+- `geom_density_2d()`
+- `geom_density_2d_filled()`
+
+### `geom_point()` {#sec-geom-point}
 
 ```{r}
 #| label: geom-point
@@ -511,7 +543,7 @@ penguins |>
   geom_point()
 ```
 
-A complementary geom to go along with `geom_point()` is `geom_rug()`, which create a compact visualizations of observations along the x- and y-axis of a plot. The documentation notes that they are best used with smaller data sets.
+A complementary geom to go along with `geom_point()` is `geom_rug()`, which creates a compact visualizations of observations along the x- and y-axis of a plot. The documentation notes that it is best used with smaller data sets.
 
 ```{r}
 #| label: geom-rug
@@ -714,7 +746,7 @@ penguins_line <- penguins |>
             .by = c(species_sex, year))
 ```
 
-The `group` aesthetic determines which cases are connected together. Thus, when you want to draw multiple lines in a plot, you need to use `group` or another aesthetic such as `color` or `linetype` to create the groups, See @sec-aes-groups. The difference between `geom_line()` and `geom_path()` can be shown by not including a `group` aesthetic. When you see a plot like the first one, you know that you are missing a `group` aesthetic.
+The `group` aesthetic determines which cases are connected together. Thus, when you want to draw multiple lines in a plot, you need to use `group` or another aesthetic such as `color` or `linetype` to create the groups, see @sec-aes-groups. The difference between `geom_line()` and `geom_path()` can be shown by not including a `group` aesthetic. When you see a plot like the first one, you know that you are missing a `group` aesthetic.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -734,29 +766,31 @@ penguins_line |>
 ```
 :::
 
-Mapping a `color` or `linetype` aesthetic leads the correct grouping.
+Mapping a `color` or `linetype` aesthetic creates the correct grouping.
 
 ::: {layout-ncol="2"}
 ```{r}
 #| label: line-color
 penguins_line |> 
-  ggplot(aes(x = year,
-             y = body_mass_g,
-             color = species_sex)) +
+  ggplot(aes(
+    x = year,
+    y = body_mass_g,
+    color = species_sex)) +
   geom_line(linewidth = 1.5)
 ```
 
 ```{r}
 #| label: linetype
 penguins_line |> 
-  ggplot(aes(x = year,
-             y = body_mass_g,
-             linetype = species_sex)) +
+  ggplot(aes(
+    x = year,
+    y = body_mass_g,
+    linetype = species_sex)) +
   geom_line(linewidth = 1.5)
 ```
 :::
 
-`geom_step()` is good for highlighting exactly when changes occur, for instance with financial data where credits and debits are made on specific days not over a continuous period or at a constant pace. It is thus good for more discrete forms of time data. Think of the difference between accounting data vs stock market prices taken at regular intervals of days or even hours. For the `penguin` data using `geom_step()` highlights that the data was collected at three specific point (at least according to the data we have) and does not represent continuous data over time. The changes can be further highlighted by adding points.
+`geom_step()` is good for highlighting exactly when changes occur, for instance with financial data where credits and debits are made on specific days, not over a continuous period or at a constant pace. It is thus good for more discrete forms of time data. Think of the difference between accounting data vs stock market prices taken at regular intervals of days or even hours. For the `penguin` data using `geom_step()` highlights that the data was collected at three specific point (at least according to the data we have) and does not represent continuous data over time. The changes can be further highlighted by adding points.
 
 ```{r}
 #| label: geom-step
@@ -793,7 +827,7 @@ penguins |>
 ```
 
 ### Reference lines {#sec-geom-line-ref}
-Reference line geoms draw horizontal (`geom_hline()`), vertical (`geom_vline()`), or angled (`geom_abline()`) across the plot panel. These geoms are drawn using `geom_line()` so they support the same aesthetics: `alpha`, `color`, `linetype`, and `linewidth`. The argumebts for the geoms are very simple and the placement aesthetics are usually provided manually instead of in the data. If you want the lines to vary across facets, you need to construct a data frame and then use them within aesthetics.
+Reference line geoms draw horizontal (`geom_hline()`), vertical (`geom_vline()`), or angled (`geom_abline()`) lines across the plot panel. These geoms are drawn using `geom_line()` so they support the same aesthetics: `alpha`, `color`, `linetype`, and `linewidth`. The arguments for the geoms are very simple, and the placement aesthetics are usually provided manually instead of in the data. If you want the lines to vary across facets, you need to construct a data frame and then use them within aesthetics.
 
 - `geom_vline()`: `xintercept`
 - `geom_hline()`: `yintercept`

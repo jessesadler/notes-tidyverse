@@ -11,7 +11,7 @@ date-modified: last-modified
 source("_common.R")
 ```
 
-Non-color scales are covered in [Chapter -@sec-scales]. Color is used in two aesthetics: `color` and `fill`. All of the color scales have a `scale_color_*()` function and an equivalent `scale_fill_*()` function.
+Non-color scales are covered in [Chapter -@sec-scales]. Color is used in two aesthetics: `color` and `fill`. Like other scales, color scales have five types: continuous, binned, discrete, manual, and identity. All five types have a `scale_color_*()` function and an equivalent `scale_fill_*()` function. Most of the example use the `scale_color_*()` variants, but the concepts are all the same with `scale_fill_*()`.
 
 ## Resources {#sec-color-resources}
 - [Scales documentation](https://ggplot2.tidyverse.org/reference/index.html#scales)
@@ -59,14 +59,13 @@ pdisc <- penguins |>
 ```
 
 ## Color functions {#sec-color-fns}
+The default color scales are provided to quickly choose a palette type. To manually set colors it is better to use the lower-level functions designed for creating color scales. `ggplot2` also provides functions to use the popular Color brewer and Viridis sets of color palettes that are designed for discrete and continuous scales respectively.
 
 ### Default color scales {#sec-color-defaults}
-The default color scales are provided to easy to use color scales. You can quickly choose the type of palette to use, but to manually set the colors of a scale it is better to use the functions for creating color scales.
-
-- Continuous scales: `type` is "gradient" or "virdis"
+- Continuous scales: `type` is "gradient" or "viridis"
   - `scale_color_continuous()`
   - `scale_fill_continuous()`
-- Binned scales: `type` is "gradient" or "virdis"
+- Binned scales: `type` is "gradient" or "viridis"
   - `scale_color_binned()`
   - `scale_fill_binned()`
 - Discrete scales: `type` is `scale_fill_hue()` or `scale_color_brewer()`
@@ -77,7 +76,7 @@ The default color scales are provided to easy to use color scales. You can quick
 - Continuous scales: Gradient
   - `scale_color_gradient()`: produces a two-color sequential gradient.
   - `scale_color_gradient2()`: produces a three-color diverging gradient with specified midpoint.
-  - `scale_color_gradientn()`: produces an n-color gradient.
+  - `scale_color_gradientn()`: produces an n-color gradient. Used to transform a discrete color palette—often from a color palette package—to a continuous color palette.
 - Binned scales: Binned variants of gradient scales that work in the same way
   - `scale_color_steps()`
   - `scale_color_steps2()`
@@ -178,7 +177,7 @@ pcont +
   )
 ```
 
-`scale_color_gradientn()` creates an n-colored gradient. The function needs a vector of `colors` to work, and the `colors` argument must be named. You can provide your own color palette, a palette using the `scales::*_pal()` functions, a base R color palette, or one from a color palette package. When using predefined color palettes the colors used for the gradient may change depending on the number of colors used to create the palette if the palette is dynamic. For instance, notice the difference in the gradient created with 6 vs 25 terrain colors: the changes across the gradient are more subtle with 25 colors.
+`scale_color_gradientn()` creates an n-colored gradient. The function needs a vector of `colors` to work, and the `colors` argument must be named. You can provide your own color palette, a palette using the `scales::*_pal()` functions, a base R color palette, or one from a color palette package. When using predefined color palettes, the colors used for the gradient may change depending on the number of colors used to create the palette if the palette is dynamic. For instance, notice the difference in the gradient created with 6 vs 25 terrain colors: the changes across the gradient are more subtle with 25 colors.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -198,10 +197,10 @@ pcont +
 ```
 :::
 
-`scale_color_gradientn()` is important for transforming a discrete palette into a continuous palette. This makes it the primary way to use color packages with continuous color scales.
+`scale_color_gradientn()` is important for transforming a discrete palette into a continuous palette. This makes it the primary way to use color packages with a continuous color scale.
 
 #### Color brewer continuous scales
-`scale_color_distiller()` provides a continuous palette using the Color Brewer palettes. Use the `type` argument to choose between sequential `"seq"`, diverging `"div"`, and qualitative `"qual"` palettes. This is a quick way to choose the default palette for each type and can be used with numerical manner for choosing a palette. Or just write the name of the palette in the `palette` argument.
+`scale_color_distiller()` provides continuous color scales using the Color Brewer palettes that are designed for discrete data. Use the `type` argument to choose between sequential `"seq"`, diverging `"div"`, and qualitative `"qual"` palettes. This is a quick way to choose the default palette for each type and can be used with the numerical manner for choosing a palette. Or just write the name of the palette in the `palette` argument.
 
 **Sequential**
 ```{r}
@@ -227,10 +226,10 @@ pcont +
 #### Viridis continuous scales
 The viridis colors are the most well suited to a continuous scale among the built in `ggplot2` color scales. They are designed to be perceptually uniform in both color and when reduced to black and white, and to be perceptible to people with various forms of color blindness.
 
-You can access the virdis palette from `scale_color_continuous()`
+You can access the viridis palette from `scale_color_continuous()`
 
 ```{r}
-#| label: scale-continuous-virdis
+#| label: scale-continuous-viridis
 pcont + 
   scale_color_continuous(type = "viridis")
 ```
@@ -304,6 +303,8 @@ pcont +
 #### Viridis and color brewer
 The binned versions of the viridis and color brewer palettes work in the same way as `scale_color_steps()` with the `n.breaks` argument and their continuous variants.
 
+**Color brewer**
+
 `scale_color_fermenter()` has the same ability to pick a `type` and `palette`:
 
 ```{r}
@@ -312,7 +313,9 @@ pcont +
   scale_color_fermenter(palette = "Oranges")
 ```
 
-`scale_color_virdis_b()` has the same ability to pick a palette `option`:
+**Viridis**
+
+`scale_color_viridis_b()` has the same ability to pick a palette `option`:
 
 ```{r}
 #| label: viridis-bin
@@ -325,17 +328,21 @@ pcont +
 #### Default discrete scale
 The default scale for discrete color scales is `scale_color_discrete()`, which defaults to using `scale_color_hue()`.
 
+::: {layout-ncol="2"}
 ```{r}
-#| label: discrete-default
-#| layout-ncol: 2
+#| label: discrete-default-1
 pdisc + 
   scale_color_discrete()
+```
 
+```{r}
+#| label: discrete-default-2
 pdisc + 
   scale_color_hue()
 ```
+:::
 
-Use `scales::hue_pal()` to recreate or access the discrete color palette used for a plot, making sure to use the length of the discrete colors.
+Use `scales::hue_pal()` to recreate or access the discrete color palette used for a plot. Making sure to use the length of the discrete colors, as the colors used changes with the length of the palette.
 
 ```{r}
 #| label: find-discrete-pal
@@ -343,6 +350,8 @@ Use `scales::hue_pal()` to recreate or access the discrete color palette used fo
 scales::hue_pal()(6)
 show_col(scales::hue_pal()(6))
 ```
+
+This can be used with `scale_color_manual()` to color a subset of the groups. See the discussion in [Annotations: Highlighting](02-annotations.qmd#sec-ann-highlight-color) and below @sec-color-manual. 
 
 #### HCL color scale
 `scale_color_hue()` provides access to HCL colors directly within `ggplot2`. The default color scheme picks evenly spaced hues around the HCL color wheel. The functions do not produce color blind compatible palettes.
@@ -449,7 +458,7 @@ pdisc +
   scale_color_brewer(palette = "Dark2")
 ```
 
-`scale_color_virdis_d()` provides the same set of viridis palettes in a discrete scale:
+`scale_color_viridis_d()` provides the same set of viridis palettes in a discrete scale:
 
 ```{r}
 #| label: viridis-discrete
@@ -486,6 +495,33 @@ pdisc +
       "Gentoo female"    = "seagreen",
       "Gentoo male"      = "seagreen3")
   )
+```
+
+A common workflow for using `scale_color_manual()` is to color a subset of discrete groups using the same color scale that would be used for all groups. This is the basis for highlighting groups or certain instances shown in [Annotations: Highlighting](02-annotations.qmd#sec-ann-highlight-color). This is done by taking a subset of the discrete palette constructor `scales::hue_pal()` discussed in @sec-color-disc. For instance, we can color only the male penguins but maintain the same color palette as used in `pdisc`. Compare the use of the default palette to maintaining the palette used when there are six groups.
+
+```{r}
+#| label: subset-disc
+# Default discrete scale
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_point(color = "gray60") + 
+  geom_point(data = filter(penguins, sex == "male"),
+             aes(color = species)) + 
+  labs(color = "Males")
+```
+
+```{r}
+#| label: subset-disc-manual
+# Use same color scale as pdisc
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_point(color = "gray60") + 
+  geom_point(data = filter(penguins, sex == "male"),
+             aes(color = species)) + 
+  scale_color_manual("Males",
+                     values = scales::hue_pal()(6)[c(2, 4, 6)])
 ```
 
 `scale_color_identity()` works similarly, but the colors to be used are in the data frame.
@@ -538,16 +574,16 @@ library(palettes)
 ```
 
 ### Overview {#sec-color-pkgs-overview}
-Most color palette packages have two main types of functions: **scale** functions that are usually named `scale_color_*()` and are meant to replace the `ggplot2` scale functions and **pal** functions that provide access to the hex values of palettes that can then be used with `scale_color_manual()`. The API for accessing these functions differs. This has led to the creation of `paletteer` (@sec-color-paletteer) to try to create a common interface for palettes.
+Most color palette packages have two main types of functions: **scale** functions that are usually named `scale_color_*()` and are meant to replace the `ggplot2` scale functions and **pal** functions that provide access to the hex values of palettes that can then be used with `scale_color_manual()` or `scale_color_gradientn()` to create a continuous palette. The API for accessing these functions differs. This has led to the creation of `paletteer` (@sec-color-paletteer) to try to create a common interface for palettes.
 
-Most of the color packages have functions to list the name of the available palettes and to view the palettes as a plot. A particularly useful way to view of palette before using it is with `scales::show_col()`.
+Most of the color packages have functions to list the name of the available palettes and to view the palettes as a plot. A particularly useful way to view a palette before using it is with `scales::show_col()`.
 
 ### palettes pkg {#sec-solor-palettes-pkg}
-A fun, quick alternative to `scales::show_col()` is to use the `palettes` package, which uses `vctrs` to print vectors of colors as hex rbg values with a color preview. `palettes` has its own way to access color palettes in `ggplot2`, but it is particularly useful for printing out a vector of colors with `pal_colour()`.
+A fun, quick alternative to `scales::show_col()` is to use the `palettes` package, which uses `vctrs` to print vectors of colors as hex rbg values with a color preview. `palettes` has its own way to access color palettes in `ggplot2`, but it is particularly useful for printing out a vector of colors with `pal_color()`.
 
 ```{r}
 #| label: palettes-pkg
-pal_colour(
+pal_color(
   c("#a00e00", "#d04e00", "#f6c200", "#0086a8", "#132b69")
 )
 ```
@@ -555,7 +591,7 @@ pal_colour(
 ### Scales pkg {#sec-color-scales-pkg}
 `scales` provides a number of functions to [specify palettes and perform color mapping](https://scales.r-lib.org/reference/index.html#colour-palettes-colour-mapping) that provide the basis for the color scale functions in `ggplot2`. The `*_pal()` functions have consistent APIs with their associated `scale_color_*()` variants in `ggplot2`. The `*_pal()` functions all return a function. Thus, to access the hex color values you need to add another set of parentheses: **discrete** palettes take an `n`, while **continuous** palettes take a vector of values from 0 to 1 that produce `length(x)` colors.
 
-Once you have a palette, you can view the colors with `scales::show_col()`. This provides a good workflow to view the color palette and make any changes you want. Using `show_col()` is a good workflow for using any palette.
+Once you have a palette, you can view the colors with `scales::show_col()`. This provides a good workflow to view the color palette and make any changes you want.
 
 #### Discrete palettes
 - `brewer_pal()`
@@ -689,7 +725,7 @@ R comes with a number of [base color palettes](https://rdrr.io/r/grDevices/palet
 Post R 4.0 palettes
 
 - `palette()`: Default discrete R palette of 8 colors "R4"
-- `palette.colors(n, palette)`: Access to a set of qualitative palettes; default is "Okabe-Ito"
+- `palette.colors(n, palette)`: Access to a set of discrete palettes; default is "Okabe-Ito"
   - `palette.pals()`: Vector of palette names to use in `palette.colors()`.
 - `hcl.colors(n, palette)`: Continuous hcl color palettes; default is "viridis"
   - `hcl.pals()`: Vector of 115 continuous color palettes
@@ -745,7 +781,7 @@ show_col(hcl.colors(9, palette = "Pastel 1"))
 ```
 
 #### Continuous palettes
-`hcl.colors()` is a simplified implementation of the color palettes from `colorspace`, see @sec-color-colorspace. This means that you can use the `colorspace` package to use these palettes directly in `ggplot2`.
+`hcl.colors()` is a simplified implementation of the color palettes from the `colorspace` package, see @sec-color-colorspace. This means that you can use the `colorspace` package to use these palettes directly in `ggplot2`.
 
 `hcl.colors()` does not select from a fixed set of colors but provides a specific path in the HCL color space. For hue, chroma, and luminance a color palette can have either a constant, linear, or triangular trajectory within the HCL values. The default is viridis:
 
@@ -756,7 +792,7 @@ show_col(hcl.colors(9))
 
 `hcl.colors()` has single hue, multi-hue, diverging, and divergingx palettes which can be listed with "qualitative", "sequential", "diverging", or "divergingx" in `hcl.pals()`.
 
-The single hue are all inspired by Color Brewer except Oslo, which is from the `scico` palettes. 
+The single hue are all inspired by Color Brewer except Oslo, which is from the `scico` package. 
 
 ```{r}
 #| label: base-hcl-single
@@ -791,7 +827,7 @@ The `colorspace` package provides a broad toolbox for selecting individual color
 
 Use `hcl_palettes()` to access the palettes provided by `colorspace`. These are the same palettes as provided by base R with `hcl.colors()`, see @sec-color-base. The main difference is that `hcl.colors()` does not have the ability to modify the existing palettes through the `h`, `c`, and `l` arguments in the palette functions.
 
-- `hcl_palettes(plot = TRUE)`: View a plot of the palettes.cvd
+- `hcl_palettes(plot = TRUE)`: View a plot of the palettes.
 - `hclwizard()`: shiny app to view and play around with the palettes.
 
 Many of the palettes are similar to those provided by other packages such as Color Brewer, Viridis, rcartocolors, and scico. See the [vignette](http://colorspace.r-forge.r-project.org/articles/approximations.html) for a discussion and visualizations of the comparisons.
@@ -880,7 +916,7 @@ pdisc +
     "Blues", nmax = 8, order = 3:8)
 ```
 
-Like the palette functions you can also change the `h1`, `c1`, and `l1` and `h2`, `c2`, and `l2` arguments for the starting and ending values. In addition, the continuous scale functions have arguments for `begin` and `end` that indicate where to begin and end on the color scale from 0 to 1. 
+Like the palette functions, you can also change the `h1`, `c1`, and `l1` and `h2`, `c2`, and `l2` arguments for the starting and ending values. In addition, the continuous scale functions have arguments for `begin` and `end` that indicate where to begin and end on the color scale from 0 to 1. 
 
 #### Palette visualization and assessment
 Use `swatchplot()` to view color palettes similar to `scales::show_col()`.
@@ -996,7 +1032,7 @@ max_chroma(h = seq(0, 360, by = 60), l = 50)
 ```
 
 ### scico {#sec-color-scico}
-The `scico` package provides access to the perceptually uniform and color-blindness friendly palettes developed by Fabio Crameri. The package has 35 different palettes. The color scales are sequential, and so it is a good augmentation to the viridis palettes.
+The `scico` package provides access to the perceptually uniform and color-blind friendly palettes developed by Fabio Crameri. The package has 35 different palettes. The color scales are sequential, and so it is a good augmentation to the viridis palettes.
 
 - `scico_palette_names()`: Vector of palette names.
 - `scico_palette_show()`: View the palettes.
@@ -1021,7 +1057,7 @@ pdisc +
 :::
 
 ### ggsci {#sec-color-ggsci}
-ggsci offers a collection of ggplot2 color palettes inspired by scientific journals, data visualization libraries, science fiction movies, and TV shows. The palettes are mostly discrete. Each palette type has its own functions to access palettes (`pal_palname()`) and scale functions to use the palettes (`scale_color_palname()`). Each palette has different `palette` options.
+ggsci offers a collection of `ggplot2` color palettes inspired by scientific journals, data visualization libraries, science fiction movies, and TV shows. The palettes are mostly discrete. Each palette type has its own functions to access palettes (`pal_palname()`) and scale functions to use the palettes (`scale_color_palname()`). Each palette has different `palette` options.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -1039,7 +1075,7 @@ pdisc +
 :::
 
 ### ggthemes {#sec-color-ggthemes}
-`ggthemes` provides a number of extra color palettes derived from the style of news organizations and other visualization platforms. Like `ggsci` it has functions to access palettes (`palname_pal()`) and scale functions (`scale_color_palname()`).
+`ggthemes` provides a number of extra color palettes derived from the style of news organizations and other visualization platforms. Like `ggsci`, it has functions to access palettes (`palname_pal()`) and scale functions (`scale_color_palname()`).
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -1059,7 +1095,7 @@ pdisc +
 :::
 
 ### rcartocolors {#sec-color-rcartocolors}
-`rcartocolor` provides color palettes made for mapping designed by [CARTO](https://carto.com/carto-colors/). Similar to Color brewer, the carto has sequential, diverging, and qualitative color palettes.
+`rcartocolor` provides color palettes made for mapping designed by [CARTO](https://carto.com/carto-colors/). Similar to Color brewer, `rcartocolor` has sequential, diverging, and qualitative color palettes.
 
 - `cartocolors$Name`: vector of palette names
   - `cartocolors[c(1, 2)]`: Data frame of palette names and types
@@ -1096,8 +1132,6 @@ pdisc +
   - `scale_color_met_c()`
   - `scale_color_met_d()`
 
-Use either the `MetBrewer` scale functions or the palettes within the `ggplot2` `scale_color_*()` functions.
-
 ::: {layout-ncol="2"}
 ```{r}
 #| label: metbrewer-scale
@@ -1115,7 +1149,7 @@ pdisc +
 :::
 
 ### paletteer {#sec-color-paletteer}
-`paletteer` provides a common API for accessing [dozens of palette packages](https://emilhvitfeldt.github.io/paletteer/index.html#included-packages) and thousands of color palette. The basic structure is `function("package::palette")`.
+`paletteer` provides a common API for accessing [dozens of palette packages](https://emilhvitfeldt.github.io/paletteer/index.html#included-packages) and thousands of color palettes. The basic structure is `function("package::palette")`.
 
 `paletteer` palettes are divided among **discrete** and **continuous**. There are two types of discrete palettes: fixed width and dynamic. **Fixed width** palettes have a set number of colors and return colors from 1 to n. **Dynamic** palettes return different discrete colors depending on the number of colors desired using similar starting and ending values. 
 

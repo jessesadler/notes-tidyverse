@@ -11,19 +11,18 @@ date-modified: last-modified
 source("_common.R")
 ```
 
-Coordinate systems define how `x` and `y` are related to each other to produce a 2d plot. The coordinate system, thus, is in charge of drawing the axes and panel backgrounds. "While the scales control the values that appear on the axes, and how they map from data to position, it is the coordinate system which actually draws them." (Wickham, ggplot2 Book: Ch 15) Therefore, coordinate systems are closely related to positional scales, and the topics discussed here are also explained in the notes on [scales](02-scales.qmd#sec-scale-limits).
+Coordinate systems define how `x` and `y` are related to each other to produce a 2d plot. The coordinate system, thus, is in charge of drawing the axes and panel backgrounds. "While the scales control the values that appear on the axes, and how they map from data to position, it is the coordinate system which actually draws them."[^1]  Therefore, coordinate systems are closely related to positional scales, and the topics discussed here are also explained in the notes on [Positional scales](02-scales.qmd#sec-scale-limits).
 
 ## Resources {#sec-coords-resources}
 
-- [Coordinates documentation](https://ggplot2.tidyverse.org/reference/index.html#coordinate-systems)
-- [Wickham, ggplot2 Book: Coordinates](https://ggplot2-book.org/coord.html)
+-   [Coordinates documentation](https://ggplot2.tidyverse.org/reference/index.html#coordinate-systems)
+-   [Wickham, ggplot2 Book: Coordinates](https://ggplot2-book.org/coord.html)
 
 ```{r}
 #| label: setup
 #| message: false
 library(ggplot2)
 library(dplyr)
-library(readr)
 library(palmerpenguins)
 
 # Data
@@ -33,12 +32,14 @@ penguins <- penguins |>
 ```
 
 ## Plot limits {#sec-coords-limits}
+
 See @sec-scale-limits for more on the differences of using `scale_x/y_*()` or `coord_cartesian()` to set plot limits.
 
 ### Zooming {#sec-coords-zoom}
+
 Use `coord_cartesian(xlim, ylim)` to zoom in on a plot.
 
-For zooming in on data in a plot, making the axes limits smaller than the data, it is preferable to use `coord_cartesian()` instead of `scale_x/y_*()`, which subsets the data, turning all of the data outside the limits into `NA`.
+For zooming in on data in a plot—making the axes limits smaller than the data—it is preferable to use `coord_cartesian()` instead of `scale_x/y_*()`. `scale_x/y_*()` subsets the data, turning all of the data outside the limits into `NA`. `coord_cartesian()` draws the same plot but with more confined bounds. The difference is clear with a box plot.
 
 ::: {layout-ncol="2"}
 ```{r}
@@ -66,9 +67,10 @@ ggplot(aes(x = species,
 :::
 
 ### Padding {#sec-coords-pad}
+
 The `expand` and `clip` arguments of `coord_cartesian()` are useful to eliminate padding of the data. To alter the padding or eliminate it for one axis, `scale_x/y_*(expand)` is preferable. You need to be careful in using `clip = "off"` because it can lead to plotted data outside the panel region. However, it is useful to prevent points from being clipped on the limits of the plot.
 
-For more complex adjustment of padding, see @sec-scale-limits-padding.
+For more complex adjustment of padding with `scale_x/y_*()`, see @sec-scale-limits-padding.
 
 ```{r}
 #| label: coords-pad
@@ -84,7 +86,8 @@ penguins |>
 ## Linear coordinate systems {#sec-coords-linear}
 
 ### Flipped coords {#sec-coords-flipped}
-`coord_flip()` is often used with bar plots to make them sideways. This can also be done by placing the variable to be counted on the y axis. `coord_flip()` is more important when fitting a model, which assumes the data is `y ~ x`.
+
+`coord_flip()` is often used with bar plots to make them sideways. Alternatively, this can also be done by placing the variable to be counted on the y axis. `coord_flip()` is more important when fitting a model, which assumes the data is `y ~ x`.
 
 ```{r}
 #| label: coords-flipped
@@ -95,10 +98,12 @@ penguins |>
 ```
 
 ### Fixed coords {#sec-coords-fixed}
+
 `coord_fixed()` fixes the ratio of length on the `x` and `y` axes using the `ratio` argument. The aspect ratio will also be set to ensure that the mapping is maintained regardless of the shape of the output device
 
 ## Circular coordinate system {#sec-coords-circular}
-With `coord_polar()` `x` and `y` are transformed into angle (`theta`) and radius. Rectangles become arcs. This is shown in the below plots. The expansion of the `x` axis moves the starting point out, while the expansion of the `y` axis ensures that the largest bar does not become a closed donut. See the [lollipop plot example](02-ggplot2-rstudioconf-2022.qmd#sec-rs22-gd-lollipop) from [Cédric Scherer, Graphic Design with ggplot2 at RStudio conf 2022](https://rstudio-conf-2022.github.io/ggplot2-graphic-design/) for a more complex example.
+
+With `coord_polar()` `x` and `y` are transformed into angle (`theta`) and radius. Rectangles become arcs. This is shown in the below plots. The expansion of the `x` axis moves the starting point out from the center, while the expansion of the `y` axis ensures that the largest bar does not become a closed donut. See the [lollipop plot example](02-ggplot2-rstudioconf-2022.qmd#sec-rs22-gd-lollipop) from [Cédric Scherer, Graphic Design with ggplot2 at RStudio conf 2022](https://rstudio-conf-2022.github.io/ggplot2-graphic-design/) for a more complex example.
 
 ```{r}
 #| label: coords-polar
@@ -109,3 +114,5 @@ penguins |>
   scale_y_continuous(expand = expansion(add = c(0, 10))) + 
   coord_polar(theta = "y")
 ```
+
+[^1]: [@wickham16, p. 159]

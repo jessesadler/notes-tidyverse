@@ -92,7 +92,7 @@ High level arguments in the theme hierarchy:
 - `aspect.ratio`: aspect ratio of the panel
 
 ### Axes {#sec-theme-axes}
-- `axis.title`: labels of axes
+- `axis.title`: title of axes
 - `axis.text`: tick labels along axes
 - `axis.ticks`: tick marks `element_line()`
 - `axis.line`: lines along axes
@@ -139,11 +139,11 @@ p +
 - Legend keys: see @sec-guide-key-spacing
   - `legend.key`: background underneath legend keys (symbols of geoms)
   - `legend.key.size`, `legend.key.height`, and `legend.key.width`
-- Legend text
+- Legend text: see @sec-guide-labels
   - `legend.text`: legend item labels
   - `legend.text.align`: alignment of legend labels (number from 0 (left) to 1 (right))
   - `legend.title`: legend title
-	- `legend.title.align`: alignment of legend title
+  - `legend.title.align`: alignment of legend title
 
 ```{r}
 #| label: legend
@@ -160,7 +160,7 @@ p +
         )
 ```
 
-Place legend in plot by positioning it at the bottom-right of the plot with legends justified to the right.
+Place legend in the plot by positioning it at the bottom-right of the plot with legends justified to the right.
 
 ```{r}
 #| label: legend-plot
@@ -173,11 +173,43 @@ p +
         )
 ```
 
+### Plot title and metadata
+Plots can have a number of plot labels: title, subtitle, caption, and tag.
+
+- `plot.title`
+	- `plot.title.position`: Applies to both title and subtitle
+		- `"panel"` (default): Aligns to plotting region
+		- `"plot"`: Aligns to entire plot
+- `plot.subtitle`
+- `plot.caption`: caption below the plot
+- `plot.tag`: upper-left label to identify a plot
+  - `plot.tag.position`: `"topleft"`, `"top"`, `"topright"`, `"left"`, `"right"`, `"bottomleft"`, `"bottom"`, `"bottomright"`, or a coordinate
+
+```{r}
+#| label: plot-title
+p + 
+  labs(subtitle = "Flipper length and body mass of penguins",
+       caption = "Caption: Palmer Station LTER",
+       tag = "Tag: ex. plot") + 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 1,
+                                  color = "firebrick",
+                                  family = "mono"),
+        plot.subtitle = element_text(hjust = 1,
+                                     color = "orchid",
+                                     family = "serif"),
+        plot.caption = element_text(color = "salmon", size = 11),
+        plot.caption.position = "panel", # the default
+        plot.tag = element_text(family = "mono"),
+        plot.tag.position = "bottomleft")
+```
+
 ### Panel: Plotting area {#sec-theme-panel}
+The panel encompasses the area in which the data is plotted. The main elements that will be changed are the color of the background (`panel.background`) and the major and minor grid drawn on the panel (`panel.grid`).
+
 - `panel.background`: background of plotting area, drawn underneath plot
 - `panel.border`: border around plotting area, drawn on top of plot so that it covers tick marks and grid lines.
   - Therefore you need to assign `fill = NA` when overriding `panel.border`.
-- `panel.spacing`: spacing between facet panels
 - `panel.grid`: `element_line()`
 	- `panel.grid.major`
 	- `panel.grid.minor`
@@ -191,7 +223,7 @@ p +
   theme(panel.background = element_rect(fill = "lightsteelblue"),
         panel.border = element_rect(linetype = "dashed", fill = NA),
         panel.grid.major = element_line(color = "firebrick"),
-        panel.grid.major.x = element_line(linewidth = 0.2),
+        panel.grid.major.x = element_line(linewidth = 1.5),
         panel.grid.minor = element_blank(),
         plot.background = element_rect(color = "forestgreen", linewidth = 2)
         )
@@ -199,45 +231,28 @@ p +
 
 ### Plot: Whole area of the plot {#sec-theme-plot}
 - `plot.background`: background of the entire plot
-- `plot.title`
-	- `plot.title.position`: Applies to both title and subtitle
-		- `"panel"` (default): Aligns to plotting region
-		- `"plot"`: Aligns to entire plot
-- `plot.subtitle`
-- `plot.caption`: caption below the plot
-- `plot.tag`: upper-left label to identify a plot
-  - `plot.tag.position`: `"topleft"`, `"top"`, `"topright"`, `"left"`, `"right"`, `"bottomleft"`, `"bottom"`, `"bottomright"`, or a coordinate
 - `plot.margin`: margin around entire plot
 
-As above, notice the difference between the **panel** and the **plot**. The panel fill is "transparent" (can also use `NA`) to show plot.background covers the whole plot area.
+As above, notice the difference between the **panel** and the **plot**. The panel fill is "transparent" (can also use `NA`) to show `plot.background` covers the whole plot area.
 
 ```{r}
 #| label: plot
 p + 
-  labs(subtitle = "Flipper length and body mass of penguins",
-       caption = "Palmer Station LTER",
-       tag = "ex. plot") + 
   theme(panel.background = element_rect(fill = "transparent",
-                                        color = "forestgreen", linewidth = 2),
+                                        color = "forestgreen",
+                                        linewidth = 2),
         plot.background = element_rect(fill = "lightsteelblue",
-                                       color = "black", linetype = "dashed"),
-        plot.title.position = "plot",
-        plot.title = element_text(hjust = 1, color = "firebrick", family = "mono"),
-        plot.subtitle = element_text(hjust = 1, color = "orchid", family = "serif"),
-        plot.caption = element_text(color = "salmon", size = 16),
-        plot.caption.position = "panel", # the default
-        plot.tag = element_text(family = "mono"),
-        plot.tag.position = "bottomleft",
+                                       color = "black",
+                                       linetype = "dashed"),
         plot.margin = margin(t = 0.5, r = 1, b = 0.5, l = 1, unit = "cm")
         )
 ```
 
 ### Facets: Strip {#sec-theme-facets}
-- `strip.background`
-- `strip.clip`
-- `strip.placement`
-- `strip.text`
-- `strip.switch`
+- `strip.background`: Background of panel strips
+- `strip.text`: Text in the strips
+- `strip.placement`: placement of strip with respect to axes, either "inside" or "outside". Only important when axes and strips are on the same side of the plot.
+- `panel.spacing`: spacing between facet panels
 
 ```{r}
 #| label: strip-default
@@ -343,10 +358,10 @@ p +
 ## Setting themes {#sec-set-theme}
 
 - `theme_set()`: completely overrides the current theme.
-- `theme_update()`: Update individual elements of a plot. Any unspecified values in the theme element will default to the values they are set in the theme.
+- `theme_update()`: Update individual elements of a plot. Any unspecified values in the theme element will default to the values set in the current theme.
 - `theme_replace()`: Modifies a particular element of the current theme using the `%+replace%` operator to completely replace the element, so any unspecified values will overwrite the current value in the theme with `NULL`.
 
-`theme_update()` also returns the previous theme parameters, so you can easily restore the original parameters once you’re done.
+`theme_update()` also returns the previous theme parameters, so you can easily restore the original parameters once you are done by using `theme_set()` again.
 
 ```{r}
 #| label: set-theme
@@ -359,6 +374,9 @@ og_theme <- theme_update(
   panel.grid.minor = element_blank(),
   plot.title = element_text(face = "bold"),
   legend.position = "top",
+  legend.box = "vertical",
+  legend.box.just = "left",
+  legend.spacing = grid::unit(0, "lines"),
   plot.title.position = "plot"
 )
 p
@@ -373,7 +391,7 @@ p
 ```
 
 ### Reusing themes {#sec-reuse-themes}
-Since `update_theme()` essentially uses `+`, they can be used somewhat interchangeably. This opens up the ability to save a theme layer and reuse it just as you would with any other plot layer.
+Since `update_theme()` essentially uses `+`, the function and the operator can be used somewhat interchangeably. This opens up the ability to save a theme layer and reuse it just as you would with any other plot layer.
 
 ```{r}
 #| label: reuse-theme
@@ -395,7 +413,7 @@ p + my_theme
 
 The packages `systemfonts` and `ragg` from Posit work together to give RStudio access to the fonts on your system and use them within plots. This works seemlessly for the most part once you install the packages and tell RStudio to use AGG as its graphic device. This is done in Settings -> General -> Graphics -> Backend. To use `ragg` in `knitr` and `quarto` set `knitr::opts_chunk$set(dev = "ragg_png")`.
 
-Use `system_fonts()` to list all fonts available on your system.
+Use `system_fonts()` to list all fonts available on your system. A good workflow is to look for family of fonts using `stringr::str_detect()`.
 
 ```{r}
 #| label: systemfonts
@@ -458,6 +476,10 @@ p +
 ## ggtext {#sec-theme-ggtext}
 The [ggtext](https://wilkelab.org/ggtext) package provides two theme elements functions to render markdown and HTML in plot guides. They are alternatives to `element_text()`. In addition, the package provides two geoms that replace `geom_label()`, see @sec-ann-ggtext. In both the geoms and the theme elements `ggtext` provides two alternatives: markdown text labels and markdown text boxes with word wrapping.
 
+The theme elements functions are `element_markdown()` and `element_textbox()` with a third option to use `element_textbox_simple()` that provides common defaults for `element_textbox()`.
+
+These theme elements will mostly be used for labeling x and y axes and for adding information to titles of plots. They work by providing these labels with marked up text and then adding `element_markdown()` or `element_textbox_simple()` to the corresponding theme argument.
+
 ### Supported HTML {#sec-theme-html-support}
 
 - Bold and italic fonts
@@ -476,24 +498,11 @@ The [ggtext](https://wilkelab.org/ggtext) package provides two theme elements fu
   - `<img src="image-source.jpg" />`
 
 ### `element_markdown()` {#sec-theme-element-markdown}
-`ggtext` provides two theme elements that can replace `element_text()`: `element_markdown()` and `element_textbox()` with a third option to use `element_textbox_simple()` that provides common defaults for `element_textbox()`. The functions differ in whether they provide word wrapping or not.
-
-These theme elements will mostly be used for labeling x and y axes and for adding information to titles of plots. They work by providing these labels with marked up text and then adding `element_markdown()` or `element_textbox_simple()` to the corresponding theme element.
-
-For instance, simple Markdown can be added to the labels used in the base plot by adding the Markdown in `labs()` and then adding `element_markdown()`.
+Simple Markdown can be added to the labels used in the base plot by adding the Markdown in `labs()` and then adding `element_markdown()`. Making the whole labels bold accomplishes the same as can be done with theme elements, but interspersing italics is different.
 
 ```{r}
 #| label: element-markdown
-p1 <- penguins |> 
-  filter(!is.na(flipper_length_mm),
-         !is.na(sex)) |> 
-  ggplot(aes(x = flipper_length_mm,
-             y = body_mass_g,
-             color = species,
-             shape = sex)) + 
-  geom_point()
-
-p1 + 
+p + 
   labs(title = "**Penguin Size**",
        x = "Flipper length (*mm*)",
        y = "Body mass (*g*)",
@@ -505,7 +514,7 @@ p1 +
         legend.title = element_markdown())
 ```
 
-A common use for `ggtext` is to include colored text that matches the colors used within the plot as an alternative to using a legend. A good workflow to do this is to extract the color palette used in the plot and use the [glue package](https://glue.tidyverse.org) to specify the colors to be used. An example is to remove the Species legend and place this information in the plot title. This example creates a title and subtitle in one string. It uses CSS to define a larger font size, while setting a smaller font size for the subtitle in `element_markdown()`. The expanded line height gives more room for both the title and subtitle. Because `element_markdown()` does not use word wrapping, it may be necessary to insert line breaks.
+A common use for `ggtext` is to include colored text that matches the colors used within the plot as an alternative to using a legend. A good workflow to do this is to extract the color palette used in the plot and use the [glue package](https://glue.tidyverse.org) to specify the colors to be used. An example is to remove the Species legend and place this information in the plot title/subtitle. This example creates a title and subtitle in one string. It uses CSS to define a larger font size for the title, while setting a smaller font size for the subtitle in `element_markdown()`. The expanded line height gives more room for both the title and subtitle. Because `element_markdown()` does not use word wrapping, it may be necessary to insert line breaks within the subtitle.
 
 ```{r}
 #| label: element-markdown-title
@@ -518,7 +527,7 @@ styled_title <- glue(
   <span style='color:{hex[[3]]};'>Gentoo</span> penguins."
 )
 
-p1 + 
+p + 
   guides(color = "none") + 
   labs(title = styled_title,
        x = "Flipper length (*mm*)",
@@ -551,7 +560,7 @@ penguins |>
 
 ### `element_textbox()` {#sec-theme-element-textbox}
 
-`element_markdown()` will likely accomplish what you need, but you can use `element_textbox()` or `element_textbox_simple()` to create text boxes that have a specific width and use word wrapping. This is useful for longer labels. For example, we can expand on the above title to include more information. If the subtitle gets long, it may be necessary to add padding to the title. This example adds 10 points to the bottom margin.
+`element_markdown()` will likely cover most cases, but you can use `element_textbox()` or `element_textbox_simple()` to create text boxes that have a specific width and use word wrapping. This is useful for longer labels. For example, we can expand on the above title to include more information. If the subtitle gets long, it may be necessary to add padding to the title. This example adds 10 points to the bottom margin.
 
 ```{r}
 #| label: element-textbox-1
@@ -565,7 +574,7 @@ longer_styled_title <- glue(
   coast of Antartica."
 )
 
-p1 + 
+p + 
   guides(color = "none") + 
   labs(title = longer_styled_title,
        x = "Flipper length (*mm*)",
@@ -584,7 +593,7 @@ Text boxes can also have a background color and border. Because `element_textbox
 
 ```{r}
 #| label: element-textbox-2
-p1 + 
+p + 
   guides(color = "none") + 
   labs(title = longer_styled_title,
        x = "Flipper length (*mm*)",

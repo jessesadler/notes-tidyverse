@@ -11,7 +11,7 @@ date-modified: last-modified
 source("_common.R")
 ```
 
-Annotations help to provide context and highlight important aspects of data. The meta data used for annotations is just another form of data, and so many ways to annotate a plot follow the same forms as plotting the data. There are a variety of `geoms` that can be used for annotations, in particular `geom_text()` and `geom_label()`, but also `geom_line()`, `geom_curve()` and the reference reference line geoms discussed in @sec-geom-line-ref. All of these geoms work like any other geom in that they take a data frame for their data argument. When you want to add annotations that are not in the data itself, you can use `annotate()`, which creates the data frame for you and allows you to choose which geom to use. Finally, there are a number of `ggplot2` extension packages that help create annotations, label geoms, and highlight aspects of the plot.
+Annotations help to provide context and highlight important aspects of data. The meta data used for annotations is just another form of data, and so many ways to annotate a plot follow the same forms as plotting the data. There are a variety of `geoms` that can be used for annotations, in particular `geom_text()` and `geom_label()`, but also `geom_segment()`, `geom_curve()` and the reference line geoms discussed in @sec-geom-line-ref. These geoms work like any other geom; they take a data frame for their data argument and require certain sets of placement aesthetics. When you want to add annotations that are not in the data itself, you can use `annotate()`, which creates the data frame for you and allows you to choose which geom to use. Finally, there are a number of `ggplot2` extension packages that help create annotations, label geoms, and highlight aspects of the plot.
 
 ## Resources {#sec-ann-resources}
 - [Annotation documentation](https://ggplot2.tidyverse.org/reference/index.html#annotations)
@@ -97,7 +97,7 @@ p +
 ```
 
 ### Nudge {#sec-ann-text-nudge}
-One way to move the text/label away from the point is to manually nudge the them using `nudge_x` and `nudge_y`, which are scaled to the `x` and `y` axes.
+One way to move the text/label away from the point so that both the point and the label can be seen is to manually nudge the them using `nudge_x` and `nudge_y`, which are scaled to the `x` and `y` axes.
 
 ```{r}
 #| label: geom-text-nudge
@@ -108,26 +108,19 @@ p +
 ```
 
 ### Alignment {#sec-ann-text-align}
-Another way to alter the position of the text/label is to alter the alignment with `vjust` and `hjust`. See the [Aesthetic specifications vignette](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#justification) for more information. The arguments take:
+Another way to alter the position of the text/label is to alter the alignment with `vjust` and `hjust`. See [Aesthetic specifications vignette: Justification](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#justification) for more information. The arguments take:
 
-- A number between 0 and 1:
-  - `hjust`: left = 0, center = 0.5, right = 1
-  - `vjust`: top = 1, middle = 0.5, bottom = 0
-- Positional character:
-  - `hjust`: `"left"`, `"center"`, or `"right"`
-  - `vjust`: `"bottom"`, `"middle"`, or `"top"`
+- `hjust`: Horizontal justification
+	- `"left"` or `0`: text begins on the point and moves to the right.
+	- `"center"` or `0.5`: Default
+	- `"right"` or `1`: text ends on the point with the text to the left.
+- `vjust`: Vertical justification
+	- `"bottom"` or `0`: the *bottom* of the text is on the point, moving the text *up*.
+	- `"middle"` or `0.5`: Default
+	- `"top"` or `1`: the *top* of the text is on the point, moving the text *down*.
 - Special position:
   - `"inward"`: towards the center
   - `"outward"`: away from the center
-
-The default is center both `hjust` and `vjust`.
-
-- **hjust**:
-  - `"left"` justification text begins on the point and moves to the right.
-  - `"right"` justification text ends on the point with the text to the left.
-- **vjust**:
-  - `"bottom"` justification the *bottom* of the text is on the point, moving the text *up*.
-  - `"top"` justification the *top* of the text is on the point, moving the text *down*.
 
 ```{r}
 #| label: alignment
@@ -148,7 +141,7 @@ p +
             nudge_x = 1)
 ```
 
-The special alignment parameters of `"inward"` and `"outward"` are particularly useful because they can move the text different ways depending upon where they are in the plot.
+The special alignment parameters of `"inward"` and `"outward"` are particularly useful because they can move the text different ways depending on where they are in the plot.
 
 ```{r}
 #| label: inward
@@ -197,7 +190,7 @@ penguins |>
 ```
 
 #### Dodge
-Using `position_dodge()` creates some complexity because `ggplot2` does not know the width of the dodge should be the same as bars. Using `width = 0.9` places the labels in the center of the bars. The other complexity is that you cannot use `nudge` if you use a position adjustment. Therefore, you need to directly change the `y` variable. Here, `y = n + 2` is the same as `nudge_y = 2`.
+Using `position_dodge()` creates some complexity because `ggplot2` does not know the width of the dodge should be the same as the bars. Using `width = 0.9` places the labels in the center of the bars. The other complexity is that you cannot use `nudge` if you use a position adjustment. Therefore, you need to directly change the `y` variable. Here, `y = n + 2` is the same as `nudge_y = 2`.
 
 ```{r}
 #| label: dodge
@@ -224,8 +217,8 @@ penguins |>
             position = position_stack(vjust = 0.5))
 ```
 
-### ggrepel {#sec-ann-ggrepel}
-`ggrepel` uses an algorithmic approach to minimize overlap of points. This quickly and easily fixes the issues of labels overlapping the points so that you do not need to use nudge and alignment adjustments.
+## ggrepel {#sec-ann-ggrepel}
+[ggrepel](https://ggrepel.slowkow.com) uses an algorithmic approach to minimize overlap of points. This quickly and easily fixes the issues of labels overlapping the points so that you do not need to use nudge and alignment adjustments. The [Examples vignette](https://ggrepel.slowkow.com/articles/examples) does a good job of showing the wide range of features available in `ggrepel`.
 
 ```{r}
 #| label: ggrepel
@@ -264,7 +257,7 @@ p +
                   box.padding = 0.5)
 ```
 
-#### Limit labels to a specific area
+### Limit labels to a specific area {#sec-ann-ggrepel-area}
 `xlim` and `ylim` arguments constrain the labels to a specific area. Limits are specified in data coordinates. Use `NA` when there is no lower or upper bound in a particular direction. For instance, we can move the labels to the upper-left of the plot. Use `direction = "y"` to have the labels stack on top of each other, while expanding the `y` limits of the plot gives more room for the labels.
 
 ```{r}
@@ -291,7 +284,7 @@ p +
   ylim(c(NA, 7500))
 ```
 
-#### Line segments
+### Line segments {#sec-ann-ggrepel-segments}
 Always, or never, draw line segments with `min.segment.length`
 
 - `min.segment.length = 0`: draw line segments for all labels, no matter how short they are.
@@ -305,7 +298,7 @@ p +
                   min.segment.length = 0)
 ```
 
-Line segments have many of the same adjustments as `geom_line()`. Arguments for lines are: 
+Line segments have many of the same adjustments as `geom_segment()`. Arguments for lines are: 
 
 - `segment.linetype`
 - `segment.color`
@@ -333,7 +326,7 @@ p +
   theme(legend.position = "none")
 ```
 
-You can make curved line segments and add arrows just like in `geom_curve()`. Arguments for curvature are:
+You can make curved line segments and add arrows just like in `geom_curve()`. See below @sec-ann-curves for more on controlling aspects of curves. Arguments for curvature are:
 
 - `segment.curvature`: Number from -1 to 1; negative for left-hand and positive for right-hand curves; 0 for straight lines.
 - `segment.angle`: 0-180, less than 90 skews control points toward the start point.
@@ -372,12 +365,12 @@ p +
 
 ## Highlighting {#sec-ann-highlight}
 
-One of the simplest and most effective forms of annotating a plot is to highlight a subset of the data that is particularly relevant for a certain point. There are a number of ways to do this.
+One of the simplest and most effective forms of annotating a plot is to highlight a subset of the data that is particularly relevant. There are a number of ways to do this.
 
 ### Color a subset of points {#sec-ann-highlight-color}
 
 #### Gray out non-essential data
-A simple example is to only add color to a subset of the points that you want to highlight, while graying out other data. For instance, we can highlight the Adelie and Chinstrap penguins that have flippers longer or equal to 205mm.
+A simple example is to only add color to a subset of the points that you want to highlight, while graying out other data. For instance, we can highlight the Adelie and Chinstrap penguins that have flippers longer or equal to 205mm. To do this, plot all of the data in gray and then plot the subset in color over it. Note the use of `scale_color_manual()` to maintain the same color palette as used for three species. See @sec-color-disc and @sec-color-manual for working with discrete and manual color scales.
 
 ```{r}
 #| label: highlight-color
@@ -412,7 +405,7 @@ ggplot(penguins,
   geom_point()
 ```
 
-A similar affect is created by surrounding the points with an open circle shape.
+A similar affect is created by surrounding the points with an open circle shape. This necessitates three `geom_point()` layers, one for the full data and two separate layers for the highlighted points.
 
 ```{r}
 #| label: highlight-color-circle
@@ -436,6 +429,7 @@ ggplot(penguins,
 ```{r}
 #| label: highlight-data
 #| code-fold: true
+# Line data
 h <- penguins |> 
   group_by(species, island, sex, year) |> 
   summarise(flipper_length_mm = median(flipper_length_mm),
@@ -443,7 +437,7 @@ h <- penguins |>
   mutate(group = paste(species, island, sex))
 ```
 
-`gghighlight` helps to automate the strategy of coloring only certain cases, while graying out all others. It works by adding a filtering layer to a ggplot with the `gghighlight()` function. The first argument is a filtering predicate that is passed to `dplyr::filter()`. You can have as many of these as you want.
+[gghighlight](https://yutannihilation.github.io/gghighlight/) helps to automate the strategy of coloring only certain cases, while graying out all others. It works by adding a filtering layer to a ggplot with the `gghighlight()` function. The first argument is a filtering predicate that is passed to `dplyr::filter()`. You can have as many of these as you want.
 
 ```{r}
 #| label: gghighlight
@@ -453,7 +447,7 @@ ggplot(h, aes(x = year, y = flipper_length_mm, color = group)) +
 ```
 
 #### Labels
-`gghighlight` uses direct labeling by default, see @sec-ann-direct for more on this process. The label is chosen with the `label_key` argument. The label type is chosen with the `line_label_type` function with choices of `"ggrepel_label"`, `"ggrepel_text"`, `"text_path"`, `"label_path"`, or `"sec_axis"`.
+`gghighlight` uses direct labeling by default, see @sec-ann-direct for more on this process. The label is chosen with the `label_key` argument. The label type is chosen with the `line_label_type` argument with choices of `"ggrepel_label"`, `"ggrepel_text"`, `"text_path"`, `"label_path"`, or `"sec_axis"`.
 
 ```{r}
 #| label: gghighlight-label
@@ -464,7 +458,7 @@ ggplot(h, aes(x = year, y = flipper_length_mm, color = group)) +
               line_label_type = "text_path")
 ```
 
-Remove direct labels with `use_direct_label = FALSE`. You can add your own text labels to the filtered data because `gghighlight` replaces the plot's data with the filtered data.
+Remove direct labels with `use_direct_label = FALSE`.
 
 ```{r}
 #| label: gghighlight-no-label
@@ -473,6 +467,20 @@ ggplot(h, aes(x = year, y = flipper_length_mm, color = group)) +
   gghighlight(min(flipper_length_mm) <= 185,
               use_direct_label = FALSE) + 
   theme(legend.position = "none")
+```
+
+You can add your own text labels to the filtered data because `gghighlight` replaces the plot's data with the filtered data. Note that the color for the highlighted points is placed in the `geom_point()` layer.
+
+```{r}
+#| label: gghighlight-add-labels
+ggplot(penguins,
+       aes(x = flipper_length_mm,
+           y = body_mass_g)) + 
+  geom_point(color = "purple") + 
+  gghighlight(body_mass_g > 4500 & species == "Adelie") + 
+  geom_text_repel(aes(label = body_mass_g),
+                  max.overlaps = Inf,
+                  box.padding = 0.3)
 ```
 
 #### Highlighted vs unhighlighted aesthetics
@@ -492,15 +500,6 @@ ggplot(h, aes(x = year, y = flipper_length_mm, color = group)) +
 
 #### Geoms
 `gghighlight` can be used with most geoms.
-
-```{r}
-#| label: gghighlight-point
-ggplot(penguins,
-       aes(x = flipper_length_mm,
-           y = body_mass_g)) + 
-  geom_point(color = "orange") + 
-  gghighlight(body_mass_g > 4500 & species == "Adelie")
-```
 
 ```{r}
 #| label: gghighlight-hist
@@ -533,7 +532,9 @@ You can use a number of geoms to create custom annotations:
 - Draw lines and curves: `geom_line()`, `geom_sement()`, and `geom_curve()`
 - Draw reference lines: `geom_vline()`, `geom_hline()`, and `geom_abline()`
 
-See @sec-line-seg and @sec-geom-line-ref for more on lines and curves.
+See @sec-line-seg for using line and curve geoms and @sec-geom-line-ref for reference line geoms.
+
+For instance, we can create a rectangle with a plot description in it using `geom_rect()` and `geom_text()`.
 
 ```{r}
 #| label: annotation-geoms
@@ -623,7 +624,7 @@ p +
   )
 ```
 
-#### Curves
+#### Curves {#sec-ann-curves}
 Create a curved line with `geom = "curve"`. Arguments to control the nature of the curve are based on `grid::curveGrob()`:
 
 - `curvature`: Direction of curvature and where to angle drawing of line segment.
@@ -657,7 +658,7 @@ p +
   )
 ```
 
-Left-hand curve with curve skewed towards beginning of line segment:
+Left-hand curve with curve skewed towards the beginning of the line segment:
 
 ```{r}
 #| label: curves-2
@@ -680,7 +681,7 @@ p +
 ```
 
 #### Arrows
-Both `geom_segment()` and `geom_curve()` both have arguments for `arrow` to add arrows on one or both sides of the line segments using the `arrow()` function, which is exported from `grid::arrow()`. Arguments for controlling the aestheics of arrows:
+Both `geom_segment()` and `geom_curve()` have arguments for `arrow` to add arrows on one or both sides of the line segments using the `arrow()` function, which is exported from `grid::arrow()`. Arguments for controlling the aesthetics of arrows:
 
 - `angle`: Angle of the arrow point. Default is 30 degrees.
 - `length`: Length of the arrow head, using `unit()`.
@@ -710,7 +711,7 @@ p +
 ```
 
 ## ggtext {#sec-ann-ggtext}
-The [ggtext](https://wilkelab.org/ggtext) package provides two geoms for creating text annotations with markdown and html rendering for ggplot2. In addition to the geoms, `ggtext` also provides a way to render markdown and html in plot theme elements, see @sec-theme-ggtext. In both the geoms and the theme elements `ggtext` provides two alternatives: markdown text labels and markdown text boxes with word wrapping. The actual rendering of the markdown and html is done by the [gridtext](https://wilkelab.org/gridtext/) package. It only supports a small subset of markdown/html capabilities. For a list of supported Markdown and HTML capabilities, see @sec-theme-html-support.
+The [ggtext](https://wilkelab.org/ggtext) package provides two geoms for creating text annotations with markdown and html rendering for ggplot2 that can replace `geom_text()` or `geom_label()`. In addition to the geoms, `ggtext` also provides a way to render markdown and html in plot theme elements, see @sec-theme-ggtext. In both the geoms and the theme elements `ggtext` provides two alternatives: markdown text labels and markdown text boxes with word wrapping. The actual rendering of the markdown and html is done by the [gridtext](https://wilkelab.org/gridtext/) package. `ggtext` only supports a small subset of markdown/html capabilities. For a list of supported Markdown and HTML capabilities, see @sec-theme-html-support for a list of supported capabilities and the valid Markdown, HTML, and CSS that can be used.
 
 ### ggtext geoms {#sec-ann-ggtext-geoms}
 `geom_richtext()` creates markdown labels and is mostly a replacement for `geom_label()` or `geom_text()` with added capabilities. For instance, we can recreate the text annotations in @sec-ann-annotate with some rich text.
@@ -735,10 +736,10 @@ p +
   geom_richtext(data = t,
             aes(x = x, y = y, label = lab),
             fill = "darkseagreen1",
-            angle = 40)
+            angle = 30)
 ```
 
-Use `fill = NA` and `label.color = NA` to remove the label box.
+Use `fill = NA` and `label.color = NA` to remove the background and box around the text.
 
 ```{r}
 #| label: geom-richtext-3
@@ -749,7 +750,7 @@ p +
             label.color = NA)
 ```
 
-`geom_textbox()` is very similar to `geom_richtext()` but it automatically wraps text and does not support arbitrary rotation angles, though it can be rotated.
+`geom_textbox()` is very similar to `geom_richtext()`, but it automatically wraps text and does not support arbitrary rotation angles, though it can be rotated at right angles.
 
 ```{r}
 #| label: geom-textbox-1
@@ -829,7 +830,7 @@ p +
     show.legend = FALSE)
 ```
 
-Use `label.*` arguments to change aspects to the labels and `con.*` arguments to alter aspects of the connecting line. Particularly relevant is `label.fill` transparent and the `con.type` argument that can be one of `"elbow"`, `"straight"`, or `"none"`.
+Use `label.*` arguments to change aspects to the labels and `con.*` arguments to alter aspects of the connecting line. Particularly relevant is `label.fill = "transparent"` and the `con.type` argument that can be one of `"elbow"`, `"straight"`, or `"none"`.
 
 ```{r}
 #| label: ggforce-label-args
@@ -871,7 +872,7 @@ p_line <- penguins |>
 There are a number of tools to automate the process of directly labeling a plot instead of doing it by hand. Two examples are [directlabels](https://tdhock.github.io/directlabels/) and [geomtextpath](https://allancameron.github.io/geomtextpath/index.html).
 
 ### directlabels {#sec-ann-directlabels}
-The `directlabels` package introduces a number of placement methods for allegorically placing labels on a plot using `geom_dl()`. See [here](https://tdhock.github.io/directlabels/docs/index.html) for a list of the possible placement methods. The most useful one for a scatter plot is `"smart.grid"`, which positions the labels near the center of each point cloud.
+The `directlabels` package introduces a number of placement methods for algorithmically placing labels on a plot using `geom_dl()`. See [here](https://tdhock.github.io/directlabels/docs/index.html) for a list of the possible placement methods. The most useful one for a scatter plot is `"smart.grid"`, which positions the labels near the center of each point cloud.
 
 ```{r}
 #| label: directlabels-point
@@ -1004,7 +1005,7 @@ p_line +
   theme(legend.position = "none")
 ```
 
-It is possible to use multiple justification parameters for the different lines with `scale_hjust_discrete()` and `scale_vjust_discrete()` and `scale_hjust_manual()` and `scale_vjust_manual()`. Use discrete options to automatically differ the horizontal or vertical justification of each group. Use manual options to pick the different levels of justification.
+It is possible to use multiple justification parameters for the different lines with `scale_hjust_discrete()`, `scale_vjust_discrete()`, `scale_hjust_manual()` and/or `scale_vjust_manual()`. Use discrete options to automatically differ the horizontal or vertical justification of each group. Use manual options to pick the different levels of justification.
 
 ```{r}
 #| label: geomtextpath-just-disc

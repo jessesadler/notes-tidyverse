@@ -13,9 +13,9 @@ source("_common.R")
 
 **Guides** are the collective name for axes and legends, which help readers interpret plots. The data elements of guides are largely driven by **scales**, but the appearance of the guides, and especially of legends, can also be controlled with `guides()`, specific `guide_*()` functions, or through `theme()` elements. Generally, the `guide_*()` functions control aspects that more directly affect how the scales of the plot are represented, while `theme()` affects non-data aspects of the plot/legend aesthetics. However, there is a great deal of overlap. One difference is that the `guide_*()` functions work on one scale at a time, whereas `theme()` can change aspects of legends that include more than one aesthetic in a single legend or multiple legends.
 
-- See Scales: Axes labels (@sec-scale-labels) for the discussion of guides in `scale_x/y_*()` functions and position labels.
-- See Scales: Other scales (@sec-aesthetic-scales) for how to alter aesthetic scales, breaks, and labels used in legends.
-- See Themes: Legends (@sec-theme-legend) for legend elements within `theme()`.
+- See [Scales: Axes labels](02-scales.qmd#sec-scale-labels) for the discussion of guides in `scale_x/y_*()` functions and position labels.
+- See [Scales: Other scales](02-scales.qmd#sec-aesthetic-scales) for how to alter aesthetic scales, breaks, and labels used in legends.
+- See [Themes: Legends](02-themes.qmd#sec-theme-legend) for legend elements within `theme()`.
 
 ## Resources {#sec-guides-resources}
 
@@ -29,7 +29,6 @@ source("_common.R")
 #| message: false
 library(ggplot2)
 library(dplyr)
-library(readr)
 library(palmerpenguins)
 
 # Data
@@ -100,10 +99,10 @@ There are three ways to provide legend titles:
 2. `scale_color_discrete("Species")`
 3. `guides(color = guide_legend("Species"))`
 
-The easiest is probably with `labs()`, but the first argument for `scale_*()` and `guide_*()` functions are `name` for the scale name and `title` to be used for the legend title. The exception is `guide_colorsteps()`, which requires `title` to be a named argument argument.
+The easiest is probably with `labs()`, but the first argument for `scale_*()` and `guide_*()` functions are `name` for the scale name and `title` to be used for the legend title. The exception is `guide_colorsteps()`, which requires `title` to be a named argument.
 
 ### Merge and split legends {#sec-guide-split}
-Legend titles are also the main way to merge or split legends. By default ggplot2 merges legends of the same variable, but they can be split by giving them different names.
+Legend titles are one way to merge or split legends. By default `ggplot2` merges legends of the same variable, but they can be split by giving them different names.
 
 ```{r}
 #| label: split-legends
@@ -133,9 +132,9 @@ To change the type of legend or elements within the legend from the defaults use
 - `guide_legend()`: discrete scales (except position scales)
 - `guide_bins()`: binned scales (except position/color/fill scales)
 
-One reason to change the type of legend is to switch between continuous, binned versions of legends. Note that this does not change the **scale** in the plot from continuous to binned but only its representation in the legend. See @sec-scale-size on changing the scale between continuous and binned within the plot itself.
+One reason to change the type of legend is to switch between continuous and binned versions of legends. Note that this does not change the **scale** in the plot from continuous to binned but only its representation in the legend. See @sec-scale-size on changing the scale between continuous and binned within the plot itself.
 
-For more details on using and tweaking the different types of legends see @sec-guide-styling.
+For more details on using and tweaking the different types of legends see @sec-guide-styling below.
 
 ### Continuous to binned {#sec-guide-cont-vs-bin}
 Change from a continuous scale that uses `guide_legend()` to a binned legend with either `guides(size = legend_bins())` or `guides(size = "bins")`.
@@ -355,10 +354,10 @@ p +
   theme(legend.key.size = grid::unit(2, "lines"))
 ```
 
-## Legend label positioning {#sec-guide-labels}
+## Legend title and label positioning {#sec-guide-labels}
 The values of the legend labels are controlled through `scale_*()` functions as shown in @sec-scale-size, while the content of the legend title is discussed above, @sec-guide-set-title.
 
-The label positions for legends can be controlled with either `guide_legend()` or `theme()`, but for the structure of the labels, `guide_legend()` generally seems to be easier. You can also affect the aesthetic text elements of labels and titles within `guide_legend()` with the `title.theme` and `label.theme` arguments, but these are probably better left to `theme()`, see below @sec-guide-theme and @sec-theme-legend.
+The title and label positions for legends can be controlled with either `guide_legend()` or `theme()`, but for the structure of the labels, `guide_legend()` generally seems to be easier. You can also affect the aesthetic text elements of labels and titles within `guide_legend()` with the `title.theme` and `label.theme` arguments, but these are probably better left to `theme()`, see below @sec-guide-theme and @sec-theme-legend.
 
 Arguments affecting the positioning of the legend title:
 
@@ -428,7 +427,7 @@ pcolor <- penguins |>
 More customization is available with color legends.
 
 #### Ticks
-By default `guide_colorbar()` has tick marks to set off the breaks in the scale. `guide_colorsteps()` does not have tick marks by default since the breaks between the colors are more clear. Use the `ticks` argument to turn on or off tick marks and use `ticks.colour` and `ticks.linewidth` to control the ticks. Note the use of the British spelling of *colour* in the argument name.
+By default `guide_colorbar()` has tick marks to set off the breaks in the continuous color scale. `guide_colorsteps()` does not have tick marks by default since the breaks between the colors are more clear. Use the `ticks` argument to turn on or off tick marks and use `ticks.colour` and `ticks.linewidth` to control the ticks. Note the use of the British spelling of *colour* in the argument name.
 
 ```{r}
 #| label: colorbar-styling-ticks
@@ -486,7 +485,7 @@ pcolor +
 ```
 
 ## Legend styling: `theme()` {#sec-guide-theme}
-See also Themes: Legends, @sec-theme-legend
+See also [Themes: Legends](02-themes.qmd#sec-theme-legend)
 
 - Legend layout: see @sec-guide-layout
   - `legend.position`: the position of legends -- "none", "left", "right", "bottom", "top", or two-element character or numeric vector
@@ -505,7 +504,7 @@ See also Themes: Legends, @sec-theme-legend
 - Legend keys: see @sec-guide-key-spacing
   - `legend.key`: background underneath legend keys (symbols of geoms)
   - `legend.key.size`, `legend.key.height`, and `legend.key.width`
-- Legend text
+- Legend text: see @sec-guide-labels
   - `legend.text`: legend item labels
   - `legend.text.align`: alignment of legend labels (number from 0 (left) to 1 (right))
   - `legend.title`: legend title
@@ -529,10 +528,12 @@ p +
     # Keys
     legend.key = element_rect(fill = "lightblue",
                               color = "black"),
-    # Spacing
+    # Spacing between legends
     legend.spacing = grid::unit(1, "cm"),
-    # Text
+    # Title
     legend.title = element_text(size = rel(1.5)),
+    legend.title.align = 1,
+    # Labels
     legend.text = element_text(color = "firebrick",
                                face = "bold")
         )

@@ -32,15 +32,26 @@ penguins <- penguins |>
          !is.na(sex))
 ```
 
-**Aesthetics** define how variables in the data are mapped to visual properties through the `aes()` function. Everything inside `aes()` changes based on the data. Aesthetics can be specified for the entire plot (`ggplot(aes())`) or within each layer (`geom_point(aes())`). Within each layer you can add, override, or remove mappings.
-
 ## Mapping vs setting aesthetics {#sec-aes-map}
-Aesthetics can either be mapped or set:
+**Aesthetics** define the visual properties of geoms. They can either be mapped to change according to variables in the data or set as a constant value.
 
-- **Map** an aesthetic to a variable with `aes()`.
-- **Set** an aesthetic outside of `aes()` with a constant.
+- **Map** an aesthetic to a variable with `aes()`: `aes(color = species)`
+- **Set** an aesthetic outside of `aes()` with a constant: `color = "blue"`
 
-It is possible to map aesthetics to constants when you want to display multiple comparable layers. You can **name** the layers within `aes()` to distinguish them and create a legend.
+Aesthetics can be mapped for the entire plot (`ggplot(aes())`) or within each layer (`geom_point(aes())`). Within each layer you can add, override, or remove mappings.
+
+```{r}
+#| label: map-vs-set
+penguins |> 
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point(
+    aes(color = species), # Map aesthetic
+    shape = "square" # Set aesthetic
+    )
+```
+
+### Naming layers {#sec-aes-naming}
+An alternative between mapping and setting aesthetics is to **name** the layers within `aes()` to distinguish them and create a legend. This is useful when you want to compare multiple layers such as two `geom_smooth()` layers with different methods.
 
 ```{r}
 #| label: naming-layers
@@ -108,13 +119,14 @@ Colors can be specified with either **rbg** hex string, color name listed under 
 
 `alpha`: Values of `alpha` range from 0 to 1, with lower values corresponding to more transparent colors.
 
-### Lines {#sec-aes-lines}
-The appearance of a line is affected by `linewidth`, `linetype`, `lineend`, `linejoin`.
+## Lines {#sec-aes-lines}
+The appearance of a line is affected by `linewidth`, `linetype`, `lineend`, `linejoin`. See [ggplot2 Aesthetic specifications: Lines](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#lines)
 
 `linewidth`: used to control the width or size of the line. 
 
 #### Line type
 `linetype`: can be specified with an integer of 0 to 6 or by name: 
+
 - 0 = blank
 - 1 = solid
 - 2 = dashed
@@ -129,8 +141,8 @@ Alternatively, `linetype` can be created with a string containing 2, 4, 6, or 8 
 - `lineend` can be one of `"butt"` (the default), `"round"`, or `"square"`.
 - `linejoin` can be one of `"round"` (the default), `"mitre"`, or `"bevel"`.
 
-### Points {#sec-aes-points}
-Points can be chosen in 5 ways:
+## Points {#sec-aes-points}
+Points can be chosen in 5 ways, see the visualization in the [Aesthetics vignette](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#sec:shape-spec):
 
 - An integer: 0 to 25
 - Name of the shape
@@ -138,7 +150,7 @@ Points can be chosen in 5 ways:
 - `.` to draw the smallest rectangle that is visible, usually 1 pixel.
 - `NA` to draw nothing
 
-### Grouping {#sec-aes-groups}
-The group aesthetic is by default set to the interaction of all discrete variables in the plot. This default is often enough, but when it does not work or when there is no discrete variable, you need to explicitly map `group` to a variable that has a different value for each group. See [Aesthetics: grouping](https://ggplot2.tidyverse.org/reference/aes_group_order.html)
+## Grouping {#sec-aes-groups}
+The group aesthetic is by default set to the interaction of all discrete variables in the plot. This default is often good enough, but when it does not work or when there is no discrete variable, you need to explicitly map `group` to a variable that has a different value for each group. See [Aesthetics: grouping](https://ggplot2.tidyverse.org/reference/aes_group_order.html).
 
 For most applications the grouping is set implicitly by mapping one or more discrete variables to `x`, `y`, `color`, `fill`, `alpha`, `shape`, `size`, and/or `linetype`. The typical case where grouping does not work by default is with `geom_line()` when only positional aesthetics are set. See @sec-geom-line for examples.
