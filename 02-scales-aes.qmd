@@ -1,0 +1,272 @@
+---
+date: "2023-07-09"
+date-modified: last-modified
+---
+
+# Aesthetic scales {#sec-scales-aes}
+
+```{r}
+#| label: common.r
+#| echo: false
+source("_common.R")
+```
+
+In addition to [position](02-scales-position.qmd) and [color](02-scales-color.qmd), `ggplot2` contains a number of scales that affect the aesthetic qualities of geoms. These include size (@sec-scale-size), transparency (@sec-scale-alpha), shape (@sec-scale-shape), line width (@sec-scale-linewidth), and line type (@sec-scale-linetype).
+
+## Resources {#sec-scale-aes-resources}
+- [Scales documentation](https://ggplot2.tidyverse.org/reference/index.html#scales)
+- [ggplot2 Cheatsheet: Scales](https://rstudio.github.io/cheatsheets/html/data-visualization.html#scales)
+- [scales package](https://scales.r-lib.org)
+- [Wickham, ggplot2 Book: Other aesthetics](https://ggplot2-book.org/scales-other)
+- [R for Data Science: Communication, Scales](https://r4ds.hadley.nz/communication.html#scales)
+
+```{r}
+#| label: setup
+#| message: false
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(palmerpenguins)
+
+# Data
+penguins <- penguins |> 
+  filter(!is.na(flipper_length_mm),
+         !is.na(sex))
+
+bikes <- read_csv(
+  here::here("data", "london-bikes-custom.csv"),
+  col_types = "Dcfffilllddddc"
+)
+
+bikes$season <- forcats::fct_inorder(bikes$season)
+
+p <- penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g)) + 
+  geom_point(aes(color = species)) + 
+  theme(legend.position = "none")
+```
+
+## Types of scales {#sec-scale-types}
+There are five main types of aesthetic scales:
+
+- Continuous: Map continuous values to visual ones - `scale_*_continuous()`
+- Discrete: Map a finite number of discrete categories to visual ones - `scale_*_discrete()`
+- Binned: Map continuous values into discrete bins or categories - `scale_*_binned()`
+- Manual: Map discrete values to manually chosen visual ones - `scale_*_manual(values = c())` (@sec-scale-manual)
+- Identity: Use data values directly as visual ones - `scale_*_identity()` (@sec-scale-identity)
+
+## Scale size {#sec-scale-size}
+The main reason to change the default scale for size is to affect the upper and lower bounds of the size of the geoms. This is done with the `range` argument. The defaults for size are `range = c(1, 6)`.
+
+**Size base plot**
+```{r}
+#| label: scale-size-base-plot
+#| code-fold: true
+psize <- penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             size = bill_depth_mm)) + 
+  geom_point(alpha = 0.4)
+```
+
+```{r}
+#| label: scale-size
+psize + 
+  scale_size(range = c(0.5, 4))
+```
+
+You can also change the guides with `scale_size()`, providing a title for the legend, the breaks for the legend, and the labels for the legend. These types of changes to `breaks` and `labels` are also available with other scales.
+
+```{r}
+#| label: scale-size-guides
+psize + 
+  scale_size("Bill depth",
+             range = c(0.5, 4),
+             breaks = c(15, 17, 19, 21),
+             labels = c("Fifteen", "Seventeen",
+                        "Nineteen", "Twenty-one")
+             )
+```
+
+The number of breaks in the size legend can be changed with `scales::extended_breaks(n)`, which provides access to an `n.breaks` argument in a continuous scale.
+
+```{r}
+#| label: scale-size-breaks
+psize + 
+  scale_size("Bill depth",
+             range = c(0.5, 4),
+             breaks = scales::extended_breaks(8)
+             )
+```
+
+A similar effect can be achieved with `scale_size_binned()`, which has an argument for `n.breaks`. Like binned position and color scales, `scale_size_binned()` makes a continuous variable into a discrete variable. Using a binned scale changes the legend style to `guide_bins()`, and it directly affects the scale used in the plot. This can be seen by choosing a smaller number of bins. To keep a continuous scale for the plot but use a binned legend use `guide_bins()`, see @sec-guide-bins.
+
+```{r}
+#| label: scale-size-binned
+psize + 
+  scale_size_binned("Bill depth",
+             range = c(0.5, 4),
+             n.breaks = 4)
+```
+
+## Scale transparency {#sec-scale-alpha}
+Scaling transparency is very similar to scaling size. The default alpha range is `range = c(0.1, 1)`.
+
+**Alpha base plot**
+```{r}
+#| label: scale-alpha-base-plot
+#| code-fold: true
+palpha <- penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             alpha = bill_depth_mm)) + 
+  geom_point()
+```
+
+Compare `scale_alpha()` and `scale_alpha_binned()`
+
+::: {layout-ncol="2"}
+```{r}
+#| label: scale-alpha
+palpha + 
+  scale_alpha("Bill depth",
+              range = c(0.2, 0.5)
+              )
+```
+
+```{r}
+#| label: scale-alpha-binned
+palpha + 
+  scale_alpha_binned("Bill depth",
+              range = c(0.2, 0.5),
+              n.breaks = 6)
+```
+:::
+
+It is also possible to map alpha to discrete values.
+
+```{r}
+#| label: scale-alpha-discrete
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             alpha = species)) + 
+  geom_point() + 
+  scale_alpha_discrete("Species")
+```
+
+## Scale shape {#sec-scale-shape}
+Mapping values to shapes can be useful when you have a small number of discrete values. The only different argument for `scale_shape()` is whether shapes should be solid or not, default is `solid = TRUE`.
+
+```{r}
+#| label: scale-shape
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             shape = species)) + 
+  geom_point() + 
+  scale_shape("Species",
+              solid = FALSE)
+```
+
+Though it is probably not useful too often, it is also possible to map a continuous variable to shapes using `scale_shape_binned()`.
+
+```{r}
+#| label: scale-shape-binned
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             shape = bill_depth_mm)) + 
+  geom_point() + 
+  scale_shape_binned("Bill depth",
+                     solid = FALSE)
+```
+
+There are [25 different shapes](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#sec:shape-spec) that are associated with each integer. Use `scale_shape_manual()` to choose the shapes.
+
+## Scale lines {#sec-scale-lines}
+There are two scales that can be applied to lines: `linewidth` and `linetype`. These are analogous to scaling `size` and `shape`. 
+
+### Line width {#sec-scale-linewidth}
+Line width used to be controlled with `size`, but now `linewidth` is preferred. Like size, you can scale line width with `scale_linewidth()` or `scale_linewidth_binned()`.
+
+```{r}
+#| label: scale-linewidth
+#| layout-ncol: 2
+# Base plot
+plw <- bikes |> 
+  summarise(count = sum(count), .by = c(month, day_night)) |> 
+  ggplot(aes(x = month, y = count, group = day_night,
+             linewidth = count)) + 
+  geom_line(lineend = "round") + 
+  scale_y_continuous(guide = "none")
+
+# linewidth
+  plw + 
+    scale_linewidth("Count",
+                    range = c(0.1, 4))
+
+# linewidth_binned
+    plw + 
+    scale_linewidth_binned("Count",
+                           range = c(0.1, 4),
+                           n.breaks = 10,
+                           labels = scales::label_comma())
+```
+
+### Line type {#sec-scale-linetype}
+
+`linetype` is like `shape` in that there is little to do with the scale other than choose among the [thirteen line types](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#sec:line-type-spec) with `scale_linetype_manual()`. You can access the default linetype palette with `scales::linetype_pal()`.
+
+```{r}
+#| label: scale_linetype
+bikes |> 
+  summarise(count = sum(count), .by = c(month, day_night)) |> 
+  ggplot(aes(x = month, y = count, group = day_night,
+             linetype = day_night)) + 
+  geom_line() + 
+  scale_y_continuous(guide = "none")
+```
+
+## Manual scales {#sec-scale-manual}
+Manual scales are created within the `scale_*_manual()` function through the `values` argument. `values` accepts a vector or a named vector to match to the values. See the [Aesthetic specifications](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html) vignette for valid aesthetic values for the different geom scales.
+
+```{r}
+#| label: scale-manual-shape
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             shape = species)) + 
+  geom_point() + 
+  scale_shape_manual("Species",
+                     values = c(8, 9, 13))
+```
+
+A named vector makes the mapping clearer:
+```{r}
+#| label: scale-manual-size
+penguins |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             size = species)) + 
+  geom_point(alpha = 0.4) + 
+  scale_size_manual("Species",
+    values = c("Adelie" = 0.5, "Chinstrap" = 3, "Gentoo" = 5)
+    )
+```
+
+## Identity scales {#sec-scale-identity}
+Identity scales are similar to manual scales, but are used when the data is already scaled. For instance, you might add a scale within the data wrangling process. By default no guide/legend is produced.
+
+```{r}
+#| label: scale-identity
+penguins |> 
+  mutate(bill_depth_cm = bill_depth_mm / 10) |> 
+  ggplot(aes(x = flipper_length_mm,
+             y = body_mass_g,
+             size = bill_depth_cm)) + 
+  geom_point(alpha = 0.4) + 
+  scale_size_identity("Bill depth\n(cm)",
+                      guide = "legend")
+```

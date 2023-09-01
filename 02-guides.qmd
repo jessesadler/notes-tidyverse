@@ -13,8 +13,8 @@ source("_common.R")
 
 **Guides** are the collective name for axes and legends, which help readers interpret plots. The data elements of guides are largely driven by **scales**, but the appearance of the guides, and especially of legends, can also be controlled with `guides()`, specific `guide_*()` functions, or through `theme()` elements. Generally, the `guide_*()` functions control aspects that more directly affect how the scales of the plot are represented, while `theme()` affects non-data aspects of the plot/legend aesthetics. However, there is a great deal of overlap. One difference is that the `guide_*()` functions work on one scale at a time, whereas `theme()` can change aspects of legends that include more than one aesthetic in a single legend or multiple legends.
 
-- See [Scales: Axes labels](02-scales.qmd#sec-scale-labels) for the discussion of guides in `scale_x/y_*()` functions and position labels.
-- See [Scales: Other scales](02-scales.qmd#sec-aesthetic-scales) for how to alter aesthetic scales, breaks, and labels used in legends.
+- See [Scales: Axes labels](02-scales-position.qmd#sec-scale-labels) for the discussion of guides in `scale_x/y_*()` functions and position labels.
+- See [Scales: Other scales](02-scales-aes.qmd) for how to alter aesthetic scales, breaks, and labels used in legends.
 - See [Themes: Legends](02-themes.qmd#sec-theme-legend) for legend elements within `theme()`.
 
 ## Resources {#sec-guides-resources}

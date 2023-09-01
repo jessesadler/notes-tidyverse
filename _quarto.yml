@@ -29,8 +29,9 @@ book:
         - 02-geoms.qmd
         - 02-annotations.qmd
         - 02-aesthetics.qmd
-        - 02-scales.qmd
+        - 02-scales-position.qmd
         - 02-scales-color.qmd
+        - 02-scales-aes.qmd
         - 02-coords.qmd
         - 02-guides.qmd
         - 02-facets.qmd

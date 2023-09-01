@@ -11,7 +11,7 @@ date-modified: last-modified
 source("_common.R")
 ```
 
-Non-color scales are covered in [Chapter -@sec-scales]. Color is used in two aesthetics: `color` and `fill`. Like other scales, color scales have five types: continuous, binned, discrete, manual, and identity. All five types have a `scale_color_*()` function and an equivalent `scale_fill_*()` function. Most of the example use the `scale_color_*()` variants, but the concepts are all the same with `scale_fill_*()`.
+Non-color aesthetic scales are covered in [Chapter -@sec-scales-aes]. Color is used in two aesthetics: `color` and `fill`. Like other scales, color scales have five types: continuous, binned, discrete, manual, and identity. All five types have a `scale_color_*()` function and an equivalent `scale_fill_*()` function. Most of the example use the `scale_color_*()` variants, but the concepts are all the same with `scale_fill_*()`.
 
 ## Resources {#sec-color-resources}
 - [Scales documentation](https://ggplot2.tidyverse.org/reference/index.html#scales)
@@ -527,7 +527,7 @@ penguins |>
 `scale_color_identity()` works similarly, but the colors to be used are in the data frame.
 
 ## Labels, breaks, and legends {#sec-color-guides}
-Just as with the scales described in @sec-scales you can change the breaks and labels of scales and how they are expressed in legends using the `scale_color_*()` functions. For more on the look of legends, see @sec-guide-bar-vs-steps on choosing the type of legend and @sec-guide-color for styling color legends.
+Just as with the scales described in @sec-scales-aes you can change the breaks and labels of scales and how they are expressed in legends using the `scale_color_*()` functions. For more on the look of legends, see @sec-guide-bar-vs-steps on choosing the type of legend and @sec-guide-color for styling color legends.
 
 Change the breaks and reverse the colorbar.
 ```{r}

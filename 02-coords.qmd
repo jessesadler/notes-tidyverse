@@ -11,7 +11,7 @@ date-modified: last-modified
 source("_common.R")
 ```
 
-Coordinate systems define how `x` and `y` are related to each other to produce a 2d plot. The coordinate system, thus, is in charge of drawing the axes and panel backgrounds. "While the scales control the values that appear on the axes, and how they map from data to position, it is the coordinate system which actually draws them."[^1]  Therefore, coordinate systems are closely related to positional scales, and the topics discussed here are also explained in the notes on [Positional scales](02-scales.qmd#sec-scale-limits).
+Coordinate systems define how `x` and `y` are related to each other to produce a 2d plot. The coordinate system, thus, is in charge of drawing the axes and panel backgrounds. "While the scales control the values that appear on the axes, and how they map from data to position, it is the coordinate system which actually draws them."[^1]  Therefore, coordinate systems are closely related to positional scales, and the topics discussed here are also explained in the notes on [Positional scales](02-scales-position.qmd#sec-scale-limits).
 
 ## Resources {#sec-coords-resources}
 
