@@ -249,7 +249,7 @@ p +
 ```
 
 ### Facets: Strip {#sec-theme-facets}
-- `strip.background`: Background of panel strips
+- `strip.background`: Background of panel strips (`element_rect()`)
 - `strip.text`: Text in the strips
 - `strip.placement`: placement of strip with respect to axes, either "inside" or "outside". Only important when axes and strips are on the same side of the plot.
 - `panel.spacing`: spacing between facet panels
@@ -615,3 +615,5 @@ p +
     legend.title = element_markdown()
     )
 ```
+
+See @sec-facet-ggtext for an example of using `element_textbox()` to provide labels for a faceted plot.

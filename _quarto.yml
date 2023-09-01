@@ -33,6 +33,7 @@ book:
         - 02-scales-color.qmd
         - 02-coords.qmd
         - 02-guides.qmd
+        - 02-facets.qmd
         - 02-themes.qmd
         - 02-patchwork.qmd
     - part: "tidy eval"
