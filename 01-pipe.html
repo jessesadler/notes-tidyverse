@@ -118,6 +118,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">tidyverse notes</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/jessesadler/notes-tidyverse" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -381,7 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul>
 </li>
   <li><a href="#sec-magrittr" id="toc-sec-magrittr" class="nav-link" data-scroll-target="#sec-magrittr"><span class="header-section-number">1.3</span> The magrittr pipe</a></li>
-  </ul></nav>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/jessesadler/notes-tidyverse/edit/main/01-pipe.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jessesadler/notes-tidyverse/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-pipe.html">tidyverse</a></li><li class="breadcrumb-item"><a href="./01-pipe.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Pipe: magrittr and native</span></a></li></ol></nav><div class="quarto-title">
@@ -472,13 +475,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">10</span>, <span class="va">.x</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span><span class="op">(</span><span class="va">mean</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.9325184 2.0084117 2.5195568 4.4813244 4.6316906</span></span>
+<span><span class="co">#&gt; [1] 0.6989054 2.1852344 2.9494400 3.3351719 4.6173895</span></span>
 <span></span>
 <span><span class="co"># Use of anonymous function</span></span>
 <span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">10</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span><span class="op">(</span><span class="va">mean</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; [1] 1.164280 2.227438 3.441444 3.859512 5.217413</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; [1] 1.447187 1.826487 2.715834 3.273295 5.036881</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section><section id="sec-underscore" class="level3" data-number="1.2.3"><h3 data-number="1.2.3" class="anchored" data-anchor-id="sec-underscore">
 <span class="header-section-number">1.2.3</span> Underscore placeholder</h3>
@@ -939,4 +942,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jessesadler/notes-tidyverse/edit/main/01-pipe.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jessesadler/notes-tidyverse/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
