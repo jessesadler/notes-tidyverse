@@ -89,6 +89,7 @@ In [R 4.3](https://stat.ethz.ch/pipermail/r-announce/2023/000691.html) the `_` p
 
 ```{r}
 #| label: extraction
+#| error: true
 mtcars |> _$cyl
 mtcars |> subset(cyl == 4) |> lm(mpg ~ disp, data = _) |> _$coef[[2]]
 ```
