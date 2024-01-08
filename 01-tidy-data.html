@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.537">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="dcterms.date" content="2023-03-21">
+<title>tidyverse notes - 9&nbsp; Tidy data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./01-tidyr-pivoting.html" rel="next">
+<link href="./01-lubridate.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-pipe.html">tidyverse</a></li><li class="breadcrumb-item"><a href="./01-tidy-data.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">tidyverse notes</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">tidyverse</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-pipe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Pipe: magrittr and native</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-readr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">readr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-colwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">dplyr: Column-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-rowwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">dplyr: Row-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.0.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">dplyr 1.0.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.1.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">dplyr 1.1.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-forcats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">forcats</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-lubridate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Dates and times with lubridate</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidy-data.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-pivoting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">tidyr: Pivoting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-rectangling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">tidyr: Rectandling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-purrr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">purrr</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">ggplot2</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ggplot2-rstudioconf-2022.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">RStudio conf 2022 ggplot2 workshop</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-geoms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Geoms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-annotations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Annotations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-aesthetics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Aesthetics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Position scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-color.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Color scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-aes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Aesthetic scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-coords.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Coordinates</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-guides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Guides: Legends</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-facets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Facets</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-themes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Themes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-patchwork.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">patchwork</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">tidy eval</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr-superceded.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Programming with dplyr (pre 1.0.0)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Programming with dplyr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Advanced R: Metaprogramming</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-tidyeval.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">rlang: Tidy evaluation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">rlang: Metaprogramming</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./readr-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">readr example data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#sec-definition" id="toc-sec-definition" class="nav-link active" data-scroll-target="#sec-definition"><span class="header-section-number">9.1</span> Tidy data: Definition</a></li>
+  <li><a href="#sec-structure" id="toc-sec-structure" class="nav-link" data-scroll-target="#sec-structure"><span class="header-section-number">9.2</span> The structure and semantics of data</a></li>
+  <li>
+<a href="#sec-messy-data" id="toc-sec-messy-data" class="nav-link" data-scroll-target="#sec-messy-data"><span class="header-section-number">9.3</span> Tidying messy datasets</a>
+  <ul class="collapse">
+<li><a href="#column-headers-are-values-not-variable-names" id="toc-column-headers-are-values-not-variable-names" class="nav-link" data-scroll-target="#column-headers-are-values-not-variable-names"><span class="header-section-number">9.3.1</span> Column headers are values, not variable names</a></li>
+  <li><a href="#multiple-variables-stored-in-one-column" id="toc-multiple-variables-stored-in-one-column" class="nav-link" data-scroll-target="#multiple-variables-stored-in-one-column"><span class="header-section-number">9.3.2</span> Multiple variables stored in one column</a></li>
+  <li><a href="#variables-are-stored-in-both-rows-and-columns" id="toc-variables-are-stored-in-both-rows-and-columns" class="nav-link" data-scroll-target="#variables-are-stored-in-both-rows-and-columns"><span class="header-section-number">9.3.3</span> Variables are stored in both rows and columns</a></li>
+  <li><a href="#multiple-types-in-one-table" id="toc-multiple-types-in-one-table" class="nav-link" data-scroll-target="#multiple-types-in-one-table"><span class="header-section-number">9.3.4</span> Multiple types in one table</a></li>
+  <li><a href="#one-type-in-multiple-tables" id="toc-one-type-in-multiple-tables" class="nav-link" data-scroll-target="#one-type-in-multiple-tables"><span class="header-section-number">9.3.5</span> One type in multiple tables</a></li>
+  </ul>
+</li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-pipe.html">tidyverse</a></li><li class="breadcrumb-item"><a href="./01-tidy-data.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title"><span id="sec-tidy-data" class="quarto-section-identifier"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 21, 2023</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">January 8, 2024</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header><p><a href="https://tidyr.tidyverse.org/articles/tidy-data.html">This vignette</a> is a code heavy version of the <a href="https://vita.had.co.nz/papers/tidy-data.html">Tidy Data paper</a> <span class="citation" data-cites="wickham14">(<a href="references.html#ref-wickham14" role="doc-biblioref">Wickham 2014</a>)</span> using data and code from <a href="https://tidyr.tidyverse.org/index.html">tidyr</a>. It defines tidy data, providing a nice clear example from some toy classroom data and then shows five types of messy data and how they might be tidied.</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="sec-definition" class="level2" data-number="9.1"><h2 data-number="9.1" class="anchored" data-anchor-id="sec-definition">
+<span class="header-section-number">9.1</span> Tidy data: Definition</h2>
+<p>“Tidy data is a standard way of mapping the meaning of a dataset to its structure. A dataset is messy or tidy depending on how rows, columns and tables are matched up with observations, variables and types.”</p>
+<ol type="1">
+<li>Every column is a <strong>variable</strong>.</li>
+<li>Every row is an <strong>observation</strong>.</li>
+<li>Every cell is a <strong>single value</strong>.</li>
+</ol></section><section id="sec-structure" class="level2" data-number="9.2"><h2 data-number="9.2" class="anchored" data-anchor-id="sec-structure">
+<span class="header-section-number">9.2</span> The structure and semantics of data</h2>
+<p>Structure of rows and columns does little to help us define whether data is tidy or not and how they relate to each other. This can be seen in representing some typical data from a classroom in two different ways that are typical for how such data might be entered.</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">classroom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
+<span>  <span class="op">~</span><span class="va">name</span>,    <span class="op">~</span><span class="va">quiz1</span>, <span class="op">~</span><span class="va">quiz2</span>, <span class="op">~</span><span class="va">test1</span>,</span>
+<span>  <span class="st">"Billy"</span>,  <span class="cn">NA</span>,     <span class="st">"D"</span>,    <span class="st">"C"</span>,</span>
+<span>  <span class="st">"Suzy"</span>,   <span class="st">"F"</span>,    <span class="cn">NA</span>,     <span class="cn">NA</span>,</span>
+<span>  <span class="st">"Lionel"</span>, <span class="st">"B"</span>,    <span class="st">"C"</span>,    <span class="st">"B"</span>,</span>
+<span>  <span class="st">"Jenny"</span>,  <span class="st">"A"</span>,    <span class="st">"A"</span>,    <span class="st">"B"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="va">classroom</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 4</span></span>
+<span><span class="co">#&gt;   name   quiz1 quiz2 test1</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 Billy  &lt;NA&gt;  D     C    </span></span>
+<span><span class="co">#&gt; 2 Suzy   F     &lt;NA&gt;  &lt;NA&gt; </span></span>
+<span><span class="co">#&gt; 3 Lionel B     C     B    </span></span>
+<span><span class="co">#&gt; 4 Jenny  A     A     B</span></span>
+<span></span>
+<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
+<span>  <span class="op">~</span><span class="va">assessment</span>, <span class="op">~</span><span class="va">Billy</span>, <span class="op">~</span><span class="va">Suzy</span>, <span class="op">~</span><span class="va">Lionel</span>, <span class="op">~</span><span class="va">Jenny</span>,</span>
+<span>  <span class="st">"quiz1"</span>,     <span class="cn">NA</span>,     <span class="st">"F"</span>,   <span class="st">"B"</span>,     <span class="st">"A"</span>,</span>
+<span>  <span class="st">"quiz2"</span>,     <span class="st">"D"</span>,    <span class="cn">NA</span>,    <span class="st">"C"</span>,     <span class="st">"A"</span>,</span>
+<span>  <span class="st">"test1"</span>,     <span class="st">"C"</span>,    <span class="cn">NA</span>,    <span class="st">"B"</span>,     <span class="st">"B"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 5</span></span>
+<span><span class="co">#&gt;   assessment Billy Suzy  Lionel Jenny</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 quiz1      &lt;NA&gt;  F     B      A    </span></span>
+<span><span class="co">#&gt; 2 quiz2      D     &lt;NA&gt;  C      A    </span></span>
+<span><span class="co">#&gt; 3 test1      C     &lt;NA&gt;  B      B</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To better define tidy data we can break data into values organized into observations and variables.</p>
+<ul>
+<li>Values: Usually either numbers (if quantitative) or strings (if qualitative).</li>
+<li>Variable: contains all values that measure the same underlying attribute (like height, temperature, duration) across units.</li>
+<li>Observation: contains all values measured on the same unit (like a person, or a day, or a race) across attributes.</li>
+</ul>
+<p>The consequence of this definition of tidy data can be seen by making the <code>classroom</code> data tidy.</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">classroom</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span><span class="va">quiz1</span><span class="op">:</span><span class="va">test1</span>, names_to <span class="op">=</span> <span class="st">"assessment"</span>, values_to <span class="op">=</span> <span class="st">"grade"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">assessment</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 12 × 3</span></span>
+<span><span class="co">#&gt;    name   assessment grade</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;</span></span>
+<span><span class="co">#&gt;  1 Billy  quiz1      &lt;NA&gt; </span></span>
+<span><span class="co">#&gt;  2 Billy  quiz2      D    </span></span>
+<span><span class="co">#&gt;  3 Billy  test1      C    </span></span>
+<span><span class="co">#&gt;  4 Jenny  quiz1      A    </span></span>
+<span><span class="co">#&gt;  5 Jenny  quiz2      A    </span></span>
+<span><span class="co">#&gt;  6 Jenny  test1      B    </span></span>
+<span><span class="co">#&gt;  7 Lionel quiz1      B    </span></span>
+<span><span class="co">#&gt;  8 Lionel quiz2      C    </span></span>
+<span><span class="co">#&gt;  9 Lionel test1      B    </span></span>
+<span><span class="co">#&gt; 10 Suzy   quiz1      F    </span></span>
+<span><span class="co">#&gt; 11 Suzy   quiz2      &lt;NA&gt; </span></span>
+<span><span class="co">#&gt; 12 Suzy   test1      &lt;NA&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This structure of data is more repetitive, but it is easier to compute on and break down into variables and observations:</p>
+<ul>
+<li>Variables: <code>name</code>, type of <code>assessment</code>, and <code>grade</code>
+</li>
+<li>Observations: The grade given to each student for each test.</li>
+</ul>
+<p>It is often trivial to define variables and observations in a given context, but it is difficult to do so in general. Whether a value should be a different onservation or a different variable is often dependent upon the context of the data.</p>
+<p>“Tidy data is particularly well suited for vectorised programming languages like R, because the layout ensures that values of different variables from the same observation are always paired.”</p>
+</section><section id="sec-messy-data" class="level2" data-number="9.3"><h2 data-number="9.3" class="anchored" data-anchor-id="sec-messy-data">
+<span class="header-section-number">9.3</span> Tidying messy datasets</h2>
+<p>Five types of messy data:</p>
+<ol type="1">
+<li>Column headers are values, not variable names</li>
+<li>Multiple variables stored in one column</li>
+<li>Variables are stored in both rows and columns</li>
+<li>Multiple types in one table</li>
+<li>One type in multiple tables</li>
+</ol>
+<section id="column-headers-are-values-not-variable-names" class="level3" data-number="9.3.1"><h3 data-number="9.3.1" class="anchored" data-anchor-id="column-headers-are-values-not-variable-names">
+<span class="header-section-number">9.3.1</span> Column headers are values, not variable names</h3>
+<p>Having values in column headers can be a nice way to present data and can be efficient for computing if you can perform matrix expressions on the data.</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">relig_income</span></span>
+<span><span class="co">#&gt; # A tibble: 18 × 11</span></span>
+<span><span class="co">#&gt;    religion `&lt;$10k` `$10-20k` `$20-30k` `$30-40k` `$40-50k` `$50-75k` `$75-100k`</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 Agnostic      27        34        60        81        76       137        122</span></span>
+<span><span class="co">#&gt;  2 Atheist       12        27        37        52        35        70         73</span></span>
+<span><span class="co">#&gt;  3 Buddhist      27        21        30        34        33        58         62</span></span>
+<span><span class="co">#&gt;  4 Catholic     418       617       732       670       638      1116        949</span></span>
+<span><span class="co">#&gt;  5 Don’t k…      15        14        15        11        10        35         21</span></span>
+<span><span class="co">#&gt;  6 Evangel…     575       869      1064       982       881      1486        949</span></span>
+<span><span class="co">#&gt;  7 Hindu          1         9         7         9        11        34         47</span></span>
+<span><span class="co">#&gt;  8 Histori…     228       244       236       238       197       223        131</span></span>
+<span><span class="co">#&gt;  9 Jehovah…      20        27        24        24        21        30         15</span></span>
+<span><span class="co">#&gt; 10 Jewish        19        19        25        25        30        95         69</span></span>
+<span><span class="co">#&gt; 11 Mainlin…     289       495       619       655       651      1107        939</span></span>
+<span><span class="co">#&gt; 12 Mormon        29        40        48        51        56       112         85</span></span>
+<span><span class="co">#&gt; 13 Muslim         6         7         9        10         9        23         16</span></span>
+<span><span class="co">#&gt; 14 Orthodox      13        17        23        32        32        47         38</span></span>
+<span><span class="co">#&gt; 15 Other C…       9         7        11        13        13        14         18</span></span>
+<span><span class="co">#&gt; 16 Other F…      20        33        40        46        49        63         46</span></span>
+<span><span class="co">#&gt; 17 Other W…       5         2         3         4         2         7          3</span></span>
+<span><span class="co">#&gt; 18 Unaffil…     217       299       374       365       341       528        407</span></span>
+<span><span class="co">#&gt; # ℹ 3 more variables: `$100-150k` &lt;dbl&gt;, `&gt;150k` &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   `Don't know/refused` &lt;dbl&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The structure of the data frame is 11 columns that are actually variables, 18 religious groups, and the frequencies of the two other variables. To tidy the data the data frame needs to be pivoted to a longer format in which the column names into a key-value pairs.</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">relig_income</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span><span class="op">-</span><span class="va">religion</span>, names_to <span class="op">=</span> <span class="st">"income"</span>, values_to <span class="op">=</span> <span class="st">"frequency"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 180 × 3</span></span>
+<span><span class="co">#&gt;    religion income             frequency</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt;                  &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 Agnostic &lt;$10k                     27</span></span>
+<span><span class="co">#&gt;  2 Agnostic $10-20k                   34</span></span>
+<span><span class="co">#&gt;  3 Agnostic $20-30k                   60</span></span>
+<span><span class="co">#&gt;  4 Agnostic $30-40k                   81</span></span>
+<span><span class="co">#&gt;  5 Agnostic $40-50k                   76</span></span>
+<span><span class="co">#&gt;  6 Agnostic $50-75k                  137</span></span>
+<span><span class="co">#&gt;  7 Agnostic $75-100k                 122</span></span>
+<span><span class="co">#&gt;  8 Agnostic $100-150k                109</span></span>
+<span><span class="co">#&gt;  9 Agnostic &gt;150k                     84</span></span>
+<span><span class="co">#&gt; 10 Agnostic Don't know/refused        96</span></span>
+<span><span class="co">#&gt; # ℹ 170 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A good example of this kind of data is found in <code>billboard</code>, which records the ranking of songs after they crack the Billboard top 100 for 75 weeks. This form is not tidy, but it is good for data entry, as it reduces duplication of data. Here, there is a bit of extra tidying to do to make the variables more conducive to the tidy structure.</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">billboard</span></span>
+<span><span class="co">#&gt; # A tibble: 317 × 79</span></span>
+<span><span class="co">#&gt;    artist     track date.entered   wk1   wk2   wk3   wk4   wk5   wk6   wk7   wk8</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;      &lt;chr&gt; &lt;date&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 2 Pac      Baby… 2000-02-26      87    82    72    77    87    94    99    NA</span></span>
+<span><span class="co">#&gt;  2 2Ge+her    The … 2000-09-02      91    87    92    NA    NA    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  3 3 Doors D… Kryp… 2000-04-08      81    70    68    67    66    57    54    53</span></span>
+<span><span class="co">#&gt;  4 3 Doors D… Loser 2000-10-21      76    76    72    69    67    65    55    59</span></span>
+<span><span class="co">#&gt;  5 504 Boyz   Wobb… 2000-04-15      57    34    25    17    17    31    36    49</span></span>
+<span><span class="co">#&gt;  6 98^0       Give… 2000-08-19      51    39    34    26    26    19     2     2</span></span>
+<span><span class="co">#&gt;  7 A*Teens    Danc… 2000-07-08      97    97    96    95   100    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  8 Aaliyah    I Do… 2000-01-29      84    62    51    41    38    35    35    38</span></span>
+<span><span class="co">#&gt;  9 Aaliyah    Try … 2000-03-18      59    53    38    28    21    18    16    14</span></span>
+<span><span class="co">#&gt; 10 Adams, Yo… Open… 2000-08-26      76    76    74    69    68    67    61    58</span></span>
+<span><span class="co">#&gt; # ℹ 307 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 68 more variables: wk9 &lt;dbl&gt;, wk10 &lt;dbl&gt;, wk11 &lt;dbl&gt;, wk12 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   wk13 &lt;dbl&gt;, wk14 &lt;dbl&gt;, wk15 &lt;dbl&gt;, wk16 &lt;dbl&gt;, wk17 &lt;dbl&gt;, wk18 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   wk19 &lt;dbl&gt;, wk20 &lt;dbl&gt;, wk21 &lt;dbl&gt;, wk22 &lt;dbl&gt;, wk23 &lt;dbl&gt;, wk24 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   wk25 &lt;dbl&gt;, wk26 &lt;dbl&gt;, wk27 &lt;dbl&gt;, wk28 &lt;dbl&gt;, wk29 &lt;dbl&gt;, wk30 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   wk31 &lt;dbl&gt;, wk32 &lt;dbl&gt;, wk33 &lt;dbl&gt;, wk34 &lt;dbl&gt;, wk35 &lt;dbl&gt;, wk36 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   wk37 &lt;dbl&gt;, wk38 &lt;dbl&gt;, wk39 &lt;dbl&gt;, wk40 &lt;dbl&gt;, wk41 &lt;dbl&gt;, wk42 &lt;dbl&gt;, …</span></span>
+<span></span>
+<span><span class="va">billboard_long</span> <span class="op">&lt;-</span> <span class="va">billboard</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span></span>
+<span>    <span class="va">wk1</span><span class="op">:</span><span class="va">wk76</span>, </span>
+<span>    names_to <span class="op">=</span> <span class="st">"week"</span>, </span>
+<span>    values_to <span class="op">=</span> <span class="st">"rank"</span>, </span>
+<span>    values_drop_na <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    week <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span><span class="st">"wk"</span>, <span class="st">""</span>, <span class="va">week</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="va">date.entered</span><span class="op">)</span> <span class="op">+</span> <span class="fl">7</span> <span class="op">*</span> <span class="op">(</span><span class="va">week</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    date.entered <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="va">billboard_long</span> </span>
+<span><span class="co">#&gt; # A tibble: 5,307 × 5</span></span>
+<span><span class="co">#&gt;    artist  track                    week  rank date      </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;                   &lt;int&gt; &lt;dbl&gt; &lt;date&gt;    </span></span>
+<span><span class="co">#&gt;  1 2 Pac   Baby Don't Cry (Keep...     1    87 2000-02-26</span></span>
+<span><span class="co">#&gt;  2 2 Pac   Baby Don't Cry (Keep...     2    82 2000-03-04</span></span>
+<span><span class="co">#&gt;  3 2 Pac   Baby Don't Cry (Keep...     3    72 2000-03-11</span></span>
+<span><span class="co">#&gt;  4 2 Pac   Baby Don't Cry (Keep...     4    77 2000-03-18</span></span>
+<span><span class="co">#&gt;  5 2 Pac   Baby Don't Cry (Keep...     5    87 2000-03-25</span></span>
+<span><span class="co">#&gt;  6 2 Pac   Baby Don't Cry (Keep...     6    94 2000-04-01</span></span>
+<span><span class="co">#&gt;  7 2 Pac   Baby Don't Cry (Keep...     7    99 2000-04-08</span></span>
+<span><span class="co">#&gt;  8 2Ge+her The Hardest Part Of ...     1    91 2000-09-02</span></span>
+<span><span class="co">#&gt;  9 2Ge+her The Hardest Part Of ...     2    87 2000-09-09</span></span>
+<span><span class="co">#&gt; 10 2Ge+her The Hardest Part Of ...     3    92 2000-09-16</span></span>
+<span><span class="co">#&gt; # ℹ 5,297 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="multiple-variables-stored-in-one-column" class="level3" data-number="9.3.2"><h3 data-number="9.3.2" class="anchored" data-anchor-id="multiple-variables-stored-in-one-column">
+<span class="header-section-number">9.3.2</span> Multiple variables stored in one column</h3>
+<p>Sometimes there are more than one variable stored in each column. This is the case in the <code>tb</code> (tuberculosis) that comes from the World Health Organization. It shows tuberculosis cases by <code>country</code>, <code>year</code>, and demographic group that includes both gender <code>m</code> or <code>f</code> and <code>age</code> group.</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/tb.csv"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 5769 Columns: 22</span></span>
+<span><span class="co">#&gt; ── Column specification ────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; Delimiter: ","</span></span>
+<span><span class="co">#&gt; chr  (1): iso2</span></span>
+<span><span class="co">#&gt; dbl (21): year, m04, m514, m014, m1524, m2534, m3544, m4554, m5564, m65, mu,...</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ℹ Use `spec()` to retrieve the full column specification for this data.</span></span>
+<span><span class="co">#&gt; ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
+<span><span class="va">tb</span></span>
+<span><span class="co">#&gt; # A tibble: 5,769 × 22</span></span>
+<span><span class="co">#&gt;    iso2   year   m04  m514  m014 m1524 m2534 m3544 m4554 m5564   m65    mu   f04</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 AD     1989    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  2 AD     1990    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  3 AD     1991    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  4 AD     1992    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  5 AD     1993    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  6 AD     1994    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  7 AD     1996    NA    NA     0     0     0     4     1     0     0    NA    NA</span></span>
+<span><span class="co">#&gt;  8 AD     1997    NA    NA     0     0     1     2     2     1     6    NA    NA</span></span>
+<span><span class="co">#&gt;  9 AD     1998    NA    NA     0     0     0     1     0     0     0    NA    NA</span></span>
+<span><span class="co">#&gt; 10 AD     1999    NA    NA     0     0     0     1     1     0     0    NA    NA</span></span>
+<span><span class="co">#&gt; # ℹ 5,759 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 9 more variables: f514 &lt;dbl&gt;, f014 &lt;dbl&gt;, f1524 &lt;dbl&gt;, f2534 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   f3544 &lt;dbl&gt;, f4554 &lt;dbl&gt;, f5564 &lt;dbl&gt;, f65 &lt;dbl&gt;, fu &lt;dbl&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The transformation to pivot longer and split the header variable can be done in a single step by supplying multiple column names to <code>names_to</code> and also supplying a grouped regular expression to <code>names_pattern</code> to split the variable after the first character.</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tb</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span></span>
+<span>  <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">iso2</span>, <span class="va">year</span><span class="op">)</span>, </span>
+<span>  names_to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"sex"</span>, <span class="st">"age"</span><span class="op">)</span>, </span>
+<span>  names_pattern <span class="op">=</span> <span class="st">"(.)(.+)"</span>,</span>
+<span>  values_to <span class="op">=</span> <span class="st">"n"</span>, </span>
+<span>  values_drop_na <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 35,750 × 5</span></span>
+<span><span class="co">#&gt;    iso2   year sex   age       n</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 AD     1996 m     014       0</span></span>
+<span><span class="co">#&gt;  2 AD     1996 m     1524      0</span></span>
+<span><span class="co">#&gt;  3 AD     1996 m     2534      0</span></span>
+<span><span class="co">#&gt;  4 AD     1996 m     3544      4</span></span>
+<span><span class="co">#&gt;  5 AD     1996 m     4554      1</span></span>
+<span><span class="co">#&gt;  6 AD     1996 m     5564      0</span></span>
+<span><span class="co">#&gt;  7 AD     1996 m     65        0</span></span>
+<span><span class="co">#&gt;  8 AD     1996 f     014       0</span></span>
+<span><span class="co">#&gt;  9 AD     1996 f     1524      1</span></span>
+<span><span class="co">#&gt; 10 AD     1996 f     2534      1</span></span>
+<span><span class="co">#&gt; # ℹ 35,740 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="variables-are-stored-in-both-rows-and-columns" class="level3" data-number="9.3.3"><h3 data-number="9.3.3" class="anchored" data-anchor-id="variables-are-stored-in-both-rows-and-columns">
+<span class="header-section-number">9.3.3</span> Variables are stored in both rows and columns</h3>
+<p>A complex form of messy data is when variables are stored in both rows and columns. This occurs in weather data recording max and min temperatures in day columns.</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">weather</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/weather.csv"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 22 Columns: 35</span></span>
+<span><span class="co">#&gt; ── Column specification ────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; Delimiter: ","</span></span>
+<span><span class="co">#&gt; chr  (2): id, element</span></span>
+<span><span class="co">#&gt; dbl (25): year, month, d1, d2, d3, d4, d5, d6, d7, d8, d10, d11, d13, d14, d...</span></span>
+<span><span class="co">#&gt; lgl  (8): d9, d12, d18, d19, d20, d21, d22, d24</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ℹ Use `spec()` to retrieve the full column specification for this data.</span></span>
+<span><span class="co">#&gt; ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
+<span><span class="va">weather</span></span>
+<span><span class="co">#&gt; # A tibble: 22 × 35</span></span>
+<span><span class="co">#&gt;    id       year month element    d1    d2    d3    d4    d5    d6    d7    d8</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 MX17004  2010     1 tmax       NA  NA    NA      NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt;  2 MX17004  2010     1 tmin       NA  NA    NA      NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt;  3 MX17004  2010     2 tmax       NA  27.3  24.1    NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt;  4 MX17004  2010     2 tmin       NA  14.4  14.4    NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt;  5 MX17004  2010     3 tmax       NA  NA    NA      NA  32.1    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  6 MX17004  2010     3 tmin       NA  NA    NA      NA  14.2    NA    NA    NA</span></span>
+<span><span class="co">#&gt;  7 MX17004  2010     4 tmax       NA  NA    NA      NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt;  8 MX17004  2010     4 tmin       NA  NA    NA      NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt;  9 MX17004  2010     5 tmax       NA  NA    NA      NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt; 10 MX17004  2010     5 tmin       NA  NA    NA      NA  NA      NA    NA    NA</span></span>
+<span><span class="co">#&gt; # ℹ 12 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 23 more variables: d9 &lt;lgl&gt;, d10 &lt;dbl&gt;, d11 &lt;dbl&gt;, d12 &lt;lgl&gt;, d13 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   d14 &lt;dbl&gt;, d15 &lt;dbl&gt;, d16 &lt;dbl&gt;, d17 &lt;dbl&gt;, d18 &lt;lgl&gt;, d19 &lt;lgl&gt;,</span></span>
+<span><span class="co">#&gt; #   d20 &lt;lgl&gt;, d21 &lt;lgl&gt;, d22 &lt;lgl&gt;, d23 &lt;dbl&gt;, d24 &lt;lgl&gt;, d25 &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   d26 &lt;dbl&gt;, d27 &lt;dbl&gt;, d28 &lt;dbl&gt;, d29 &lt;dbl&gt;, d30 &lt;dbl&gt;, d31 &lt;dbl&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To deal with this dual nature of the data we need to pivot the day variables longer to get the temperature readings in a column and then pivot the element column wider to split the temperature readings between min and max.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Pivot-longer: day columns</span></span>
+<span><span class="va">weather_longer</span> <span class="op">&lt;-</span> <span class="va">weather</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span></span>
+<span>    <span class="va">d1</span><span class="op">:</span><span class="va">d31</span>, </span>
+<span>    names_to <span class="op">=</span> <span class="st">"day"</span>, </span>
+<span>    values_to <span class="op">=</span> <span class="st">"value"</span>, </span>
+<span>    values_drop_na <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    date <span class="op">=</span> <span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html">ymd</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">year</span>, <span class="va">month</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span><span class="st">"d"</span>, <span class="st">""</span>, <span class="va">day</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">date</span>, <span class="va">element</span>, <span class="va">value</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span></span>
+<span><span class="va">weather_longer</span></span>
+<span><span class="co">#&gt; # A tibble: 66 × 4</span></span>
+<span><span class="co">#&gt;    id      date       element value</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 MX17004 2010-01-30 tmax     27.8</span></span>
+<span><span class="co">#&gt;  2 MX17004 2010-01-30 tmin     14.5</span></span>
+<span><span class="co">#&gt;  3 MX17004 2010-02-02 tmax     27.3</span></span>
+<span><span class="co">#&gt;  4 MX17004 2010-02-02 tmin     14.4</span></span>
+<span><span class="co">#&gt;  5 MX17004 2010-02-03 tmax     24.1</span></span>
+<span><span class="co">#&gt;  6 MX17004 2010-02-03 tmin     14.4</span></span>
+<span><span class="co">#&gt;  7 MX17004 2010-02-11 tmax     29.7</span></span>
+<span><span class="co">#&gt;  8 MX17004 2010-02-11 tmin     13.4</span></span>
+<span><span class="co">#&gt;  9 MX17004 2010-02-23 tmax     29.9</span></span>
+<span><span class="co">#&gt; 10 MX17004 2010-02-23 tmin     10.7</span></span>
+<span><span class="co">#&gt; # ℹ 56 more rows</span></span>
+<span></span>
+<span><span class="co"># Pivot-wider: element column</span></span>
+<span><span class="va">weather_longer</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">element</span>, values_from <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 33 × 4</span></span>
+<span><span class="co">#&gt;    id      date        tmax  tmin</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;   &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 MX17004 2010-01-30  27.8  14.5</span></span>
+<span><span class="co">#&gt;  2 MX17004 2010-02-02  27.3  14.4</span></span>
+<span><span class="co">#&gt;  3 MX17004 2010-02-03  24.1  14.4</span></span>
+<span><span class="co">#&gt;  4 MX17004 2010-02-11  29.7  13.4</span></span>
+<span><span class="co">#&gt;  5 MX17004 2010-02-23  29.9  10.7</span></span>
+<span><span class="co">#&gt;  6 MX17004 2010-03-05  32.1  14.2</span></span>
+<span><span class="co">#&gt;  7 MX17004 2010-03-10  34.5  16.8</span></span>
+<span><span class="co">#&gt;  8 MX17004 2010-03-16  31.1  17.6</span></span>
+<span><span class="co">#&gt;  9 MX17004 2010-04-27  36.3  16.7</span></span>
+<span><span class="co">#&gt; 10 MX17004 2010-05-27  33.2  18.2</span></span>
+<span><span class="co">#&gt; # ℹ 23 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="multiple-types-in-one-table" class="level3" data-number="9.3.4"><h3 data-number="9.3.4" class="anchored" data-anchor-id="multiple-types-in-one-table">
+<span class="header-section-number">9.3.4</span> Multiple types in one table</h3>
+<p>This occurs when multiple observational units are stored on one table instead of in multiple tables. One simple example of this is in the <code>billboard</code> data where there is information about both the song and its ranking on the billboard list. This leads to duplication of information about the <code>artist</code> in this case. It would be better to divide this information into two tables linked through a song id.</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Song table</span></span>
+<span><span class="va">song</span> <span class="op">&lt;-</span> <span class="va">billboard_long</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span><span class="op">(</span><span class="va">artist</span>, <span class="va">track</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>song_id <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">song</span></span>
+<span><span class="co">#&gt; # A tibble: 317 × 3</span></span>
+<span><span class="co">#&gt;    artist         track                   song_id</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;          &lt;chr&gt;                     &lt;int&gt;</span></span>
+<span><span class="co">#&gt;  1 2 Pac          Baby Don't Cry (Keep...       1</span></span>
+<span><span class="co">#&gt;  2 2Ge+her        The Hardest Part Of ...       2</span></span>
+<span><span class="co">#&gt;  3 3 Doors Down   Kryptonite                    3</span></span>
+<span><span class="co">#&gt;  4 3 Doors Down   Loser                         4</span></span>
+<span><span class="co">#&gt;  5 504 Boyz       Wobble Wobble                 5</span></span>
+<span><span class="co">#&gt;  6 98^0           Give Me Just One Nig...       6</span></span>
+<span><span class="co">#&gt;  7 A*Teens        Dancing Queen                 7</span></span>
+<span><span class="co">#&gt;  8 Aaliyah        I Don't Wanna                 8</span></span>
+<span><span class="co">#&gt;  9 Aaliyah        Try Again                     9</span></span>
+<span><span class="co">#&gt; 10 Adams, Yolanda Open My Heart                10</span></span>
+<span><span class="co">#&gt; # ℹ 307 more rows</span></span>
+<span></span>
+<span><span class="co"># Rank table</span></span>
+<span><span class="va">rank</span> <span class="op">&lt;-</span> <span class="va">billboard_long</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">song</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"artist"</span>, <span class="st">"track"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">song_id</span>, <span class="va">date</span>, <span class="va">week</span>, <span class="va">rank</span><span class="op">)</span></span>
+<span><span class="va">rank</span></span>
+<span><span class="co">#&gt; # A tibble: 5,307 × 4</span></span>
+<span><span class="co">#&gt;    song_id date        week  rank</span></span>
+<span><span class="co">#&gt;      &lt;int&gt; &lt;date&gt;     &lt;int&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1       1 2000-02-26     1    87</span></span>
+<span><span class="co">#&gt;  2       1 2000-03-04     2    82</span></span>
+<span><span class="co">#&gt;  3       1 2000-03-11     3    72</span></span>
+<span><span class="co">#&gt;  4       1 2000-03-18     4    77</span></span>
+<span><span class="co">#&gt;  5       1 2000-03-25     5    87</span></span>
+<span><span class="co">#&gt;  6       1 2000-04-01     6    94</span></span>
+<span><span class="co">#&gt;  7       1 2000-04-08     7    99</span></span>
+<span><span class="co">#&gt;  8       2 2000-09-02     1    91</span></span>
+<span><span class="co">#&gt;  9       2 2000-09-09     2    87</span></span>
+<span><span class="co">#&gt; 10       2 2000-09-16     3    92</span></span>
+<span><span class="co">#&gt; # ℹ 5,297 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="one-type-in-multiple-tables" class="level3" data-number="9.3.5"><h3 data-number="9.3.5" class="anchored" data-anchor-id="one-type-in-multiple-tables">
+<span class="header-section-number">9.3.5</span> One type in multiple tables</h3>
+<p>Sometimes an observational unit is spread among many tables that might be split by a variable such as person, year, location, etc. The fix for this is to bring the tables together and tidy:</p>
+<ol type="1">
+<li>Read the files into a list of tables.</li>
+<li>For each table, add a new column that records the original file name (the file name is often the value of an important variable).</li>
+<li>Combine all tables into a single table.</li>
+</ol>
+<p>This can be done with <code>purrr</code></p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">dir</a></span><span class="op">(</span><span class="st">"data"</span>, pattern <span class="op">=</span> <span class="st">"\\.csv$"</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">paths</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/basename.html">basename</a></span><span class="op">(</span><span class="va">paths</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html">map_dfr</a></span><span class="op">(</span><span class="va">paths</span>, <span class="va">read.csv</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span>, .id <span class="op">=</span> <span class="st">"filename"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-wickham14" class="csl-entry" role="listitem">
+Wickham, Hadley. 2014. <span>“Tidy <span>Data</span>.”</span> <em>Journal of Statistical Software</em> 59 (10). <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
+</div>
+</div>
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./01-lubridate.html" class="pagination-link  aria-label=" and="" times="" with="" lubridate="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Dates and times with lubridate</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./01-tidyr-pivoting.html" class="pagination-link" aria-label="<span class='chapter-number'>10</span>&nbsp; <span class='chapter-title'>tidyr: Pivoting</span>">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">tidyr: Pivoting</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.537">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="dcterms.date" content="2023-03-17">
+<title>tidyverse notes - 12&nbsp; purrr</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./02-ggplot2-rstudioconf-2022.html" rel="next">
+<link href="./01-tidyr-rectangling.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-pipe.html">tidyverse</a></li><li class="breadcrumb-item"><a href="./01-purrr.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">purrr</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">tidyverse notes</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">tidyverse</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-pipe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Pipe: magrittr and native</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-readr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">readr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-colwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">dplyr: Column-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-rowwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">dplyr: Row-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.0.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">dplyr 1.0.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.1.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">dplyr 1.1.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-forcats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">forcats</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-lubridate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Dates and times with lubridate</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-pivoting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">tidyr: Pivoting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-rectangling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">tidyr: Rectandling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-purrr.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">purrr</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">ggplot2</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ggplot2-rstudioconf-2022.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">RStudio conf 2022 ggplot2 workshop</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-geoms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Geoms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-annotations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Annotations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-aesthetics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Aesthetics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Position scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-color.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Color scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-aes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Aesthetic scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-coords.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Coordinates</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-guides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Guides: Legends</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-facets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Facets</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-themes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Themes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-patchwork.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">patchwork</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">tidy eval</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr-superceded.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Programming with dplyr (pre 1.0.0)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Programming with dplyr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Advanced R: Metaprogramming</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-tidyeval.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">rlang: Tidy evaluation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">rlang: Metaprogramming</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./readr-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">readr example data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#sec-resources" id="toc-sec-resources" class="nav-link active" data-scroll-target="#sec-resources"><span class="header-section-number">12.1</span> <code>purrr</code> resources</a></li>
+  <li>
+<a href="#sec-map-family" id="toc-sec-map-family" class="nav-link" data-scroll-target="#sec-map-family"><span class="header-section-number">12.2</span> Map family</a>
+  <ul class="collapse">
+<li><a href="#sec-funcs" id="toc-sec-funcs" class="nav-link" data-scroll-target="#sec-funcs"><span class="header-section-number">12.2.1</span> Functions</a></li>
+  <li><a href="#sec-args" id="toc-sec-args" class="nav-link" data-scroll-target="#sec-args"><span class="header-section-number">12.2.2</span> Arguments</a></li>
+  <li><a href="#sec-map" id="toc-sec-map" class="nav-link" data-scroll-target="#sec-map"><span class="header-section-number">12.2.3</span> <code>map()</code></a></li>
+  <li><a href="#sec-pluck-style" id="toc-sec-pluck-style" class="nav-link" data-scroll-target="#sec-pluck-style"><span class="header-section-number">12.2.4</span> <code>pluck()</code> style</a></li>
+  <li><a href="#sec-map-df" id="toc-sec-map-df" class="nav-link" data-scroll-target="#sec-map-df"><span class="header-section-number">12.2.5</span> <code>map()</code> with data frames</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-map-variant" id="toc-sec-map-variant" class="nav-link" data-scroll-target="#sec-map-variant"><span class="header-section-number">12.3</span> Map variants</a>
+  <ul class="collapse">
+<li><a href="#sec-map_if" id="toc-sec-map_if" class="nav-link" data-scroll-target="#sec-map_if"><span class="header-section-number">12.3.1</span> <code>map_if()</code> and <code>map_at()</code></a></li>
+  <li><a href="#sec-map_depth" id="toc-sec-map_depth" class="nav-link" data-scroll-target="#sec-map_depth"><span class="header-section-number">12.3.2</span> <code>map_depth(.x, .depth, .f)</code></a></li>
+  <li><a href="#sec-map2" id="toc-sec-map2" class="nav-link" data-scroll-target="#sec-map2"><span class="header-section-number">12.3.3</span> <code>map2(.x, .y, .f)</code></a></li>
+  <li><a href="#sec-pmap" id="toc-sec-pmap" class="nav-link" data-scroll-target="#sec-pmap"><span class="header-section-number">12.3.4</span> <code>pmap(.l, .f)</code></a></li>
+  <li><a href="#imap.x-.f" id="toc-imap.x-.f" class="nav-link" data-scroll-target="#imap.x-.f"><span class="header-section-number">12.3.5</span> <code>imap(.x, .f)</code></a></li>
+  <li><a href="#sec-modify" id="toc-sec-modify" class="nav-link" data-scroll-target="#sec-modify"><span class="header-section-number">12.3.6</span> <code>modify(.x, .f)</code></a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-predicate" id="toc-sec-predicate" class="nav-link" data-scroll-target="#sec-predicate"><span class="header-section-number">12.4</span> Predicate functionals</a>
+  <ul class="collapse">
+<li><a href="#sec-keep" id="toc-sec-keep" class="nav-link" data-scroll-target="#sec-keep"><span class="header-section-number">12.4.1</span> <code>keep()</code>, <code>discard()</code>, <code>compact()</code></a></li>
+  <li><a href="#sec-detect" id="toc-sec-detect" class="nav-link" data-scroll-target="#sec-detect"><span class="header-section-number">12.4.2</span> <code>detect()</code></a></li>
+  <li><a href="#sec-every" id="toc-sec-every" class="nav-link" data-scroll-target="#sec-every"><span class="header-section-number">12.4.3</span> <code>every()</code>, <code>some()</code>, <code>none()</code></a></li>
+  <li><a href="#sec-has-element" id="toc-sec-has-element" class="nav-link" data-scroll-target="#sec-has-element"><span class="header-section-number">12.4.4</span> <code>has_element()</code></a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-plucking" id="toc-sec-plucking" class="nav-link" data-scroll-target="#sec-plucking"><span class="header-section-number">12.5</span> Plucking</a>
+  <ul class="collapse">
+<li><a href="#sec-pluck" id="toc-sec-pluck" class="nav-link" data-scroll-target="#sec-pluck"><span class="header-section-number">12.5.1</span> <code>pluck()</code></a></li>
+  <li><a href="#sec-chuck" id="toc-sec-chuck" class="nav-link" data-scroll-target="#sec-chuck"><span class="header-section-number">12.5.2</span> <code>chuck()</code></a></li>
+  <li><a href="#sec-assign_in" id="toc-sec-assign_in" class="nav-link" data-scroll-target="#sec-assign_in"><span class="header-section-number">12.5.3</span> <code>assign_in()</code> and <code>modify_in()</code></a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-transform" id="toc-sec-transform" class="nav-link" data-scroll-target="#sec-transform"><span class="header-section-number">12.6</span> Transforming lists and vectors</a>
+  <ul class="collapse">
+<li><a href="#sec-flatten" id="toc-sec-flatten" class="nav-link" data-scroll-target="#sec-flatten"><span class="header-section-number">12.6.1</span> <code>list_flatten()</code></a></li>
+  <li><a href="#sec-list_c" id="toc-sec-list_c" class="nav-link" data-scroll-target="#sec-list_c"><span class="header-section-number">12.6.2</span> <code>list_c()</code></a></li>
+  <li><a href="#sec-list-simplify" id="toc-sec-list-simplify" class="nav-link" data-scroll-target="#sec-list-simplify"><span class="header-section-number">12.6.3</span> <code>list_simplify()</code></a></li>
+  <li><a href="#sec-rbind" id="toc-sec-rbind" class="nav-link" data-scroll-target="#sec-rbind"><span class="header-section-number">12.6.4</span> <code>list_rbind()</code> and <code>list_cbind()</code></a></li>
+  <li><a href="#sec-accumulate" id="toc-sec-accumulate" class="nav-link" data-scroll-target="#sec-accumulate"><span class="header-section-number">12.6.5</span> <code>accumulate()</code> and <code>reduce()</code></a></li>
+  </ul>
+</li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-pipe.html">tidyverse</a></li><li class="breadcrumb-item"><a href="./01-purrr.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">purrr</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title"><span id="sec-purrr" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">purrr</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 17, 2023</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">January 8, 2024</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header><section id="sec-resources" class="level2" data-number="12.1"><h2 data-number="12.1" class="anchored" data-anchor-id="sec-resources">
+<span class="header-section-number">12.1</span> <code>purrr</code> resources</h2>
+<ul>
+<li><a href="https://purrr.tidyverse.org/"><code>purrr</code> website</a></li>
+<li><a href="https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/"><code>purrr</code> 1.0.0 blog post</a></li>
+<li><a href="https://youtu.be/EGAs7zuRutY"><code>purrr</code> 1.0.0 - Hadley Wickham video</a></li>
+<li><a href="https://www.tidyverse.org/blog/2023/05/purrr-walk-this-way/">purrr::walk() this way</a></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/">purrr</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-map-family" class="level2" data-number="12.2"><h2 data-number="12.2" class="anchored" data-anchor-id="sec-map-family">
+<span class="header-section-number">12.2</span> Map family</h2>
+<section id="sec-funcs" class="level3" data-number="12.2.1"><h3 data-number="12.2.1" class="anchored" data-anchor-id="sec-funcs">
+<span class="header-section-number">12.2.1</span> Functions</h3>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/map.html">map()</a></code> always returns a list.</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/map.html">map_lgl()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map.html">map_int()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl()</a></code>, and <code><a href="https://purrr.tidyverse.org/reference/map.html">map_chr()</a></code> return an atomic vector of the indicated type (or die trying).</li>
+<li>
+<code>map_vec(.ptype = NULL)</code> simplifies to the common type of the output. It works with most types of simple vectors like Date, POSIXct, factors, etc.</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/map.html">walk()</a></code>: calls <code>.f</code> for its side-effect and returns the input <code>.x</code>.</li>
+</ul></section><section id="sec-args" class="level3" data-number="12.2.2"><h3 data-number="12.2.2" class="anchored" data-anchor-id="sec-args">
+<span class="header-section-number">12.2.2</span> Arguments</h3>
+<ul>
+<li>
+<code>.f</code> options
+<ul>
+<li>A named function: <code>mean</code>
+</li>
+<li>Anonymous function: <code>\(x) x + 1</code>
+</li>
+<li>Formula: <code>~ .x + 1</code>
+</li>
+<li>A string, integer, or list as short hand for <code><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck()</a></code>
+</li>
+</ul>
+</li>
+<li>
+<code>.progress</code>: Whether to have a progress bar</li>
+<li>
+<code>.default</code>: specifies value for elements that are missing or <code>NULL</code>.</li>
+</ul>
+<p>The preference from <a href="https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/"><code>purrr 1.0.0</code></a> is to use anonymous function style instead of formula or using <code>...</code> to put in arguments.</p>
+</section><section id="sec-map" class="level3" data-number="12.2.3"><h3 data-number="12.2.3" class="anchored" data-anchor-id="sec-map">
+<span class="header-section-number">12.2.3</span> <code>map()</code>
+</h3>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Random generation of vector with the normal distribution of set mean</span></span>
+<span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, mean <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt;  [1] 0.642488254 1.399065966 1.777365912 1.089911229 2.330808102 2.630754736</span></span>
+<span><span class="co">#&gt;  [7] 0.496673815 0.005822308 1.722502224 0.165323105</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt;  [1] 1.3267845 2.0736271 2.9624415 2.0291827 2.8661129 0.9251774 2.6812605</span></span>
+<span><span class="co">#&gt;  [8] 0.6033192 0.3015909 0.4339019</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt;  [1] 3.450118 1.886768 4.021908 2.996563 2.843352 3.603449 1.920055 1.706600</span></span>
+<span><span class="co">#&gt;  [9] 3.773135 2.897916</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[4]]</span></span>
+<span><span class="co">#&gt;  [1] 3.993312 4.372983 3.556594 4.854357 3.327402 3.883855 3.505459 2.709662</span></span>
+<span><span class="co">#&gt;  [9] 5.106500 3.331491</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[5]]</span></span>
+<span><span class="co">#&gt;  [1] 5.747696 5.006605 4.119193 4.659081 6.077620 5.035795 5.388017 5.620149</span></span>
+<span><span class="co">#&gt;  [9] 5.568692 5.415458</span></span>
+<span></span>
+<span><span class="co"># Simplify output to a vector instead of a list</span></span>
+<span><span class="co"># by computing the mean of the distributions</span></span>
+<span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, mean <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span><span class="op">(</span><span class="va">mean</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.3915291 1.7330735 2.7212224 4.0224017 5.0608776</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-pluck-style" class="level3" data-number="12.2.4"><h3 data-number="12.2.4" class="anchored" data-anchor-id="sec-pluck-style">
+<span class="header-section-number">12.2.4</span> <code>pluck()</code> style</h3>
+<p>Use string, integer, or list as short hand for <code><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck()</a></code>. See <a href="#sec-pluck" class="quarto-xref"><span>Section 12.5.1</span></a> on using <code><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck()</a></code>.</p>
+<ul>
+<li>
+<code>"idx"</code> short hand for <code>\(x) pluck(x, "idx")</code>
+</li>
+<li>
+<code>1</code> short hand for <code>\(x) pluck(x, 1)</code>
+</li>
+<li>
+<code>list("idx", 1)</code> short hand for <code>\(x) pluck(x, "idx", 1)</code>
+</li>
+<li>Use <code>.default</code> argument to specify elements that are missing or <code>NULL</code>
+<ul>
+<li>Need to change <code>.default = NA</code> to use <code><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl()</a></code> or <code><a href="https://purrr.tidyverse.org/reference/map.html">map_int()</a></code>
+</li>
+</ul>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract by name or position</span></span>
+<span><span class="va">l1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="cn">NULL</span>, b <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>b <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># name: elements named "b"</span></span>
+<span><span class="va">l1</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_int</a></span><span class="op">(</span><span class="st">"b"</span>, .default <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] NA  2  3</span></span>
+<span></span>
+<span><span class="co"># position: 2nd element</span></span>
+<span><span class="va">l1</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_int</a></span><span class="op">(</span><span class="fl">2</span>, .default <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] NA  2 NA</span></span>
+<span></span>
+<span><span class="co"># Supply multiple values to index deeply into a list</span></span>
+<span><span class="va">l2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>num <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,     <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>num <span class="op">=</span> <span class="fl">101</span><span class="op">:</span><span class="fl">103</span>, <span class="va">letters</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># map vs pluck</span></span>
+<span><span class="va">l2</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] "b"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] "e"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="va">l2</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] "b"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] "e"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span></span>
+<span><span class="co"># Use a list to mixes numeric indices and names</span></span>
+<span><span class="va">l2</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_int</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"num"</span>, <span class="fl">3</span><span class="op">)</span>, .default <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]   3 103  NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-map-df" class="level3" data-number="12.2.5"><h3 data-number="12.2.5" class="anchored" data-anchor-id="sec-map-df">
+<span class="header-section-number">12.2.5</span> <code>map()</code> with data frames</h3>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate on data frame columns and turn into list or vector</span></span>
+<span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span><span class="op">(</span><span class="va">sum</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      mpg      cyl     disp       hp     drat       wt     qsec       vs </span></span>
+<span><span class="co">#&gt;  642.900  198.000 7383.100 4694.000  115.090  102.952  571.160   14.000 </span></span>
+<span><span class="co">#&gt;       am     gear     carb </span></span>
+<span><span class="co">#&gt;   13.000  118.000   90.000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section><section id="sec-map-variant" class="level2" data-number="12.3"><h2 data-number="12.3" class="anchored" data-anchor-id="sec-map-variant">
+<span class="header-section-number">12.3</span> Map variants</h2>
+<section id="sec-map_if" class="level3" data-number="12.3.1"><h3 data-number="12.3.1" class="anchored" data-anchor-id="sec-map_if">
+<span class="header-section-number">12.3.1</span> <code>map_if()</code> and <code>map_at()</code>
+</h3>
+<p>Conditionally apply function to some elements of <code>x</code>.</p>
+<ul>
+<li>
+<code>map_if(.x, .p, .f, .else = NULL)</code> and <code>map_at(.x, .at, .f)</code>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">iris</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_if.html">map_if</a></span><span class="op">(</span><span class="va">is.factor</span>, <span class="va">as.character</span>, .else <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ Sepal.Length: int [1:150] 5 4 4 4 5 5 4 5 4 4 ...</span></span>
+<span><span class="co">#&gt;  $ Sepal.Width : int [1:150] 3 3 3 3 3 3 3 3 2 3 ...</span></span>
+<span><span class="co">#&gt;  $ Petal.Length: int [1:150] 1 1 1 1 1 1 1 1 1 1 ...</span></span>
+<span><span class="co">#&gt;  $ Petal.Width : int [1:150] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
+<span><span class="co">#&gt;  $ Species     : chr [1:150] "setosa" "setosa" "setosa" "setosa" ...</span></span>
+<span></span>
+<span><span class="co"># Use numeric vector of positions select elements to change:</span></span>
+<span><span class="va">iris</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_if.html">map_at</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>, <span class="va">is.numeric</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ Sepal.Length: num [1:150] 5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...</span></span>
+<span><span class="co">#&gt;  $ Sepal.Width : num [1:150] 3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...</span></span>
+<span><span class="co">#&gt;  $ Petal.Length: num [1:150] 1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...</span></span>
+<span><span class="co">#&gt;  $ Petal.Width : logi TRUE</span></span>
+<span><span class="co">#&gt;  $ Species     : logi FALSE</span></span>
+<span></span>
+<span><span class="co"># Use vector of names to specify which elements to change:</span></span>
+<span><span class="va">iris</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_if.html">map_at</a></span><span class="op">(</span><span class="st">"Species"</span>, <span class="va">toupper</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ Sepal.Length: num [1:150] 5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...</span></span>
+<span><span class="co">#&gt;  $ Sepal.Width : num [1:150] 3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...</span></span>
+<span><span class="co">#&gt;  $ Petal.Length: num [1:150] 1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...</span></span>
+<span><span class="co">#&gt;  $ Petal.Width : num [1:150] 0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...</span></span>
+<span><span class="co">#&gt;  $ Species     : chr [1:150] "SETOSA" "SETOSA" "SETOSA" "SETOSA" ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-map_depth" class="level3" data-number="12.3.2"><h3 data-number="12.3.2" class="anchored" data-anchor-id="sec-map_depth">
+<span class="header-section-number">12.3.2</span> <code>map_depth(.x, .depth, .f)</code>
+</h3>
+<p>Map or modify elements at a given depth</p>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/map_depth.html">map_depth()</a></code> or <code><a href="https://purrr.tidyverse.org/reference/map_depth.html">modify_depth()</a></code>
+</li>
+<li>
+<code>.depth</code> argument
+<ul>
+<li>
+<code>map_depth(x, 0, fun)</code> is equivalent to <code>fun(x)</code>.</li>
+<li>
+<code>map_depth(x, 1, fun)</code> is equivalent to <code>x &lt;- map(x, fun)</code>
+</li>
+<li>
+<code>map_depth(x, 2, fun)</code> is equivalent to <code>x &lt;- map(x, \(y) map(y, fun))</code>
+</li>
+</ul>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>foo <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, bar <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span>, b <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>baz <span class="op">=</span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_depth.html">map_depth</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">sum</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 2</span></span>
+<span><span class="co">#&gt;  $ a:List of 2</span></span>
+<span><span class="co">#&gt;   ..$ foo: int 3</span></span>
+<span><span class="co">#&gt;   ..$ bar: int 7</span></span>
+<span><span class="co">#&gt;  $ b:List of 1</span></span>
+<span><span class="co">#&gt;   ..$ baz: int 11</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-map2" class="level3" data-number="12.3.3"><h3 data-number="12.3.3" class="anchored" data-anchor-id="sec-map2">
+<span class="header-section-number">12.3.3</span> <code>map2(.x, .y, .f)</code>
+</h3>
+<p>Map over two inputs</p>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/map2.html">map2_lgl()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map2.html">map2_int()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map2.html">map2_dbl()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map2.html">map2_chr()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map2.html">map2_vec()</a></code>, and <code><a href="https://purrr.tidyverse.org/reference/map2.html">walk2()</a></code>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html">map2</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, \<span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="va">x</span> <span class="op">+</span> <span class="va">y</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 11</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 21</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; [1] 31</span></span>
+<span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html">map2_dbl</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, \<span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="va">x</span> <span class="op">+</span> <span class="va">y</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 11 21 31</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-pmap" class="level3" data-number="12.3.4"><h3 data-number="12.3.4" class="anchored" data-anchor-id="sec-pmap">
+<span class="header-section-number">12.3.4</span> <code>pmap(.l, .f)</code>
+</h3>
+<p>Map over multiple input simultaneously</p>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/pmap.html">pmap_lgl()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/pmap.html">pmap_int()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/pmap.html">pmap_dbl()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/pmap.html">pmap_chr()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/pmap.html">pmap_vec()</a></code>, and <code><a href="https://purrr.tidyverse.org/reference/pmap.html">pwalk()</a></code>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">300</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pmap.html">pmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span><span class="op">)</span>, <span class="va">sum</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 111</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 221</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; [1] 331</span></span>
+<span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pmap.html">pmap_dbl</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span><span class="op">)</span>, <span class="va">sum</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 111 221 331</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="imap.x-.f" class="level3" data-number="12.3.5"><h3 data-number="12.3.5" class="anchored" data-anchor-id="imap.x-.f">
+<span class="header-section-number">12.3.5</span> <code>imap(.x, .f)</code>
+</h3>
+<p>Apply a function to each element of a vector and its index.</p>
+<ul>
+<li>Short hand for <code>map2(x, names(x), ...)</code> if <code>x</code> has names, or <code>map2(x, seq_along(x), ...)</code> if it does not.</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/imap.html">imap_lgl()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/imap.html">imap_chr()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/imap.html">imap_int()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/imap.html">imap_dbl()</a></code>, and <code><a href="https://purrr.tidyverse.org/reference/imap.html">iwalk()</a></code>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Note that the order is value then index</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html">imap_chr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, <span class="va">paste</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "7 1"  "4 2"  "10 3" "2 4"  "1 5"  "6 6"  "9 7"  "5 8"  "3 9"  "8 10"</span></span>
+<span></span>
+<span><span class="co"># Use anonymous function to reverse value/index order in output</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html">imap_chr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span>, <span class="va">idx</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">idx</span>, <span class="st">": "</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "1: 4"  "2: 5"  "3: 8"  "4: 3"  "5: 1"  "6: 6"  "7: 10" "8: 2"  "9: 9" </span></span>
+<span><span class="co">#&gt; [10] "10: 7"</span></span>
+<span></span>
+<span><span class="co"># Name of column and calculated value of column</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html">iwalk</a></span><span class="op">(</span><span class="va">mtcars</span>, \<span class="op">(</span><span class="va">x</span>, <span class="va">idx</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="va">idx</span>, <span class="st">": "</span>, <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="st">"\n"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; mpg: 19.2</span></span>
+<span><span class="co">#&gt; cyl: 6</span></span>
+<span><span class="co">#&gt; disp: 196.3</span></span>
+<span><span class="co">#&gt; hp: 123</span></span>
+<span><span class="co">#&gt; drat: 3.695</span></span>
+<span><span class="co">#&gt; wt: 3.325</span></span>
+<span><span class="co">#&gt; qsec: 17.71</span></span>
+<span><span class="co">#&gt; vs: 0</span></span>
+<span><span class="co">#&gt; am: 0</span></span>
+<span><span class="co">#&gt; gear: 4</span></span>
+<span><span class="co">#&gt; carb: 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-modify" class="level3" data-number="12.3.6"><h3 data-number="12.3.6" class="anchored" data-anchor-id="sec-modify">
+<span class="header-section-number">12.3.6</span> <code>modify(.x, .f)</code>
+</h3>
+<p>Modify elements of <code>.x</code> by <code>.f</code>. Unlike <code><a href="https://purrr.tidyverse.org/reference/map.html">map()</a></code> family, <code><a href="https://purrr.tidyverse.org/reference/modify.html">modify()</a></code> always returns an object of the same type.</p>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/modify.html">modify()</a></code> is a shortcut for <code>x[[i]] &lt;- f(x[[i]]); return(x)</code>
+</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/modify.html">modify2()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/modify.html">modify_if()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/modify.html">modify_at()</a></code>
+</li>
+<li>Very similar to <code><a href="https://purrr.tidyverse.org/reference/map.html">map()</a></code> family.</li>
+</ul></section></section><section id="sec-predicate" class="level2" data-number="12.4"><h2 data-number="12.4" class="anchored" data-anchor-id="sec-predicate">
+<span class="header-section-number">12.4</span> Predicate functionals</h2>
+<p>A predicate function is a function that either returns <code>TRUE</code> or <code>FALSE</code>. The predicate functionals take a vector and a predicate function and do something useful.</p>
+<section id="sec-keep" class="level3" data-number="12.4.1"><h3 data-number="12.4.1" class="anchored" data-anchor-id="sec-keep">
+<span class="header-section-number">12.4.1</span> <code>keep()</code>, <code>discard()</code>, <code>compact()</code>
+</h3>
+<p>By predicate function</p>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/keep.html">keep()</a></code>: keep elements</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/keep.html">discard()</a></code>: discard elements</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">24</span><span class="op">)</span></span>
+<span><span class="co"># Create a list of 5 values from 1:10</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">x</span>, size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Keep</span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/keep.html">keep</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 10  6  9  8  2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1]  3  6  9 10  4</span></span>
+<span></span>
+<span><span class="co"># Discard</span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/keep.html">discard</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">6</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>By name or position</p>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/keep_at.html">keep_at()</a></code>: keep by name or position</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/keep_at.html">discard_at()</a></code>: discard by name or position</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">2</span>, cat <span class="op">=</span> <span class="fl">10</span>, dog <span class="op">=</span> <span class="fl">15</span>, elephant <span class="op">=</span> <span class="fl">5</span>, e <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/keep_at.html">keep_at</a></span><span class="op">(</span><span class="va">letters</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  a  b  e </span></span>
+<span><span class="co">#&gt;  1  2 10</span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/keep_at.html">discard_at</a></span><span class="op">(</span><span class="va">letters</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      cat      dog elephant </span></span>
+<span><span class="co">#&gt;       10       15        5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code><a href="https://purrr.tidyverse.org/reference/keep.html">compact()</a></code>: discards elements that are <code>NULL</code> or that have length zero</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="st">"a"</span>, b <span class="op">=</span> <span class="cn">NULL</span>, c <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">integer</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, d <span class="op">=</span> <span class="cn">NA</span>, e <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/keep.html">compact</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $a</span></span>
+<span><span class="co">#&gt; [1] "a"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $d</span></span>
+<span><span class="co">#&gt; [1] NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-detect" class="level3" data-number="12.4.2"><h3 data-number="12.4.2" class="anchored" data-anchor-id="sec-detect">
+<span class="header-section-number">12.4.2</span> <code>detect()</code>
+</h3>
+<p>Find the value or position of the first match</p>
+<ul>
+<li><code><a href="https://purrr.tidyverse.org/reference/detect.html">detect()</a></code></li>
+<li><code><a href="https://purrr.tidyverse.org/reference/detect.html">detect_index()</a></code></li>
+<li>
+<code>.direction</code> argument
+<ul>
+<li>
+<code>"forward"</code>: starts at the beginning of the vector and move towards the end.</li>
+<li>
+<code>"backward"</code>: starts at the end of the vector and moves towards the beginning.</li>
+</ul>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">is_even</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span></span>
+<span></span>
+<span><span class="fl">3</span><span class="op">:</span><span class="fl">10</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/detect.html">detect</a></span><span class="op">(</span><span class="va">is_even</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4</span></span>
+<span><span class="fl">3</span><span class="op">:</span><span class="fl">10</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/detect.html">detect_index</a></span><span class="op">(</span><span class="va">is_even</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span></span>
+<span><span class="co"># If you need to find all values, use keep()</span></span>
+<span><span class="fl">3</span><span class="op">:</span><span class="fl">10</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/keep.html">keep</a></span><span class="op">(</span><span class="va">is_even</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]  4  6  8 10</span></span>
+<span></span>
+<span><span class="co"># If you need to find all positions, use map_lgl()</span></span>
+<span><span class="fl">3</span><span class="op">:</span><span class="fl">10</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_lgl</a></span><span class="op">(</span><span class="va">is_even</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 2 4 6 8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-every" class="level3" data-number="12.4.3"><h3 data-number="12.4.3" class="anchored" data-anchor-id="sec-every">
+<span class="header-section-number">12.4.3</span> <code>every()</code>, <code>some()</code>, <code>none()</code>
+</h3>
+<p>Do every, some, or none of the elements of a list satisfy a predicate?</p>
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/every.html">some()</a></code>: <code>TRUE</code> when <code>.p</code> is <code>TRUE</code> for at least <strong>one</strong> element.</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/every.html">every()</a></code>: <code>TRUE</code> when <code>.p</code> is <code>TRUE</code> for <strong>all</strong> elements.</li>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/every.html">none()</a></code>: <code>TRUE</code> when <code>.p</code> is <code>FALSE</code> for <strong>all</strong> elements.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">5.5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/every.html">every</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">is.integer</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/every.html">some</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">is.integer</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/every.html">none</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">is.character</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-has-element" class="level3" data-number="12.4.4"><h3 data-number="12.4.4" class="anchored" data-anchor-id="sec-has-element">
+<span class="header-section-number">12.4.4</span> <code>has_element()</code>
+</h3>
+<p><code>has_element(.x, .y)</code>: Does a list contain an object?</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">5</span>, <span class="fl">9.9</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/has_element.html">has_element</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/has_element.html">has_element</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section><section id="sec-plucking" class="level2" data-number="12.5"><h2 data-number="12.5" class="anchored" data-anchor-id="sec-plucking">
+<span class="header-section-number">12.5</span> Plucking</h2>
+<section id="sec-pluck" class="level3" data-number="12.5.1"><h3 data-number="12.5.1" class="anchored" data-anchor-id="sec-pluck">
+<span class="header-section-number">12.5.1</span> <code>pluck()</code>
+</h3>
+<p><code>pluck(.x, ...)</code> implements a generalized form of <code>[[</code> that allow you to index deeply and flexibly into data structures. It always succeeds, returning <code>.default</code> if the index you are trying to access does not exist or is <code>NULL</code>.</p>
+<p>You can use a combination of numeric positions, vector or list names, and accessor functions.</p>
+<ul>
+<li>
+<code>pluck(x, 1)</code> is equivalent to <code>x[[1]]</code>
+</li>
+<li>
+<code>pluck(x, 1, 2)</code> is equivalent to <code>x[[1]][[2]]</code>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, elt <span class="op">=</span> <span class="st">"foo"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"b"</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">2</span>, elt <span class="op">=</span> <span class="st">"bar"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># equivalent to `x[[1]][[2]]`</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $elt</span></span>
+<span><span class="co">#&gt; [1] "foo"</span></span>
+<span></span>
+<span><span class="co"># Combine numeric positions with names</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="st">"elt"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "foo"</span></span>
+<span></span>
+<span><span class="co"># By default returns `NULL` when an element does not exist</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span></span>
+<span><span class="co"># You can supply a default value for non-existing elements</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span>, .default <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Can assign values with <code>pluck() &lt;- x</code></p>
+<div class="cell">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"kook"</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "kook"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-chuck" class="level3" data-number="12.5.2"><h3 data-number="12.5.2" class="anchored" data-anchor-id="sec-chuck">
+<span class="header-section-number">12.5.2</span> <code>chuck()</code>
+</h3>
+<p><code><a href="https://purrr.tidyverse.org/reference/chuck.html">chuck()</a></code> is the same as <code><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck()</a></code> but throws an error if the index does not exist.</p>
+<div class="cell">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://purrr.tidyverse.org/reference/chuck.html">chuck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "kook"</span></span>
+<span></span>
+<span><span class="co"># pluck vs chuck</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/chuck.html">chuck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in `chuck()`:</span></span>
+<span><span class="co">#&gt; ! Index 1 exceeds the length of plucked object (10 &gt; 2).</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-assign_in" class="level3" data-number="12.5.3"><h3 data-number="12.5.3" class="anchored" data-anchor-id="sec-assign_in">
+<span class="header-section-number">12.5.3</span> <code>assign_in()</code> and <code>modify_in()</code>
+</h3>
+<p>Modify values in a pluck location.</p>
+<ul>
+<li>
+<code>assign_in(x, where, value)</code>: Assigns a value to a pluck location.</li>
+<li>
+<code>modify_in(.x, .where, .f)</code>: Applies a function to a pluck location.</li>
+<li>
+<code>where/.where</code> arguments are a pluck location as a numeric vector of positions, a character vector of names, or a list combining both.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Return "kook" back to "foo"</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "kook"</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/modify_in.html">assign_in</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"foo"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "foo"</span></span>
+<span></span>
+<span><span class="co"># Modify a location by a function</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="st">"elt"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "foo"</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/modify_in.html">modify_in</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="st">"elt"</span><span class="op">)</span>, <span class="va">toupper</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/pluck.html">pluck</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="st">"elt"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "FOO"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section><section id="sec-transform" class="level2" data-number="12.6"><h2 data-number="12.6" class="anchored" data-anchor-id="sec-transform">
+<span class="header-section-number">12.6</span> Transforming lists and vectors</h2>
+<section id="sec-flatten" class="level3" data-number="12.6.1"><h3 data-number="12.6.1" class="anchored" data-anchor-id="sec-flatten">
+<span class="header-section-number">12.6.1</span> <code>list_flatten()</code>
+</h3>
+<p>Removes a single level of hierarchy from a list; the output is always a list. Lists are flattened from outside to inside so the outermost list is flattened and inner lists are maintained.</p>
+<p><code><a href="https://purrr.tidyverse.org/reference/list_flatten.html">list_flatten()</a></code> supersedes <code>flatten()</code> in <a href="https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/#flattening-and-simplification"><code>purrr 1.0.0</code></a>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 3</span></span>
+<span><span class="co">#&gt;  $ : num 1</span></span>
+<span><span class="co">#&gt;  $ :List of 2</span></span>
+<span><span class="co">#&gt;   ..$ : num 2</span></span>
+<span><span class="co">#&gt;   ..$ : num 3</span></span>
+<span><span class="co">#&gt;  $ :List of 2</span></span>
+<span><span class="co">#&gt;   ..$ : num 4</span></span>
+<span><span class="co">#&gt;   ..$ :List of 1</span></span>
+<span><span class="co">#&gt;   .. ..$ : num 5</span></span>
+<span></span>
+<span><span class="co"># 2nd-level lists are flattened</span></span>
+<span><span class="co"># 3rd-level lists made into 2nd level</span></span>
+<span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_flatten.html">list_flatten</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ : num 1</span></span>
+<span><span class="co">#&gt;  $ : num 2</span></span>
+<span><span class="co">#&gt;  $ : num 3</span></span>
+<span><span class="co">#&gt;  $ : num 4</span></span>
+<span><span class="co">#&gt;  $ :List of 1</span></span>
+<span><span class="co">#&gt;   ..$ : num 5</span></span>
+<span></span>
+<span><span class="co"># Flat lists are left as is</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_flatten.html">list_flatten</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ : num 1</span></span>
+<span><span class="co">#&gt;  $ : num 2</span></span>
+<span><span class="co">#&gt;  $ : num 3</span></span>
+<span><span class="co">#&gt;  $ : num 4</span></span>
+<span><span class="co">#&gt;  $ : num 5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-list_c" class="level3" data-number="12.6.2"><h3 data-number="12.6.2" class="anchored" data-anchor-id="sec-list_c">
+<span class="header-section-number">12.6.2</span> <code>list_c()</code>
+</h3>
+<p>Concatenate the elements of a list to produce a vector. This allows elements in a list to be different lengths, breaking the one-to-one mapping between input and output of <code><a href="https://purrr.tidyverse.org/reference/map.html">map()</a></code> family of functions. Optional argument <code>ptype</code> to provide a prototype to ensure that the output type is always the same.</p>
+<p><code><a href="https://purrr.tidyverse.org/reference/list_c.html">list_c()</a></code> supersedes <code>flatten_lgl()</code>, <code>flatten_int()</code>, <code>flatten_dbl()</code>, and <code>flatten_chr()</code> in <a href="https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/#flattening-and-simplification"><code>purrr 1.0.0</code></a>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html">list_c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1 1 2 1 2 3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-list-simplify" class="level3" data-number="12.6.3"><h3 data-number="12.6.3" class="anchored" data-anchor-id="sec-list-simplify">
+<span class="header-section-number">12.6.3</span> <code>list_simplify()</code>
+</h3>
+<p>Reduces a list to a homogeneous vector; the output is always the same length as the input. Thus, all elements of the list must be length 1. Use <code>.ptype</code> to specify what class the resulting vector should be.</p>
+<p><code><a href="https://purrr.tidyverse.org/reference/list_simplify.html">list_simplify()</a></code> supersedes <code><a href="https://purrr.tidyverse.org/reference/as_vector.html">simplify()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/as_vector.html">simplify_all()</a></code>, and <code><a href="https://purrr.tidyverse.org/reference/as_vector.html">as_vector()</a></code> in <a href="https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/#flattening-and-simplification"><code>purrr 1.0.0</code></a>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_simplify.html">list_simplify</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1 2 3</span></span>
+<span></span>
+<span><span class="co"># Error with more than one element</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_simplify.html">list_simplify</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in `list_simplify()`:</span></span>
+<span><span class="co">#&gt; ! `x[[3]]` must have size 1, not size 3.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-rbind" class="level3" data-number="12.6.4"><h3 data-number="12.6.4" class="anchored" data-anchor-id="sec-rbind">
+<span class="header-section-number">12.6.4</span> <code>list_rbind()</code> and <code>list_cbind()</code>
+</h3>
+<p>Combine data frames together to create a larger data frame either by row or column. <code>x</code> must be a list of data frames.</p>
+<p><code><a href="https://purrr.tidyverse.org/reference/list_c.html">list_rbind()</a></code> and <code><a href="https://purrr.tidyverse.org/reference/list_c.html">list_cbind()</a></code> supersedes <code><a href="https://purrr.tidyverse.org/reference/flatten.html">flatten_dfr()</a></code> and <code><a href="https://purrr.tidyverse.org/reference/flatten.html">flatten_dfc()</a></code>in <a href="https://www.tidyverse.org/blog/2022/12/purrr-1-0-0/#flattening-and-simplification"><code>purrr 1.0.0</code></a>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  a <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  b <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"a"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># rbind</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html">list_rbind</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    x    y</span></span>
+<span><span class="co">#&gt; 1  1 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2  2 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3 NA    a</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html">list_rbind</a></span><span class="op">(</span><span class="va">x</span>, names_to <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   id  x    y</span></span>
+<span><span class="co">#&gt; 1  a  1 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2  a  2 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3  b NA    a</span></span>
+<span></span>
+<span><span class="co">#cbind</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html">list_cbind</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   x y</span></span>
+<span><span class="co">#&gt; 1 1 a</span></span>
+<span><span class="co">#&gt; 2 2 a</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-accumulate" class="level3" data-number="12.6.5"><h3 data-number="12.6.5" class="anchored" data-anchor-id="sec-accumulate">
+<span class="header-section-number">12.6.5</span> <code>accumulate()</code> and <code>reduce()</code>
+</h3>
+<ul>
+<li>Accumulate intermediate results of a vector reduction.
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/accumulate.html">accumulate()</a></code> and <code><a href="https://purrr.tidyverse.org/reference/accumulate.html">accumulate2()</a></code>
+</li>
+</ul>
+</li>
+<li>Reduce a list to a single value by iteratively applying a binary function
+<ul>
+<li>
+<code><a href="https://purrr.tidyverse.org/reference/reduce.html">reduce()</a></code> and <code><a href="https://purrr.tidyverse.org/reference/reduce.html">reduce2()</a></code>
+</li>
+</ul>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># accumulate is equivalent to cumsum</span></span>
+<span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/accumulate.html">accumulate</a></span><span class="op">(</span><span class="va">`+`</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]  1  3  6 10 15</span></span>
+<span></span>
+<span><span class="co"># reduce is equivalent to sum</span></span>
+<span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/reduce.html">reduce</a></span><span class="op">(</span><span class="va">`+`</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 15</span></span>
+<span></span>
+<span><span class="co"># with paste</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/accumulate.html">accumulate</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, <span class="va">paste</span>, sep <span class="op">=</span> <span class="st">"."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "a"         "a.b"       "a.b.c"     "a.b.c.d"   "a.b.c.d.e"</span></span>
+<span><span class="fu"><a href="https://purrr.tidyverse.org/reference/reduce.html">reduce</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, <span class="va">paste</span>, sep <span class="op">=</span> <span class="st">"."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "a.b.c.d.e"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./01-tidyr-rectangling.html" class="pagination-link  aria-label=" rectandling="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">tidyr: Rectandling</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./02-ggplot2-rstudioconf-2022.html" class="pagination-link" aria-label="<span class='chapter-number'>13</span>&nbsp; <span class='chapter-title'>RStudio conf 2022 ggplot2 workshop</span>">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">RStudio conf 2022 ggplot2 workshop</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

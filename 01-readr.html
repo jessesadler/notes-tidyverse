@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.537">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="dcterms.date" content="2023-03-15">
+<title>tidyverse notes - 2&nbsp; readr</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./01-dplyr-colwise.html" rel="next">
+<link href="./01-pipe.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-pipe.html">tidyverse</a></li><li class="breadcrumb-item"><a href="./01-readr.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">readr</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">tidyverse notes</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">tidyverse</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-pipe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Pipe: magrittr and native</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-readr.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">readr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-colwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">dplyr: Column-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-rowwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">dplyr: Row-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.0.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">dplyr 1.0.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.1.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">dplyr 1.1.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-forcats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">forcats</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-lubridate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Dates and times with lubridate</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-pivoting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">tidyr: Pivoting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-rectangling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">tidyr: Rectandling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-purrr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">purrr</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">ggplot2</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ggplot2-rstudioconf-2022.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">RStudio conf 2022 ggplot2 workshop</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-geoms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Geoms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-annotations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Annotations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-aesthetics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Aesthetics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Position scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-color.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Color scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-aes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Aesthetic scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-coords.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Coordinates</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-guides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Guides: Legends</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-facets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Facets</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-themes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Themes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-patchwork.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">patchwork</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">tidy eval</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr-superceded.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Programming with dplyr (pre 1.0.0)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Programming with dplyr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Advanced R: Metaprogramming</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-tidyeval.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">rlang: Tidy evaluation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">rlang: Metaprogramming</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./readr-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">readr example data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#sec-resources" id="toc-sec-resources" class="nav-link active" data-scroll-target="#sec-resources"><span class="header-section-number">2.1</span> <code>readr</code> resources</a></li>
+  <li>
+<a href="#sec-overview" id="toc-sec-overview" class="nav-link" data-scroll-target="#sec-overview"><span class="header-section-number">2.2</span> Overview</a>
+  <ul class="collapse">
+<li><a href="#sec-overriding" id="toc-sec-overriding" class="nav-link" data-scroll-target="#sec-overriding"><span class="header-section-number">2.2.1</span> Overriding the defaults</a></li>
+  <li><a href="#sec-chickens" id="toc-sec-chickens" class="nav-link" data-scroll-target="#sec-chickens"><span class="header-section-number">2.2.2</span> Chickens example</a></li>
+  <li><a href="#sec-col-specs" id="toc-sec-col-specs" class="nav-link" data-scroll-target="#sec-col-specs"><span class="header-section-number">2.2.3</span> Available column specifications</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-ex-data" id="toc-sec-ex-data" class="nav-link" data-scroll-target="#sec-ex-data"><span class="header-section-number">2.3</span> Example data</a>
+  <ul class="collapse">
+<li><a href="#overriding-guesses" id="toc-overriding-guesses" class="nav-link" data-scroll-target="#overriding-guesses"><span class="header-section-number">2.3.1</span> Overriding guesses</a></li>
+  <li><a href="#sec-dates" id="toc-sec-dates" class="nav-link" data-scroll-target="#sec-dates"><span class="header-section-number">2.3.2</span> Dealing with dates</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-parsers" id="toc-sec-parsers" class="nav-link" data-scroll-target="#sec-parsers"><span class="header-section-number">2.4</span> Vector parsers</a>
+  <ul class="collapse">
+<li><a href="#sec-vctrs" id="toc-sec-vctrs" class="nav-link" data-scroll-target="#sec-vctrs"><span class="header-section-number">2.4.1</span> Atomic vectors</a></li>
+  <li><a href="#sec-number" id="toc-sec-number" class="nav-link" data-scroll-target="#sec-number"><span class="header-section-number">2.4.2</span> Flexible numeric parser</a></li>
+  <li><a href="#sec-datetime" id="toc-sec-datetime" class="nav-link" data-scroll-target="#sec-datetime"><span class="header-section-number">2.4.3</span> Date-times</a></li>
+  <li><a href="#sec-factors" id="toc-sec-factors" class="nav-link" data-scroll-target="#sec-factors"><span class="header-section-number">2.4.4</span> Factors</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-specs" id="toc-sec-specs" class="nav-link" data-scroll-target="#sec-specs"><span class="header-section-number">2.5</span> Column specification</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-pipe.html">tidyverse</a></li><li class="breadcrumb-item"><a href="./01-readr.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">readr</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title"><span id="sec-readr" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">readr</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 15, 2023</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">January 8, 2024</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header><section id="sec-resources" class="level2" data-number="2.1"><h2 data-number="2.1" class="anchored" data-anchor-id="sec-resources">
+<span class="header-section-number">2.1</span> <code>readr</code> resources</h2>
+<ul>
+<li><a href="https://readr.tidyverse.org/index.html"><code>readr</code> website</a></li>
+<li><a href="https://r4ds.hadley.nz/data-import.html">R for Data Science, Chapter 8: Data Import</a></li>
+<li><a href="https://readr.tidyverse.org/articles/readr.html">Introduction to readr vignette</a></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The primary task of <code>readr</code> is to parse a flat, plain-text file into a data frame in which each column is cast into the correct type. Parsing takes place in three basic stages:</p>
+<ol type="1">
+<li>The flat file is parsed into a rectangular matrix of strings.</li>
+<li>The type of each column is determined.</li>
+<li>Each column of strings is parsed into a vector of a more specific type.</li>
+</ol></section><section id="sec-overview" class="level2" data-number="2.2"><h2 data-number="2.2" class="anchored" data-anchor-id="sec-overview">
+<span class="header-section-number">2.2</span> Overview</h2>
+<p>The <code>read_*</code> functions work by first calling the respective <code>spec_*</code> function, as described in <a href="01-tidyr-pivoting.html#sec-specs" class="quarto-xref"><span>Section 10.4</span></a>, which uses <code><a href="https://readr.tidyverse.org/reference/parse_guess.html">guess_parser()</a></code> on each column and casts the character vectors to the specified types using the <code>parse_*</code> functions as described in <a href="#sec-parsers" class="quarto-xref"><span>Section 2.4</span></a>. Use <code><a href="https://readr.tidyverse.org/reference/spec.html">spec()</a></code> after the csv is read in to see all of the column types, or <code><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv()</a></code> to see the column specifications before reading in the data. This is particularly useful with very wide data.</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Read in data</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"mini-gapminder-americas.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 6 Columns: 5</span></span>
+<span><span class="co">#&gt; ── Column specification ────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; Delimiter: ","</span></span>
+<span><span class="co">#&gt; chr (1): country</span></span>
+<span><span class="co">#&gt; dbl (4): year, lifeExp, pop, gdpPercap</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ℹ Use `spec()` to retrieve the full column specification for this data.</span></span>
+<span><span class="co">#&gt; ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
+<span><span class="va">df</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 5</span></span>
+<span><span class="co">#&gt;   country    year lifeExp      pop gdpPercap</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 Argentina  1952    62.5 17876956     5911.</span></span>
+<span><span class="co">#&gt; 2 Bolivia    1952    40.4  2883315     2677.</span></span>
+<span><span class="co">#&gt; 3 Brazil     1952    50.9 56602560     2109.</span></span>
+<span><span class="co">#&gt; 4 Canada     1952    68.8 14785584    11367.</span></span>
+<span><span class="co">#&gt; 5 Chile      1952    54.7  6377619     3940.</span></span>
+<span><span class="co">#&gt; 6 Colombia   1952    50.6 12350771     2144.</span></span>
+<span></span>
+<span><span class="co"># See full column specification</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec.html">spec</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   country = col_character(),</span></span>
+<span><span class="co">#&gt;   year = col_double(),</span></span>
+<span><span class="co">#&gt;   lifeExp = col_double(),</span></span>
+<span><span class="co">#&gt;   pop = col_double(),</span></span>
+<span><span class="co">#&gt;   gdpPercap = col_double()</span></span>
+<span><span class="co">#&gt; )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="sec-overriding" class="level3" data-number="2.2.1"><h3 data-number="2.2.1" class="anchored" data-anchor-id="sec-overriding">
+<span class="header-section-number">2.2.1</span> Overriding the defaults</h3>
+<p>One of the main aspects of working with <code>readr</code> is the ability to override the default column specifications. One way to start the process of overriding the defaults is to copy the code output generated by <code><a href="https://readr.tidyverse.org/reference/spec.html">spec()</a></code>.</p>
+<p>Override default column types with <code>col_types</code> argument in three ways:</p>
+<ol type="1">
+<li>With a compact string representation where each character represents one column: <code>"dcnf"</code>
+</li>
+<li>With a named list using <code>col_*</code> functions</li>
+<li>With a names list using character abbreviations of types</li>
+</ol>
+<p>Columns not specified will be parsed automatically. You can skip columns to not import them with <code><a href="https://readr.tidyverse.org/reference/col_skip.html">col_skip()</a></code>. Alternatively, you can only read in the columns that you specify with <code><a href="https://readr.tidyverse.org/reference/cols.html">cols_only()</a></code> instead of a named list. You can also set a default type for columns through the <code>.default</code> argument in the named list.</p>
+</section><section id="sec-chickens" class="level3" data-number="2.2.2"><h3 data-number="2.2.2" class="anchored" data-anchor-id="sec-chickens">
+<span class="header-section-number">2.2.2</span> Chickens example</h3>
+<p>Here is a simple example of reading in a column as a factor instead of a character and integer instead of double. Use of <code><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv()</a></code> to only show the column types.</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 1. Compact method</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"chickens.csv"</span><span class="op">)</span>, col_types <span class="op">=</span> <span class="st">"cfic"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 5 × 4</span></span>
+<span><span class="co">#&gt;   chicken                 sex     eggs_laid motto                               </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;                   &lt;fct&gt;       &lt;int&gt; &lt;chr&gt;                               </span></span>
+<span><span class="co">#&gt; 1 Foghorn Leghorn         rooster         0 That's a joke, ah say, that's a jok…</span></span>
+<span><span class="co">#&gt; 2 Chicken Little          hen             3 The sky is falling!                 </span></span>
+<span><span class="co">#&gt; 3 Ginger                  hen            12 Listen. We'll either die free chick…</span></span>
+<span><span class="co">#&gt; 4 Camilla the Chicken     hen             7 Bawk, buck, ba-gawk.                </span></span>
+<span><span class="co">#&gt; 5 Ernie The Giant Chicken rooster         0 Put Captain Solo in the cargo hold.</span></span>
+<span></span>
+<span><span class="co"># 2. col_* functions</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"chickens.csv"</span><span class="op">)</span>, col_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  sex <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_factor.html">col_factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"hen"</span>, <span class="st">"rooster"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  eggs_laid <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_atomic.html">col_integer</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   chicken = col_character(),</span></span>
+<span><span class="co">#&gt;   sex = col_factor(levels = c("hen", "rooster"), ordered = FALSE, include_na = FALSE),</span></span>
+<span><span class="co">#&gt;   eggs_laid = col_integer(),</span></span>
+<span><span class="co">#&gt;   motto = col_character()</span></span>
+<span><span class="co">#&gt; )</span></span>
+<span></span>
+<span><span class="co"># 3. list with abbreviations</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"chickens.csv"</span><span class="op">)</span>, col_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  sex <span class="op">=</span> <span class="st">"f"</span>,</span>
+<span>  eggs_laid <span class="op">=</span> <span class="st">"i"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   chicken = col_character(),</span></span>
+<span><span class="co">#&gt;   sex = col_factor(levels = NULL, ordered = FALSE, include_na = FALSE),</span></span>
+<span><span class="co">#&gt;   eggs_laid = col_integer(),</span></span>
+<span><span class="co">#&gt;   motto = col_character()</span></span>
+<span><span class="co">#&gt; )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Notice that the <code>col_*</code> functions method is the most explicit and provides the most flexibility to provide additional parameters such as specifying the levels of a factor of a date format.</p>
+</section><section id="sec-col-specs" class="level3" data-number="2.2.3"><h3 data-number="2.2.3" class="anchored" data-anchor-id="sec-col-specs">
+<span class="header-section-number">2.2.3</span> Available column specifications</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Function</th>
+<th>Abbreviated string</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">col_logical()</a></code></td>
+<td><code>"l"</code></td>
+</tr>
+<tr class="even">
+<td><code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">col_integer()</a></code></td>
+<td><code>"i"</code></td>
+</tr>
+<tr class="odd">
+<td><code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">col_double()</a></code></td>
+<td><code>"d"</code></td>
+</tr>
+<tr class="even">
+<td><code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">col_character()</a></code></td>
+<td><code>"c"</code></td>
+</tr>
+<tr class="odd">
+<td><code>col_factor(levels, ordered)</code></td>
+<td><code>"f"</code></td>
+</tr>
+<tr class="even">
+<td><code>col_date(format = "")</code></td>
+<td><code>"D"</code></td>
+</tr>
+<tr class="odd">
+<td><code>col_time(format = "")</code></td>
+<td><code>"t"</code></td>
+</tr>
+<tr class="even">
+<td><code>col_datetime(format = "")</code></td>
+<td><code>"T"</code></td>
+</tr>
+<tr class="odd">
+<td><code><a href="https://readr.tidyverse.org/reference/parse_number.html">col_number()</a></code></td>
+<td><code>"n"</code></td>
+</tr>
+<tr class="even">
+<td><code><a href="https://readr.tidyverse.org/reference/col_skip.html">col_skip()</a></code></td>
+<td>
+<code>"_"</code> or <code>"-"</code>
+</td>
+</tr>
+<tr class="odd">
+<td><code><a href="https://readr.tidyverse.org/reference/parse_guess.html">col_guess()</a></code></td>
+<td><code>"?"</code></td>
+</tr>
+</tbody>
+</table></section></section><section id="sec-ex-data" class="level2" data-number="2.3"><h2 data-number="2.3" class="anchored" data-anchor-id="sec-ex-data">
+<span class="header-section-number">2.3</span> Example data</h2>
+<p>I have created some example data in <a href="readr-data.html" class="quarto-xref">Appendix&nbsp;<span>A</span></a> that provides a good overview of the different data formats that might be encountered and how to deal with them. Consult the <a href="./readr-data.html#key">data key</a> to see how columns should be parsed.</p>
+<p>Start by seeing how it does by default with <code><a href="https://readr.tidyverse.org/reference/parse_guess.html">guess_parser()</a></code> using <code><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv()</a></code> and what the data looks like:</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/readr-example.csv"</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 50 × 13</span></span>
+<span><span class="co">#&gt;    a     b         c d     e           f g              h i          j     k    </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;lgl&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;date&gt;     &lt;chr&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt;  1 p     b      95.2 TRUE  gnarly     48 $42,498.… 1.47e7 1585-05-06 20 J… Feb …</span></span>
+<span><span class="co">#&gt;  2 x     b      71.1 FALSE none       36 $141,971… 1.58e7 1366-12-10 23 A… Jun …</span></span>
+<span><span class="co">#&gt;  3 e     d      15.6 FALSE kook       35 $15,852.… 1.55e7 1606-06-05 4 Ju… Sep …</span></span>
+<span><span class="co">#&gt;  4 o     b      57.6 TRUE  kook       46 $66,555.… 1.46e7 1675-01-14 20 O… Dec …</span></span>
+<span><span class="co">#&gt;  5 v     d      91.1 TRUE  hello      23 $143,747… 1.35e7 1400-05-12 27 J… Oct …</span></span>
+<span><span class="co">#&gt;  6 r     d      40.0 TRUE  gnarly     36 $46,013.… 1.34e7 1578-09-14 26 J… Nov …</span></span>
+<span><span class="co">#&gt;  7 h     &lt;NA&gt;   70.8 TRUE  gnarly     43 $126,686… 1.32e7 1492-08-28 5 No… Aug …</span></span>
+<span><span class="co">#&gt;  8 p     e      82.0 TRUE  goodbye    43 $85,459.… 1.37e7 1214-10-11 17 F… Feb …</span></span>
+<span><span class="co">#&gt;  9 u     &lt;NA&gt;   96.9 FALSE hello      37 $143,002… 1.56e7 1310-10-12 27 O… Nov …</span></span>
+<span><span class="co">#&gt; 10 i     d      12.1 FALSE hello      48 $162,345… 1.61e7 1299-01-20 25 S… Aug …</span></span>
+<span><span class="co">#&gt; # ℹ 40 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 2 more variables: l &lt;dbl&gt;, m &lt;dttm&gt;</span></span>
+<span></span>
+<span><span class="co"># Column specifications</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv</a></span><span class="op">(</span><span class="st">"data/readr-example.csv"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   a = col_character(),</span></span>
+<span><span class="co">#&gt;   b = col_character(),</span></span>
+<span><span class="co">#&gt;   c = col_double(),</span></span>
+<span><span class="co">#&gt;   d = col_logical(),</span></span>
+<span><span class="co">#&gt;   e = col_character(),</span></span>
+<span><span class="co">#&gt;   f = col_double(),</span></span>
+<span><span class="co">#&gt;   g = col_character(),</span></span>
+<span><span class="co">#&gt;   h = col_double(),</span></span>
+<span><span class="co">#&gt;   i = col_date(format = ""),</span></span>
+<span><span class="co">#&gt;   j = col_character(),</span></span>
+<span><span class="co">#&gt;   k = col_character(),</span></span>
+<span><span class="co">#&gt;   l = col_double(),</span></span>
+<span><span class="co">#&gt;   m = col_datetime(format = "")</span></span>
+<span><span class="co">#&gt; )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The parser generally does well. Columns <code>a</code>, <code>b</code>, <code>c</code>, and <code>d</code> are all completely correct, including identifying <code>NA</code> values in column <code>b</code>, but there are some issues to deal with in columns <code>e</code>, <code>f</code>, and <code>g</code>.</p>
+<section id="overriding-guesses" class="level3" data-number="2.3.1"><h3 data-number="2.3.1" class="anchored" data-anchor-id="overriding-guesses">
+<span class="header-section-number">2.3.1</span> Overriding guesses</h3>
+<p>To override the guesses from <code><a href="https://readr.tidyverse.org/reference/parse_guess.html">guess_parser()</a></code> we can use <code>col_*</code> functions to be more specific, turning <code><a href="https://rdrr.io/r/base/character.html">character()</a></code> into <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code> (<a href="#sec-factors" class="quarto-xref"><span>Section 2.4.4</span></a>) and <code><a href="https://rdrr.io/r/base/double.html">double()</a></code> to <code><a href="https://rdrr.io/r/base/integer.html">integer()</a></code> (<a href="#sec-vctrs" class="quarto-xref"><span>Section 2.4.1</span></a>). Use <code><a href="https://readr.tidyverse.org/reference/parse_number.html">col_number()</a></code> to properly read in values such as $42,498.74 as numeric (<a href="#sec-number" class="quarto-xref"><span>Section 2.4.2</span></a>). Can also add “none” to the <code>na</code> argument to turn “none” into <code>NA</code> in column <code>e</code>. Use of <code>col_only()</code> only reads in the specified columns.</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/readr-example.csv"</span>, </span>
+<span>         na <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">""</span>, <span class="st">"NA"</span>, <span class="st">"none"</span><span class="op">)</span>, <span class="co"># Add none as NA in b</span></span>
+<span>         col_types <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/cols.html">cols_only</a></span><span class="op">(</span></span>
+<span>  e <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_factor.html">col_factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"hello"</span>, <span class="st">"goodbye"</span>, <span class="st">"kook"</span>, <span class="st">"gnarly"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  f <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_atomic.html">col_integer</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  g <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_number.html">col_number</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 50 × 3</span></span>
+<span><span class="co">#&gt;    e           f       g</span></span>
+<span><span class="co">#&gt;    &lt;fct&gt;   &lt;int&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 gnarly     48  42499.</span></span>
+<span><span class="co">#&gt;  2 &lt;NA&gt;       36 141972.</span></span>
+<span><span class="co">#&gt;  3 kook       35  15853.</span></span>
+<span><span class="co">#&gt;  4 kook       46  66555.</span></span>
+<span><span class="co">#&gt;  5 hello      23 143748.</span></span>
+<span><span class="co">#&gt;  6 gnarly     36  46013.</span></span>
+<span><span class="co">#&gt;  7 gnarly     43 126687.</span></span>
+<span><span class="co">#&gt;  8 goodbye    43  85460.</span></span>
+<span><span class="co">#&gt;  9 hello      37 143003.</span></span>
+<span><span class="co">#&gt; 10 hello      48 162346.</span></span>
+<span><span class="co">#&gt; # ℹ 40 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-dates" class="level3" data-number="2.3.2"><h3 data-number="2.3.2" class="anchored" data-anchor-id="sec-dates">
+<span class="header-section-number">2.3.2</span> Dealing with dates</h3>
+<p>Dealing with dates often requires the use of a date format in <code><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_date()</a></code>, <code><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_time()</a></code>, and <code><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_datetime()</a></code> functions. Columns <code>i</code> and <code>m</code> are correctly specified as <code>date</code> and <code>datetime</code> because they follow the formats in <code><a href="https://readr.tidyverse.org/reference/locale.html">locale()</a></code>. See <a href="#sec-datetime" class="quarto-xref"><span>Section 2.4.3</span></a> for details.</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"data/readr-example.csv"</span>, col_types <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/cols.html">cols_only</a></span><span class="op">(</span></span>
+<span>  h <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_date</a></span><span class="op">(</span><span class="st">"%Y%m%d"</span><span class="op">)</span>, <span class="co"># date as 8 digit number (20230316)</span></span>
+<span>  i <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_date</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># date in locale (2023-03-16)</span></span>
+<span>  j <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_date</a></span><span class="op">(</span><span class="st">"%d %B %Y"</span><span class="op">)</span>, <span class="co"># 16 March 2023</span></span>
+<span>  k <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_date</a></span><span class="op">(</span><span class="st">"%b %d %Y"</span><span class="op">)</span>, <span class="co"># Mar 16 2023</span></span>
+<span>  l <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_time</a></span><span class="op">(</span><span class="st">"%h"</span><span class="op">)</span>, <span class="co"># time</span></span>
+<span>  m <span class="op">=</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">col_datetime</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># datetime in locale (2023-03-16 11:49)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 50 × 6</span></span>
+<span><span class="co">#&gt;    h          i          j          k          l         m                  </span></span>
+<span><span class="co">#&gt;    &lt;date&gt;     &lt;date&gt;     &lt;date&gt;     &lt;date&gt;     &lt;time&gt;    &lt;dttm&gt;             </span></span>
+<span><span class="co">#&gt;  1 1465-12-20 1585-05-06 1503-01-20 1313-02-04 150248:00 2023-05-16 02:57:00</span></span>
+<span><span class="co">#&gt;  2 1582-09-13 1366-12-10 1390-04-23 1553-06-17 197379:00 2023-04-28 23:26:00</span></span>
+<span><span class="co">#&gt;  3 1546-08-15 1606-06-05 1585-07-04 1299-09-18 101224:00 2023-09-22 13:17:00</span></span>
+<span><span class="co">#&gt;  4 1463-11-27 1675-01-14 1237-10-20 1558-12-01 225648:00 2023-02-27 07:48:00</span></span>
+<span><span class="co">#&gt;  5 1352-03-26 1400-05-12 1394-07-27 1297-10-21 300957:00 2023-02-11 17:22:00</span></span>
+<span><span class="co">#&gt;  6 1335-05-25 1578-09-14 1593-07-26 1621-11-23  43411:00 2023-06-02 06:30:00</span></span>
+<span><span class="co">#&gt;  7 1315-03-20 1492-08-28 1237-11-05 1681-08-09 317706:00 2023-07-26 12:09:00</span></span>
+<span><span class="co">#&gt;  8 1370-01-09 1214-10-11 1650-02-17 1301-02-28 224552:00 2023-06-26 01:25:00</span></span>
+<span><span class="co">#&gt;  9 1562-05-23 1310-10-12 1660-10-27 1524-11-08  48277:00 2023-12-25 14:20:00</span></span>
+<span><span class="co">#&gt; 10 1608-06-21 1299-01-20 1263-09-25 1290-08-23 239288:00 2023-04-14 04:22:00</span></span>
+<span><span class="co">#&gt; # ℹ 40 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section><section id="sec-parsers" class="level2" data-number="2.4"><h2 data-number="2.4" class="anchored" data-anchor-id="sec-parsers">
+<span class="header-section-number">2.4</span> Vector parsers</h2>
+<p>Parse character vectors and return specified vector types with <code>parse_*</code> functions.</p>
+<section id="sec-vctrs" class="level3" data-number="2.4.1"><h3 data-number="2.4.1" class="anchored" data-anchor-id="sec-vctrs">
+<span class="header-section-number">2.4.1</span> Atomic vectors</h3>
+<p><code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_logical()</a></code>, <code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_integer()</a></code>, <code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_double()</a></code>, and <code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_character()</a></code> are straightforward parsers that produce the corresponding atomic vector.</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_double</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"1.56"</span>, <span class="st">"2.34"</span>, <span class="st">"3.56"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1.56 2.34 3.56</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "integer"</span></span>
+<span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_logical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"true"</span>, <span class="st">"false"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]  TRUE FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-number" class="level3" data-number="2.4.2"><h3 data-number="2.4.2" class="anchored" data-anchor-id="sec-number">
+<span class="header-section-number">2.4.2</span> Flexible numeric parser</h3>
+<p><code><a href="https://readr.tidyverse.org/reference/parse_number.html">parse_number()</a></code> is more flexible than <code><a href="https://readr.tidyverse.org/reference/parse_atomic.html">parse_double()</a></code>; it allows non-numeric prefixes and suffixes, and knows how to deal with grouping marks.</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_number.html">parse_number</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"0%"</span>, <span class="st">"10%"</span>, <span class="st">"150%"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]   0  10 150</span></span>
+<span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_number.html">parse_number</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"$1,234.5"</span>, <span class="st">"$12.45"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1234.50   12.45</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-datetime" class="level3" data-number="2.4.3"><h3 data-number="2.4.3" class="anchored" data-anchor-id="sec-datetime">
+<span class="header-section-number">2.4.3</span> Date-times</h3>
+<p><code>readr</code> supports three types of date-times, which all take a <code>format</code> argument to define how the date-time is formatted:</p>
+<ul>
+<li>dates: number of days since 1970-01-01
+<ul>
+<li>
+<code><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_date()</a></code> uses the <code>date_format</code> specified by the <code><a href="https://readr.tidyverse.org/reference/locale.html">locale()</a></code>. The default value is <code>%AD</code> which uses an automatic date parser that recognizes dates of the format <code>Y-m-d</code> or <code>Y/m/d</code>.</li>
+</ul>
+</li>
+<li>times: number of seconds since midnight
+<ul>
+<li>
+<code><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_time()</a></code> uses the <code>time_format</code> specified by <code><a href="https://readr.tidyverse.org/reference/locale.html">locale()</a></code>. The default value is <code>%At</code> which uses an automatic time parser that recognizes times of the form <code>H:M</code> optionally followed by seconds and am/pm.</li>
+</ul>
+</li>
+<li>datetimes: number of seconds since midnight 1970-01-01
+<ul>
+<li>Recognizes <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO8601</a> datetimes.</li>
+</ul>
+</li>
+</ul>
+<p>Parsing dates with default formats:</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_date</a></span><span class="op">(</span><span class="st">"2010-10-01"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2010-10-01"</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_time</a></span><span class="op">(</span><span class="st">"1:00pm"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 13:00:00</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_datetime</a></span><span class="op">(</span><span class="st">"2010-10-01 21:45"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2010-10-01 21:45:00 UTC"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>See the default formats with <code><a href="https://readr.tidyverse.org/reference/locale.html">locale()</a></code></p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/locale.html">locale</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;locale&gt;</span></span>
+<span><span class="co">#&gt; Numbers:  123,456.78</span></span>
+<span><span class="co">#&gt; Formats:  %AD / %AT</span></span>
+<span><span class="co">#&gt; Timezone: UTC</span></span>
+<span><span class="co">#&gt; Encoding: UTF-8</span></span>
+<span><span class="co">#&gt; &lt;date_names&gt;</span></span>
+<span><span class="co">#&gt; Days:   Sunday (Sun), Monday (Mon), Tuesday (Tue), Wednesday (Wed), Thursday</span></span>
+<span><span class="co">#&gt;         (Thu), Friday (Fri), Saturday (Sat)</span></span>
+<span><span class="co">#&gt; Months: January (Jan), February (Feb), March (Mar), April (Apr), May (May),</span></span>
+<span><span class="co">#&gt;         June (Jun), July (Jul), August (Aug), September (Sep), October</span></span>
+<span><span class="co">#&gt;         (Oct), November (Nov), December (Dec)</span></span>
+<span><span class="co">#&gt; AM/PM:  AM/PM</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In most cases you will need to supply a <code>format</code> for date and datetime. See <a href="https://readr.tidyverse.org/reference/parse_datetime.html">date format specifications</a>.</p>
+<ul>
+<li>Year: <code>"%Y"</code> (4 digits); <code>"%y"</code> (2 digits)</li>
+<li>Month: <code>"%m"</code> (2 digits), <code>"%b"</code> (abbreviated name), <code>"%B"</code> (full name)</li>
+<li>Day: <code>"%d"</code> (2 digits), <code>"%e"</code> (optional leading space), <code>"%a"</code> (abbreviated name)</li>
+<li>Hour: <code>"%H"</code>, or <code>"%I"</code> with AM/PM, or “%h” if times represent durations longer than one day.</li>
+<li>Minutes: <code>"%M"</code>
+</li>
+<li>Seconds: <code>"%S"</code> (integer seconds), <code>"%OS"</code> (partial seconds)</li>
+<li>Time zone: <code>"%Z"</code> (as name, e.g.&nbsp;“America/Chicago”), <code>"%z"</code> (as offset from UTC, e.g.&nbsp;“+0800”)</li>
+<li>AM/PM indicator: “%p”</li>
+<li>Shortcuts:
+<ul>
+<li>
+<code>"%D"</code> = <code>"%m/%d/%y"</code>
+</li>
+<li>
+<code>"%F"</code> = <code>"%Y-%m-%d"</code>
+</li>
+<li>
+<code>"%R"</code> = <code>"%H:%M"</code>
+</li>
+<li>
+<code>"%T"</code> = <code>"%H:%M:%S"</code>
+</li>
+<li>
+<code>"%x"</code> = <code>"%y/%m/%d"</code>
+</li>
+</ul>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_date</a></span><span class="op">(</span><span class="st">"1 January, 2020"</span>, <span class="st">"%d %B, %Y"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2020-01-01"</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_date</a></span><span class="op">(</span><span class="st">"20230315"</span>, <span class="st">"%Y%m%d"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2023-03-15"</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_datetime.html">parse_datetime</a></span><span class="op">(</span><span class="st">"02/02/23"</span>, <span class="st">"%m/%d/%y"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2023-02-02 UTC"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="sec-factors" class="level3" data-number="2.4.4"><h3 data-number="2.4.4" class="anchored" data-anchor-id="sec-factors">
+<span class="header-section-number">2.4.4</span> Factors</h3>
+<p><code>readr</code> does not parse characters as factors. Use <code><a href="https://readr.tidyverse.org/reference/parse_factor.html">parse_factor()</a></code> with optional argument for <code>levels</code>. If <code>levels</code> is <code>NULL</code>, they are discovered from unique values in the supplied character vector.</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_factor.html">parse_factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"a"</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] a b a</span></span>
+<span><span class="co">#&gt; Levels: a b c</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_factor.html">parse_factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"a"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] a b a</span></span>
+<span><span class="co">#&gt; Levels: a b</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section><section id="sec-specs" class="level2" data-number="2.5"><h2 data-number="2.5" class="anchored" data-anchor-id="sec-specs">
+<span class="header-section-number">2.5</span> Column specification</h2>
+<p><code>readr</code> works by guessing which parser to use for each column. You can access the results using <code><a href="https://readr.tidyverse.org/reference/parse_guess.html">guess_parser()</a></code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_guess.html">guess_parser</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "double"</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_guess.html">guess_parser</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"1,000"</span>, <span class="st">"2,000"</span>, <span class="st">"3,000"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "number"</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/parse_guess.html">guess_parser</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"2001/10/10"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "date"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Use <code><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv()</a></code> and others to see the specification that <code>readr</code> would generate for columns in a file.</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"challenge.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   x = col_double(),</span></span>
+<span><span class="co">#&gt;   y = col_logical()</span></span>
+<span><span class="co">#&gt; )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Use <code><a href="https://readr.tidyverse.org/reference/spec.html">spec()</a></code> to see the specifications that <code>readr</code> used when reading in a tibble from a flat file.</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"mtcars.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 32 Columns: 11</span></span>
+<span><span class="co">#&gt; ── Column specification ────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; Delimiter: ","</span></span>
+<span><span class="co">#&gt; dbl (11): mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ℹ Use `spec()` to retrieve the full column specification for this data.</span></span>
+<span><span class="co">#&gt; ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
+<span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec.html">spec</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   mpg = col_double(),</span></span>
+<span><span class="co">#&gt;   cyl = col_double(),</span></span>
+<span><span class="co">#&gt;   disp = col_double(),</span></span>
+<span><span class="co">#&gt;   hp = col_double(),</span></span>
+<span><span class="co">#&gt;   drat = col_double(),</span></span>
+<span><span class="co">#&gt;   wt = col_double(),</span></span>
+<span><span class="co">#&gt;   qsec = col_double(),</span></span>
+<span><span class="co">#&gt;   vs = col_double(),</span></span>
+<span><span class="co">#&gt;   am = col_double(),</span></span>
+<span><span class="co">#&gt;   gear = col_double(),</span></span>
+<span><span class="co">#&gt;   carb = col_double()</span></span>
+<span><span class="co">#&gt; )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>readr</code> uses the first 1000 rows to guess the column type to speed up the reading process. You can change the number of rows used with <code>guess_max</code>. Note the difference with <code>challenge.csv</code> with <code>y</code> going from logical to date.</p>
+<div class="cell">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"challenge.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   x = col_double(),</span></span>
+<span><span class="co">#&gt;   y = col_logical()</span></span>
+<span><span class="co">#&gt; )</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/spec_delim.html">spec_csv</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/readr_example.html">readr_example</a></span><span class="op">(</span><span class="st">"challenge.csv"</span><span class="op">)</span>, guess_max <span class="op">=</span> <span class="fl">1001</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cols(</span></span>
+<span><span class="co">#&gt;   x = col_double(),</span></span>
+<span><span class="co">#&gt;   y = col_date(format = "")</span></span>
+<span><span class="co">#&gt; )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./01-pipe.html" class="pagination-link  aria-label=" magrittr="" and="" native="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Pipe: magrittr and native</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./01-dplyr-colwise.html" class="pagination-link" aria-label="<span class='chapter-number'>3</span>&nbsp; <span class='chapter-title'>dplyr: Column-wise operations</span>">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">dplyr: Column-wise operations</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

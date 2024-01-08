@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.537">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="dcterms.date" content="2023-07-07">
+<title>tidyverse notes - 23&nbsp; Themes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./02-patchwork.html" rel="next">
+<link href="./02-facets.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-ggplot2-rstudioconf-2022.html">ggplot2</a></li><li class="breadcrumb-item"><a href="./02-themes.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Themes</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">tidyverse notes</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">tidyverse</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-pipe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Pipe: magrittr and native</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-readr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">readr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-colwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">dplyr: Column-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-rowwise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">dplyr: Row-wise operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.0.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">dplyr 1.0.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-dplyr-1.1.0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">dplyr 1.1.0</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-forcats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">forcats</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-lubridate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Dates and times with lubridate</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-pivoting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">tidyr: Pivoting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-tidyr-rectangling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">tidyr: Rectandling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-purrr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">purrr</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">ggplot2</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ggplot2-rstudioconf-2022.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">RStudio conf 2022 ggplot2 workshop</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-geoms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Geoms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-annotations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Annotations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-aesthetics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Aesthetics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-position.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Position scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-color.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Color scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-scales-aes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Aesthetic scales</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-coords.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Coordinates</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-guides.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Guides: Legends</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-facets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Facets</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-themes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Themes</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-patchwork.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">patchwork</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">tidy eval</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr-superceded.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Programming with dplyr (pre 1.0.0)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-programming-dplyr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Programming with dplyr</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Advanced R: Metaprogramming</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-tidyeval.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">rlang: Tidy evaluation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-rlang-metaprogramming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">rlang: Metaprogramming</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./readr-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">readr example data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#sec-theme-resources" id="toc-sec-theme-resources" class="nav-link active" data-scroll-target="#sec-theme-resources"><span class="header-section-number">23.1</span> Resources</a>
+  <ul class="collapse">
+<li><a href="#ggplot2-theme-elements" id="toc-ggplot2-theme-elements" class="nav-link" data-scroll-target="#ggplot2-theme-elements">ggplot2 Theme Elements</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-theme-baseplot" id="toc-sec-theme-baseplot" class="nav-link" data-scroll-target="#sec-theme-baseplot"><span class="header-section-number">23.2</span> Base plot</a></li>
+  <li><a href="#sec-theme-inheritance" id="toc-sec-theme-inheritance" class="nav-link" data-scroll-target="#sec-theme-inheritance"><span class="header-section-number">23.3</span> Theme inheritance</a></li>
+  <li><a href="#sec-theme-elements" id="toc-sec-theme-elements" class="nav-link" data-scroll-target="#sec-theme-elements"><span class="header-section-number">23.4</span> Theme elements</a></li>
+  <li>
+<a href="#sec-theme-components" id="toc-sec-theme-components" class="nav-link" data-scroll-target="#sec-theme-components"><span class="header-section-number">23.5</span> Components of a theme</a>
+  <ul class="collapse">
+<li><a href="#sec-theme-components-general" id="toc-sec-theme-components-general" class="nav-link" data-scroll-target="#sec-theme-components-general"><span class="header-section-number">23.5.1</span> General</a></li>
+  <li><a href="#sec-theme-axes" id="toc-sec-theme-axes" class="nav-link" data-scroll-target="#sec-theme-axes"><span class="header-section-number">23.5.2</span> Axes</a></li>
+  <li><a href="#sec-theme-legend" id="toc-sec-theme-legend" class="nav-link" data-scroll-target="#sec-theme-legend"><span class="header-section-number">23.5.3</span> Legend</a></li>
+  <li><a href="#plot-title-and-metadata" id="toc-plot-title-and-metadata" class="nav-link" data-scroll-target="#plot-title-and-metadata"><span class="header-section-number">23.5.4</span> Plot title and metadata</a></li>
+  <li><a href="#sec-theme-panel" id="toc-sec-theme-panel" class="nav-link" data-scroll-target="#sec-theme-panel"><span class="header-section-number">23.5.5</span> Panel: Plotting area</a></li>
+  <li><a href="#sec-theme-plot" id="toc-sec-theme-plot" class="nav-link" data-scroll-target="#sec-theme-plot"><span class="header-section-number">23.5.6</span> Plot: Whole area of the plot</a></li>
+  <li><a href="#sec-theme-facets" id="toc-sec-theme-facets" class="nav-link" data-scroll-target="#sec-theme-facets"><span class="header-section-number">23.5.7</span> Facets: Strip</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-complete-themes" id="toc-sec-complete-themes" class="nav-link" data-scroll-target="#sec-complete-themes"><span class="header-section-number">23.6</span> Complete themes</a>
+  <ul class="collapse">
+<li><a href="#sec-light-themes" id="toc-sec-light-themes" class="nav-link" data-scroll-target="#sec-light-themes"><span class="header-section-number">23.6.1</span> Light themes</a></li>
+  <li><a href="#sec-minimal-themes" id="toc-sec-minimal-themes" class="nav-link" data-scroll-target="#sec-minimal-themes"><span class="header-section-number">23.6.2</span> Minimal themes</a></li>
+  <li><a href="#sec-theme-pkgs" id="toc-sec-theme-pkgs" class="nav-link" data-scroll-target="#sec-theme-pkgs"><span class="header-section-number">23.6.3</span> Theme packages</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-set-theme" id="toc-sec-set-theme" class="nav-link" data-scroll-target="#sec-set-theme"><span class="header-section-number">23.7</span> Setting themes</a>
+  <ul class="collapse">
+<li><a href="#sec-reuse-themes" id="toc-sec-reuse-themes" class="nav-link" data-scroll-target="#sec-reuse-themes"><span class="header-section-number">23.7.1</span> Reusing themes</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-fonts" id="toc-sec-fonts" class="nav-link" data-scroll-target="#sec-fonts"><span class="header-section-number">23.8</span> Fonts</a>
+  <ul class="collapse">
+<li><a href="#sec-register-fonts" id="toc-sec-register-fonts" class="nav-link" data-scroll-target="#sec-register-fonts"><span class="header-section-number">23.8.1</span> Registering font variants</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-theme-ggtext" id="toc-sec-theme-ggtext" class="nav-link" data-scroll-target="#sec-theme-ggtext"><span class="header-section-number">23.9</span> ggtext</a>
+  <ul class="collapse">
+<li><a href="#sec-theme-html-support" id="toc-sec-theme-html-support" class="nav-link" data-scroll-target="#sec-theme-html-support"><span class="header-section-number">23.9.1</span> Supported HTML</a></li>
+  <li><a href="#sec-theme-element-markdown" id="toc-sec-theme-element-markdown" class="nav-link" data-scroll-target="#sec-theme-element-markdown"><span class="header-section-number">23.9.2</span> <code>element_markdown()</code></a></li>
+  <li><a href="#sec-theme-element-textbox" id="toc-sec-theme-element-textbox" class="nav-link" data-scroll-target="#sec-theme-element-textbox"><span class="header-section-number">23.9.3</span> <code>element_textbox()</code></a></li>
+  </ul>
+</li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-ggplot2-rstudioconf-2022.html">ggplot2</a></li><li class="breadcrumb-item"><a href="./02-themes.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Themes</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title"><span id="sec-themes" class="quarto-section-identifier"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Themes</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 7, 2023</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">January 8, 2024</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header><p>Themes affect the aesthetics of non-data components of plots: i.e.&nbsp;titles, labels, fonts, background, grid lines, and legends.</p>
+<section id="sec-theme-resources" class="level2" data-number="23.1"><h2 data-number="23.1" class="anchored" data-anchor-id="sec-theme-resources">
+<span class="header-section-number">23.1</span> Resources</h2>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme() documentation</a></li>
+<li><a href="https://github.com/tidyverse/ggplot2/blob/main/R/theme-defaults.R">theme() code</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/element.html">Theme elements functions</a></li>
+<li><a href="https://ggplot2-book.org/themes.html">Wickham, ggplot2 book: Themes</a></li>
+<li><a href="https://r4ds.hadley.nz/communication.html#sec-themes">R for Data Science: Communication, Themes</a></li>
+<li><a href="https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/#themes">Scherer, ggplot2 Tutorial: Themes</a></li>
+<li><a href="https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/">Thomas Mock - Creating and using custom ggplot2 themes</a></li>
+<li><a href="https://isabella-b.com/blog/ggplot2-theme-elements-reference/">ggplot2 Theme Elements Reference Sheet</a></li>
+</ul>
+<section id="ggplot2-theme-elements" class="level3 unnumbered"><h3 class="unnumbered anchored" data-anchor-id="ggplot2-theme-elements">ggplot2 Theme Elements</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="img/ggplot2-theme-elements-reference-v2.png" class="img-fluid figure-img"></p>
+<figcaption>Isabella Benabaye - ggplot2 Theme Elements Reference Sheet</figcaption></figure>
+</div>
+</section></section><section id="sec-theme-baseplot" class="level2" data-number="23.2"><h2 data-number="23.2" class="anchored" data-anchor-id="sec-theme-baseplot">
+<span class="header-section-number">23.2</span> Base plot</h2>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://allisonhorst.github.io/palmerpenguins/">palmerpenguins</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-lib/systemfonts">systemfonts</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://wilkelab.org/ggtext/">ggtext</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidyverse/glue">glue</a></span><span class="op">)</span></span>
+<span><span class="co"># Base plot</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">penguins</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">flipper_length_mm</span><span class="op">)</span>,</span>
+<span>         <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">flipper_length_mm</span>,</span>
+<span>             y <span class="op">=</span> <span class="va">body_mass_g</span>,</span>
+<span>             color <span class="op">=</span> <span class="va">species</span>,</span>
+<span>             shape <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Penguin Size"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Flipper length (mm)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Body mass (g)"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"Penguin species"</span>,</span>
+<span>       shape <span class="op">=</span> <span class="st">"Sex"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Default plot uses <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_grey()</a></code></p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/default-theme-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-theme-inheritance" class="level2" data-number="23.3"><h2 data-number="23.3" class="anchored" data-anchor-id="sec-theme-inheritance">
+<span class="header-section-number">23.3</span> Theme inheritance</h2>
+<p>Theme elements inherit properties from other theme elements hierarchically. For example, <code>axis.title.x.bottom</code> inherits from <code>axis.title.x</code> which inherits from <code>axis.title</code>, which in turn inherits from <code>text</code>. All text elements inherit directly or indirectly from <code>text</code>; all lines inherit from <code>line</code>, and all rectangular objects inherit from <code>rect.</code> This means that you can modify the appearance of multiple elements by setting a single high-level component.</p>
+</section><section id="sec-theme-elements" class="level2" data-number="23.4"><h2 data-number="23.4" class="anchored" data-anchor-id="sec-theme-elements">
+<span class="header-section-number">23.4</span> Theme elements</h2>
+<p><a href="https://ggplot2.tidyverse.org/reference/element.html">Theme elements documentation</a>: These functions are used to modify arguments in <code><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme()</a></code>.</p>
+<ul>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank()</a></code>: draws nothing, and assigns no space.</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect()</a></code>: borders and backgrounds.
+<ul>
+<li>Arguments: fill, color, linewidth, linetype</li>
+</ul>
+</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line()</a></code>: lines.
+<ul>
+<li>Arguments: fill, color, linewidth, linetype, lineend, arrow</li>
+</ul>
+</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text()</a></code>: text.
+<ul>
+<li>Arguments: family, face, color, size, hjust, vjust, angle, lineheight, margin</li>
+</ul>
+</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/element.html">rel()</a></code>: Specify sizes relative to the parent
+<ul>
+<li>e.g.&nbsp;<code>plot.title = element_text(size = rel(2))</code> to make size of plot title twice as big.</li>
+</ul>
+</li>
+<li><code>margin(t = 0, r = 0, b = 0, l = 0, unit = "pt")</code></li>
+</ul></section><section id="sec-theme-components" class="level2" data-number="23.5"><h2 data-number="23.5" class="anchored" data-anchor-id="sec-theme-components">
+<span class="header-section-number">23.5</span> Components of a theme</h2>
+<p>Arguments in <code><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme()</a></code>. Not all levels of the argument hierarchy are presented here.</p>
+<section id="sec-theme-components-general" class="level3" data-number="23.5.1"><h3 data-number="23.5.1" class="anchored" data-anchor-id="sec-theme-components-general">
+<span class="header-section-number">23.5.1</span> General</h3>
+<p>High level arguments in the theme hierarchy:</p>
+<ul>
+<li>
+<code>rect</code>: <code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect()</a></code>
+</li>
+<li>
+<code>line</code>: <code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line()</a></code>
+</li>
+<li>
+<code>text</code>: <code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text()</a></code>
+</li>
+<li>
+<code>title</code>: <code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text()</a></code> all title elements: plot, axes, legends</li>
+<li>
+<code>aspect.ratio</code>: aspect ratio of the panel</li>
+</ul></section><section id="sec-theme-axes" class="level3" data-number="23.5.2"><h3 data-number="23.5.2" class="anchored" data-anchor-id="sec-theme-axes">
+<span class="header-section-number">23.5.2</span> Axes</h3>
+<ul>
+<li>
+<code>axis.title</code>: title of axes</li>
+<li>
+<code>axis.text</code>: tick labels along axes</li>
+<li>
+<code>axis.ticks</code>: tick marks <code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line()</a></code>
+</li>
+<li>
+<code>axis.line</code>: lines along axes</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span>,</span>
+<span>        axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"orange"</span><span class="op">)</span>,</span>
+<span>        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="op">-</span><span class="fl">90</span>, vjust <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                                   margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">margin</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span>,</span>
+<span>        axis.ticks.length.y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="st">"cm"</span><span class="op">)</span>,</span>
+<span>        axis.ticks.length.x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.25</span>, <span class="st">"cm"</span><span class="op">)</span>,</span>
+<span>        axis.line <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">3</span>, colour <span class="op">=</span> <span class="st">"grey80"</span><span class="op">)</span></span>
+<span>        <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/axes-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-theme-legend" class="level3" data-number="23.5.3"><h3 data-number="23.5.3" class="anchored" data-anchor-id="sec-theme-legend">
+<span class="header-section-number">23.5.3</span> Legend</h3>
+<p>For a full discussion of legends see <a href="02-guides.html" class="quarto-xref"><span>Chapter 21</span></a> and specifically <a href="02-guides.html#sec-guide-theme" class="quarto-xref"><span>Section 21.9</span></a>.</p>
+<section id="remove-legend" class="level4"><h4 class="anchored" data-anchor-id="remove-legend">Remove legend</h4>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/remove-legend-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="legend-arguments" class="level4"><h4 class="anchored" data-anchor-id="legend-arguments">Legend arguments</h4>
+<ul>
+<li>Legend layout: see <a href="02-guides.html#sec-guide-layout" class="quarto-xref"><span>Section 21.5</span></a>
+<ul>
+<li>
+<code>legend.position</code>: the position of legends – <code>"none"</code>, <code>"left"</code>, <code>"right"</code>, <code>"bottom"</code>, <code>"top"</code>, or two-element character or numeric vector</li>
+<li>
+<code>legend.direction</code>: <code>"horizontal"</code> or <code>"vertical"</code>
+</li>
+<li>
+<code>legend.justification</code>: anchor point for positioning legend</li>
+</ul>
+</li>
+<li>Bounding box of all legends
+<ul>
+<li>
+<code>legend.box</code>: arrangement of multiple legends (<code>"horizontal"</code> or <code>"vertical"</code>)</li>
+<li>
+<code>legend.box.background</code>: background of full legend area</li>
+<li>
+<code>legend.box.just</code>: justification of each legend within the overall bounding box</li>
+<li>
+<code>legend.box.margin</code>: margins around the full legend bounding box</li>
+<li>
+<code>legend.box.spacing</code>: The spacing between the plotting area and the full legend bounding box</li>
+</ul>
+</li>
+<li>Bounding box of each legend
+<ul>
+<li><code>legend.background</code></li>
+<li>
+<code>legend.margin</code>: the margin around each legend</li>
+<li>
+<code>legend.spacing</code>: spacing between legends if there are multiple legends</li>
+</ul>
+</li>
+<li>Legend keys: see <a href="02-guides.html#sec-guide-key-spacing" class="quarto-xref"><span>Section 21.6.3</span></a>
+<ul>
+<li>
+<code>legend.key</code>: background underneath legend keys (symbols of geoms)</li>
+<li>
+<code>legend.key.size</code>, <code>legend.key.height</code>, and <code>legend.key.width</code>
+</li>
+</ul>
+</li>
+<li>Legend text: see <a href="02-guides.html#sec-guide-labels" class="quarto-xref"><span>Section 21.7</span></a>
+<ul>
+<li>
+<code>legend.text</code>: legend item labels</li>
+<li>
+<code>legend.text.align</code>: alignment of legend labels (number from 0 (left) to 1 (right))</li>
+<li>
+<code>legend.title</code>: legend title</li>
+<li>
+<code>legend.title.align</code>: alignment of legend title</li>
+</ul>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
+<span>        legend.direction <span class="op">=</span> <span class="st">"vertical"</span>,</span>
+<span>        legend.justification <span class="op">=</span> <span class="st">"left"</span>,</span>
+<span>        legend.box.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span>,</span>
+<span>        legend.box.margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">margin</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">6</span>, <span class="fl">6</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>        legend.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"orange"</span>, fill <span class="op">=</span> <span class="st">"lightgrey"</span><span class="op">)</span>,</span>
+<span>        legend.key <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"lightblue"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span>,</span>
+<span>        legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">rel</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"firebrick"</span><span class="op">)</span></span>
+<span>        <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/legend-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Place legend in the plot by positioning it at the bottom-right of the plot with legends justified to the right.</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>, <span class="co"># position on right, bottom</span></span>
+<span>        legend.justification <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"right"</span>, <span class="st">"bottom"</span><span class="op">)</span>, <span class="co"># anchor point</span></span>
+<span>        <span class="co"># same as legend.justification = c(1, 0),</span></span>
+<span>        legend.box.just <span class="op">=</span> <span class="st">"right"</span>, <span class="co"># justification of legends in box</span></span>
+<span>        legend.spacing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">0</span>, unit <span class="op">=</span> <span class="st">"lines"</span><span class="op">)</span></span>
+<span>        <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/legend-plot-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section></section><section id="plot-title-and-metadata" class="level3" data-number="23.5.4"><h3 data-number="23.5.4" class="anchored" data-anchor-id="plot-title-and-metadata">
+<span class="header-section-number">23.5.4</span> Plot title and metadata</h3>
+<p>Plots can have a number of plot labels: title, subtitle, caption, and tag.</p>
+<ul>
+<li>
+<code>plot.title</code>
+<ul>
+<li>
+<code>plot.title.position</code>: Applies to both title and subtitle
+<ul>
+<li>
+<code>"panel"</code> (default): Aligns to plotting region</li>
+<li>
+<code>"plot"</code>: Aligns to entire plot</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>plot.subtitle</code></li>
+<li>
+<code>plot.caption</code>: caption below the plot</li>
+<li>
+<code>plot.tag</code>: upper-left label to identify a plot
+<ul>
+<li>
+<code>plot.tag.position</code>: <code>"topleft"</code>, <code>"top"</code>, <code>"topright"</code>, <code>"left"</code>, <code>"right"</code>, <code>"bottomleft"</code>, <code>"bottom"</code>, <code>"bottomright"</code>, or a coordinate</li>
+</ul>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"Flipper length and body mass of penguins"</span>,</span>
+<span>       caption <span class="op">=</span> <span class="st">"Caption: Palmer Station LTER"</span>,</span>
+<span>       tag <span class="op">=</span> <span class="st">"Tag: ex. plot"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>plot.title.position <span class="op">=</span> <span class="st">"plot"</span>,</span>
+<span>        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                                  color <span class="op">=</span> <span class="st">"firebrick"</span>,</span>
+<span>                                  family <span class="op">=</span> <span class="st">"mono"</span><span class="op">)</span>,</span>
+<span>        plot.subtitle <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                                     color <span class="op">=</span> <span class="st">"orchid"</span>,</span>
+<span>                                     family <span class="op">=</span> <span class="st">"serif"</span><span class="op">)</span>,</span>
+<span>        plot.caption <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"salmon"</span>, size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span>,</span>
+<span>        plot.caption.position <span class="op">=</span> <span class="st">"panel"</span>, <span class="co"># the default</span></span>
+<span>        plot.tag <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>family <span class="op">=</span> <span class="st">"mono"</span><span class="op">)</span>,</span>
+<span>        plot.tag.position <span class="op">=</span> <span class="st">"bottomleft"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/plot-title-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-theme-panel" class="level3" data-number="23.5.5"><h3 data-number="23.5.5" class="anchored" data-anchor-id="sec-theme-panel">
+<span class="header-section-number">23.5.5</span> Panel: Plotting area</h3>
+<p>The panel encompasses the area in which the data is plotted. The main elements that will be changed are the color of the background (<code>panel.background</code>) and the major and minor grid drawn on the panel (<code>panel.grid</code>).</p>
+<ul>
+<li>
+<code>panel.background</code>: background of plotting area, drawn underneath plot</li>
+<li>
+<code>panel.border</code>: border around plotting area, drawn on top of plot so that it covers tick marks and grid lines.
+<ul>
+<li>Therefore you need to assign <code>fill = NA</code> when overriding <code>panel.border</code>.</li>
+</ul>
+</li>
+<li>
+<code>panel.grid</code>: <code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line()</a></code>
+<ul>
+<li><code>panel.grid.major</code></li>
+<li><code>panel.grid.minor</code></li>
+</ul>
+</li>
+<li>
+<code>panel.ontop</code>: <code>logical</code> option to place the panel (background, gridlines) over the data layers.</li>
+</ul>
+<p>Note the difference between the <strong>panel</strong>, which has a fill of “lightsteelblue” and outlined in a dotted line, and the <strong>plot</strong>, which is outlined in “forestgreen”.</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>panel.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"lightsteelblue"</span><span class="op">)</span>,</span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>linetype <span class="op">=</span> <span class="st">"dashed"</span>, fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>        panel.grid.major <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"firebrick"</span><span class="op">)</span>,</span>
+<span>        panel.grid.major.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>        panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        plot.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"forestgreen"</span>, linewidth <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span>        <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/panel-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-theme-plot" class="level3" data-number="23.5.6"><h3 data-number="23.5.6" class="anchored" data-anchor-id="sec-theme-plot">
+<span class="header-section-number">23.5.6</span> Plot: Whole area of the plot</h3>
+<ul>
+<li>
+<code>plot.background</code>: background of the entire plot</li>
+<li>
+<code>plot.margin</code>: margin around entire plot</li>
+</ul>
+<p>As above, notice the difference between the <strong>panel</strong> and the <strong>plot</strong>. The panel fill is “transparent” (can also use <code>NA</code>) to show <code>plot.background</code> covers the whole plot area.</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>panel.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"transparent"</span>,</span>
+<span>                                        color <span class="op">=</span> <span class="st">"forestgreen"</span>,</span>
+<span>                                        linewidth <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>        plot.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"lightsteelblue"</span>,</span>
+<span>                                       color <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>                                       linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span>,</span>
+<span>        plot.margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">margin</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fl">0.5</span>, r <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">0.5</span>, l <span class="op">=</span> <span class="fl">1</span>, unit <span class="op">=</span> <span class="st">"cm"</span><span class="op">)</span></span>
+<span>        <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/plot-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-theme-facets" class="level3" data-number="23.5.7"><h3 data-number="23.5.7" class="anchored" data-anchor-id="sec-theme-facets">
+<span class="header-section-number">23.5.7</span> Facets: Strip</h3>
+<ul>
+<li>
+<code>strip.background</code>: Background of panel strips (<code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect()</a></code>)</li>
+<li>
+<code>strip.text</code>: Text in the strips</li>
+<li>
+<code>strip.placement</code>: placement of strip with respect to axes, either “inside” or “outside”. Only important when axes and strips are on the same side of the plot.</li>
+<li>
+<code>panel.spacing</code>: spacing between facet panels</li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">sex</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/strip-default-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>strip.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"ivory"</span>, color <span class="op">=</span> <span class="st">"salmon"</span><span class="op">)</span>,</span>
+<span>        strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"firebrick"</span><span class="op">)</span>,</span>
+<span>        panel.spacing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">1</span>, <span class="st">"lines"</span><span class="op">)</span></span>
+<span>        <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/strip-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section></section><section id="sec-complete-themes" class="level2" data-number="23.6"><h2 data-number="23.6" class="anchored" data-anchor-id="sec-complete-themes">
+<span class="header-section-number">23.6</span> Complete themes</h2>
+<p><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">Documentation for complete themes</a></p>
+<ul>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_gray()</a></code>: default</li>
+<li><code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw()</a></code></li>
+<li><code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_linedraw()</a></code></li>
+<li><code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light()</a></code></li>
+<li><code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_dark()</a></code></li>
+<li><code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal()</a></code></li>
+<li><code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_classic()</a></code></li>
+<li><code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void()</a></code></li>
+</ul>
+<p>A good way to explore aspects of themes is to look at the code of the theme functions. Use <code>theme_grey</code> to explore all aspects of the default themes. See also the code for themes on <a href="https://github.com/tidyverse/ggplot2/blob/main/R/theme-defaults.R">GitHub</a>.</p>
+<p>Theme arguments: Changes to text size, text font, lines, and rects.</p>
+<ul>
+<li><code>base_size = 11</code></li>
+<li><code>base_family</code></li>
+<li><code>base_line_size = base_size/22</code></li>
+<li><code>base_rect_size = base_size/22</code></li>
+</ul>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">theme_bw</span></span>
+<span><span class="co">#&gt; function (base_size = 11, base_family = "", base_line_size = base_size/22, </span></span>
+<span><span class="co">#&gt;     base_rect_size = base_size/22) </span></span>
+<span><span class="co">#&gt; {</span></span>
+<span><span class="co">#&gt;     theme_grey(base_size = base_size, base_family = base_family, </span></span>
+<span><span class="co">#&gt;         base_line_size = base_line_size, base_rect_size = base_rect_size) %+replace% </span></span>
+<span><span class="co">#&gt;         theme(panel.background = element_rect(fill = "white", </span></span>
+<span><span class="co">#&gt;             colour = NA), panel.border = element_rect(fill = NA, </span></span>
+<span><span class="co">#&gt;             colour = "grey20"), panel.grid = element_line(colour = "grey92"), </span></span>
+<span><span class="co">#&gt;             panel.grid.minor = element_line(linewidth = rel(0.5)), </span></span>
+<span><span class="co">#&gt;             strip.background = element_rect(fill = "grey85", </span></span>
+<span><span class="co">#&gt;                 colour = "grey20"), legend.key = element_rect(fill = "white", </span></span>
+<span><span class="co">#&gt;                 colour = NA), complete = TRUE)</span></span>
+<span><span class="co">#&gt; }</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x111701990&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: namespace:ggplot2&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="sec-light-themes" class="level3" data-number="23.6.1"><h3 data-number="23.6.1" class="anchored" data-anchor-id="sec-light-themes">
+<span class="header-section-number">23.6.1</span> Light themes</h3>
+<p>The light themes are all very similar. <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_linedraw()</a></code> have a black border around the plot panel. The other differences are in the width and color of the grid lines.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"theme_bw()"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/theme-bw-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"theme_linedraw()"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_linedraw</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/theme-linedraw-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"theme_light()"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/theme-light-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-minimal-themes" class="level3" data-number="23.6.2"><h3 data-number="23.6.2" class="anchored" data-anchor-id="sec-minimal-themes">
+<span class="header-section-number">23.6.2</span> Minimal themes</h3>
+<p>None of these themes have a panel border. <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal()</a></code> has grid lines. <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_classic()</a></code> does not have grid lines and has x- and y-axis lines. <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void()</a></code> is completely empty.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"theme_minimal()"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/theme-minimal-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"theme_classic()"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_classic</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/theme-classic-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"theme_void()"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/theme-void-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-theme-pkgs" class="level3" data-number="23.6.3"><h3 data-number="23.6.3" class="anchored" data-anchor-id="sec-theme-pkgs">
+<span class="header-section-number">23.6.3</span> Theme packages</h3>
+<ul>
+<li><a href="https://github.com/jrnold/ggthemes">ggthemes</a></li>
+<li><a href="https://cinc.rud.is/web/packages/hrbrthemes/">hrbrthemes</a></li>
+</ul></section></section><section id="sec-set-theme" class="level2" data-number="23.7"><h2 data-number="23.7" class="anchored" data-anchor-id="sec-set-theme">
+<span class="header-section-number">23.7</span> Setting themes</h2>
+<ul>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set()</a></code>: completely overrides the current theme.</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_update()</a></code>: Update individual elements of a plot. Any unspecified values in the theme element will default to the values set in the current theme.</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_replace()</a></code>: Modifies a particular element of the current theme using the <code>%+replace%</code> operator to completely replace the element, so any unspecified values will overwrite the current value in the theme with <code>NULL</code>.</li>
+</ul>
+<p><code><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_update()</a></code> also returns the previous theme parameters, so you can easily restore the original parameters once you are done by using <code><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set()</a></code> again.</p>
+<div class="cell">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set theme for remaining plots </span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Update theme</span></span>
+<span><span class="va">og_theme</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_update</a></span><span class="op">(</span></span>
+<span>  panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span>,</span>
+<span>  legend.position <span class="op">=</span> <span class="st">"top"</span>,</span>
+<span>  legend.box <span class="op">=</span> <span class="st">"vertical"</span>,</span>
+<span>  legend.box.just <span class="op">=</span> <span class="st">"left"</span>,</span>
+<span>  legend.spacing <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">0</span>, <span class="st">"lines"</span><span class="op">)</span>,</span>
+<span>  plot.title.position <span class="op">=</span> <span class="st">"plot"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/set-theme-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Return to old theme.</p>
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span><span class="op">(</span><span class="va">og_theme</span><span class="op">)</span></span>
+<span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/reset-theme-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="sec-reuse-themes" class="level3" data-number="23.7.1"><h3 data-number="23.7.1" class="anchored" data-anchor-id="sec-reuse-themes">
+<span class="header-section-number">23.7.1</span> Reusing themes</h3>
+<p>Since <code>update_theme()</code> essentially uses <code>+</code>, the function and the operator can be used somewhat interchangeably. This opens up the ability to save a theme layer and reuse it just as you would with any other plot layer.</p>
+<div class="cell">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Save theme layer</span></span>
+<span><span class="va">my_theme</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"bottom"</span>,</span>
+<span>        plot.title.position <span class="op">=</span> <span class="st">"plot"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span> <span class="op">+</span> <span class="va">my_theme</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/reuse-theme-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section></section><section id="sec-fonts" class="level2" data-number="23.8"><h2 data-number="23.8" class="anchored" data-anchor-id="sec-fonts">
+<span class="header-section-number">23.8</span> Fonts</h2>
+<ul>
+<li><a href="https://systemfonts.r-lib.org/">systemfonts</a></li>
+<li><a href="https://ragg.r-lib.org">ragg</a></li>
+<li><a href="https://www.tidyverse.org/blog/2021/02/modern-text-features/">Modern Text Features in R</a></li>
+<li><a href="https://yjunechoe.github.io/posts/2021-06-24-setting-up-and-debugging-custom-fonts/">June Choe - Setting up and debugging custom fonts</a></li>
+</ul>
+<p>The packages <code>systemfonts</code> and <code>ragg</code> from Posit work together to give RStudio access to the fonts on your system and use them within plots. This works seemlessly for the most part once you install the packages and tell RStudio to use AGG as its graphic device. This is done in Settings -&gt; General -&gt; Graphics -&gt; Backend. To use <code>ragg</code> in <code>knitr</code> and <code>quarto</code> set <code>knitr::opts_chunk$set(dev = "ragg_png")</code>.</p>
+<p>Use <code><a href="https://systemfonts.r-lib.org/reference/system_fonts.html">system_fonts()</a></code> to list all fonts available on your system. A good workflow is to look for family of fonts using <code><a href="https://stringr.tidyverse.org/reference/str_detect.html">stringr::str_detect()</a></code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://systemfonts.r-lib.org/reference/system_fonts.html">system_fonts</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect</a></span><span class="op">(</span><span class="va">family</span>, <span class="st">"Garamond"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 10 × 8</span></span>
+<span><span class="co">#&gt;    index name                       family   style weight width italic monospace</span></span>
+<span><span class="co">#&gt;    &lt;int&gt; &lt;chr&gt;                      &lt;chr&gt;    &lt;chr&gt; &lt;ord&gt;  &lt;ord&gt; &lt;lgl&gt;  &lt;lgl&gt;    </span></span>
+<span><span class="co">#&gt;  1     1 EBGaramondItalic-Medium    EB Gara… Medi… medium norm… TRUE   FALSE    </span></span>
+<span><span class="co">#&gt;  2     3 EBGaramondItalic-Bold      EB Gara… Bold… bold   norm… TRUE   FALSE    </span></span>
+<span><span class="co">#&gt;  3     4 EBGaramondItalic-ExtraBold EB Gara… Extr… ultra… norm… TRUE   FALSE    </span></span>
+<span><span class="co">#&gt;  4     1 EBGaramondRoman-Medium     EB Gara… Medi… medium norm… FALSE  FALSE    </span></span>
+<span><span class="co">#&gt;  5     0 EBGaramond-Regular         EB Gara… Regu… normal norm… FALSE  FALSE    </span></span>
+<span><span class="co">#&gt;  6     0 EBGaramond-Italic          EB Gara… Ital… normal norm… TRUE   FALSE    </span></span>
+<span><span class="co">#&gt;  7     3 EBGaramondRoman-Bold       EB Gara… Bold  bold   norm… FALSE  FALSE    </span></span>
+<span><span class="co">#&gt;  8     2 EBGaramondItalic-SemiBold  EB Gara… Semi… semib… norm… TRUE   FALSE    </span></span>
+<span><span class="co">#&gt;  9     4 EBGaramondRoman-ExtraBold  EB Gara… Extr… ultra… norm… FALSE  FALSE    </span></span>
+<span><span class="co">#&gt; 10     2 EBGaramondRoman-SemiBold   EB Gara… Semi… semib… norm… FALSE  FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span></span>
+<span>    base_family <span class="op">=</span> <span class="st">"EB Garamond"</span><span class="op">)</span></span>
+<span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span></span>
+<span>    base_family <span class="op">=</span> <span class="st">"Roboto Condensed"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/fonts-garamond-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/fonts-roboto-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<section id="sec-register-fonts" class="level3" data-number="23.8.1"><h3 data-number="23.8.1" class="anchored" data-anchor-id="sec-register-fonts">
+<span class="header-section-number">23.8.1</span> Registering font variants</h3>
+<p>There may be times when you want to use a certain variant of a font. You can do this with either <code><a href="https://systemfonts.r-lib.org/reference/register_font.html">register_font()</a></code> or <code><a href="https://systemfonts.r-lib.org/reference/register_variant.html">register_variant()</a></code>. For instance, you can get access to the Black variant of Source Code Pro. You first need to find the font with <code><a href="https://systemfonts.r-lib.org/reference/system_fonts.html">system_fonts()</a></code> and then register it with a new name, here “Source Code Black”. You can then use that name as the <code>base_family</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://systemfonts.r-lib.org/reference/system_fonts.html">system_fonts</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">family</span> <span class="op">==</span> <span class="st">"Source Code Pro"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">weight</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 14 × 2</span></span>
+<span><span class="co">#&gt;    name                       weight  </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;                      &lt;ord&gt;   </span></span>
+<span><span class="co">#&gt;  1 SourceCodePro-Bold         bold    </span></span>
+<span><span class="co">#&gt;  2 SourceCodePro-Regular      normal  </span></span>
+<span><span class="co">#&gt;  3 SourceCodePro-Light        normal  </span></span>
+<span><span class="co">#&gt;  4 SourceCodePro-Black        heavy   </span></span>
+<span><span class="co">#&gt;  5 SourceCodePro-Medium       medium  </span></span>
+<span><span class="co">#&gt;  6 SourceCodePro-MediumIt     medium  </span></span>
+<span><span class="co">#&gt;  7 SourceCodePro-BlackIt      heavy   </span></span>
+<span><span class="co">#&gt;  8 SourceCodePro-BoldIt       bold    </span></span>
+<span><span class="co">#&gt;  9 SourceCodePro-Semibold     semibold</span></span>
+<span><span class="co">#&gt; 10 SourceCodePro-ExtraLight   light   </span></span>
+<span><span class="co">#&gt; 11 SourceCodePro-SemiboldIt   semibold</span></span>
+<span><span class="co">#&gt; 12 SourceCodePro-LightIt      normal  </span></span>
+<span><span class="co">#&gt; 13 SourceCodePro-It           normal  </span></span>
+<span><span class="co">#&gt; 14 SourceCodePro-ExtraLightIt light</span></span>
+<span></span>
+<span><span class="fu"><a href="https://systemfonts.r-lib.org/reference/register_variant.html">register_variant</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Source Code Black"</span>, </span>
+<span>    family <span class="op">=</span> <span class="st">"Source Code Pro"</span>, </span>
+<span>    weight <span class="op">=</span> <span class="st">"heavy"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://systemfonts.r-lib.org/reference/register_font.html">registry_fonts</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">family</span>, <span class="va">style</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 2</span></span>
+<span><span class="co">#&gt;   family            style      </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;             &lt;chr&gt;      </span></span>
+<span><span class="co">#&gt; 1 Source Code Black Regular    </span></span>
+<span><span class="co">#&gt; 2 Source Code Black Bold       </span></span>
+<span><span class="co">#&gt; 3 Source Code Black Italic     </span></span>
+<span><span class="co">#&gt; 4 Source Code Black Bold Italic</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span></span>
+<span>    base_family <span class="op">=</span> <span class="st">"Source Code Pro"</span><span class="op">)</span></span>
+<span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span></span>
+<span>    base_family <span class="op">=</span> <span class="st">"Source Code Black"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/fonts-source-code-pro-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/fonts-source-code-black-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section></section><section id="sec-theme-ggtext" class="level2" data-number="23.9"><h2 data-number="23.9" class="anchored" data-anchor-id="sec-theme-ggtext">
+<span class="header-section-number">23.9</span> ggtext</h2>
+<p>The <a href="https://wilkelab.org/ggtext">ggtext</a> package provides two theme elements functions to render markdown and HTML in plot guides. They are alternatives to <code><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text()</a></code>. In addition, the package provides two geoms that replace <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html">geom_label()</a></code>, see <a href="02-annotations.html#sec-ann-ggtext" class="quarto-xref"><span>Section 15.6</span></a>. In both the geoms and the theme elements <code>ggtext</code> provides two alternatives: markdown text labels and markdown text boxes with word wrapping.</p>
+<p>The theme elements functions are <code><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown()</a></code> and <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox()</a></code> with a third option to use <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox_simple()</a></code> that provides common defaults for <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox()</a></code>.</p>
+<p>These theme elements will mostly be used for labeling x and y axes and for adding information to titles of plots. They work by providing these labels with marked up text and then adding <code><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown()</a></code> or <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox_simple()</a></code> to the corresponding theme argument.</p>
+<section id="sec-theme-html-support" class="level3" data-number="23.9.1"><h3 data-number="23.9.1" class="anchored" data-anchor-id="sec-theme-html-support">
+<span class="header-section-number">23.9.1</span> Supported HTML</h3>
+<ul>
+<li>Bold and italic fonts
+<ul>
+<li>Bold: <code>**bold text**</code>
+</li>
+<li>Italic: <code>*italic text*</code>
+</li>
+</ul>
+</li>
+<li>Change fonts
+<ul>
+<li><code>&lt;span style = 'font-size:14pt; font-family:Helvetica;'&gt;font and size&lt;/span&gt;</code></li>
+</ul>
+</li>
+<li>Font color and size:
+<ul>
+<li>color: <code>&lt;span style='color:blue'&gt;colored text&lt;/span&gt;</code>
+</li>
+<li>size: <code>&lt;span style='font-size:18pt'&gt;larger text&lt;/span&gt;</code>
+</li>
+</ul>
+</li>
+<li>Super and subscript text
+<ul>
+<li><code>&lt;sup&gt;super&lt;/sup&gt;</code></li>
+<li><code>&lt;sub&gt;2&lt;/sub&gt;</code></li>
+</ul>
+</li>
+<li>Line breaks: <code>&lt;br&gt;</code>
+</li>
+<li>Some image support
+<ul>
+<li><code>&lt;img src="image-source.jpg" /&gt;</code></li>
+</ul>
+</li>
+</ul></section><section id="sec-theme-element-markdown" class="level3" data-number="23.9.2"><h3 data-number="23.9.2" class="anchored" data-anchor-id="sec-theme-element-markdown">
+<span class="header-section-number">23.9.2</span> <code>element_markdown()</code>
+</h3>
+<p>Simple Markdown can be added to the labels used in the base plot by adding the Markdown in <code><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs()</a></code> and then adding <code><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown()</a></code>. Making the whole labels bold accomplishes the same as can be done with theme elements, but interspersing italics is different.</p>
+<div class="cell">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"**Penguin Size**"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Flipper length (*mm*)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Body mass (*g*)"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"**Penguin species**"</span>,</span>
+<span>       shape <span class="op">=</span> <span class="st">"**Sex**"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.title.x <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.title.y <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/element-markdown-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A common use for <code>ggtext</code> is to include colored text that matches the colors used within the plot as an alternative to using a legend. A good workflow to do this is to extract the color palette used in the plot and use the <a href="https://glue.tidyverse.org">glue package</a> to specify the colors to be used. An example is to remove the Species legend and place this information in the plot title/subtitle. This example creates a title and subtitle in one string. It uses CSS to define a larger font size for the title, while setting a smaller font size for the subtitle in <code><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown()</a></code>. The expanded line height gives more room for both the title and subtitle. Because <code><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown()</a></code> does not use word wrapping, it may be necessary to insert line breaks within the subtitle.</p>
+<div class="cell">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">hex</span> <span class="op">&lt;-</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/pal_hue.html">hue_pal</a></span><span class="op">(</span><span class="op">)</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">styled_title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html">glue</a></span><span class="op">(</span></span>
+<span>  <span class="st">"&lt;span style = 'font-size:14pt'&gt;Penguin size&lt;/span&gt;&lt;br&gt;</span></span>
+<span><span class="st">  The body mass (*g*) compared to flipper length (*mm*) of&lt;br&gt;</span></span>
+<span><span class="st">  &lt;span style='color:{hex[[1]]};'&gt;Adelie&lt;/span&gt;,</span></span>
+<span><span class="st">  &lt;span style='color:{hex[[2]]};'&gt;Chinstrap&lt;/span&gt;, and</span></span>
+<span><span class="st">  &lt;span style='color:{hex[[3]]};'&gt;Gentoo&lt;/span&gt; penguins."</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">styled_title</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Flipper length (*mm*)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Body mass (*g*)"</span>,</span>
+<span>       shape <span class="op">=</span> <span class="st">"**Sex**"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">11</span>, lineheight <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,</span>
+<span>        axis.title.x <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.title.y <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/element-markdown-title-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Another option is to color the axis text on a bar plot by modifying the group names, in this case the species, with markup using <code><a href="https://glue.tidyverse.org/reference/glue.html">glue()</a></code>. There are a couple of tricks here. Using <code>sort = TRUE</code> in <code><a href="https://dplyr.tidyverse.org/reference/count.html">count()</a></code> helps to keep the sequence of the palette colors consistent. Placing the colors in a column and using <code><a href="https://ggplot2.tidyverse.org/reference/scale_identity.html">scale_fill_identity()</a></code> ensures that the colors of the axis text are correctly aligned with the fill of the bars. <code><a href="https://forcats.tidyverse.org/reference/fct_reorder.html">fct_reorder()</a></code> places the bars in descending order and reconverts the species column to a factor; <code><a href="https://glue.tidyverse.org/reference/glue.html">glue()</a></code> casts the column to class <code>glue</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://forcats.tidyverse.org/">forcats</a></span><span class="op">)</span></span>
+<span><span class="va">penguins</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span><span class="op">(</span><span class="va">species</span>, sort <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/pal_hue.html">hue_pal</a></span><span class="op">(</span><span class="op">)</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>,</span>
+<span>         species <span class="op">=</span> <span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html">glue</a></span><span class="op">(</span></span>
+<span>           <span class="st">"&lt;span style='color:{color};'&gt;**{species}**&lt;/span&gt;"</span><span class="op">)</span>,</span>
+<span>         species <span class="op">=</span> <span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html">fct_reorder</a></span><span class="op">(</span><span class="va">species</span>, <span class="va">n</span>, .desc <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">species</span>, y <span class="op">=</span> <span class="va">n</span>,</span>
+<span>             fill <span class="op">=</span> <span class="va">color</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_col</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_identity.html">scale_fill_identity</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/axis-text-color-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-theme-element-textbox" class="level3" data-number="23.9.3"><h3 data-number="23.9.3" class="anchored" data-anchor-id="sec-theme-element-textbox">
+<span class="header-section-number">23.9.3</span> <code>element_textbox()</code>
+</h3>
+<p><code><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown()</a></code> will likely cover most cases, but you can use <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox()</a></code> or <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox_simple()</a></code> to create text boxes that have a specific width and use word wrapping. This is useful for longer labels. For example, we can expand on the above title to include more information. If the subtitle gets long, it may be necessary to add padding to the title. This example adds 10 points to the bottom margin.</p>
+<div class="cell">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">longer_styled_title</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glue.tidyverse.org/reference/glue.html">glue</a></span><span class="op">(</span></span>
+<span>  <span class="st">"&lt;span style = 'font-size:14pt'&gt;Penguin size&lt;/span&gt;&lt;br&gt;</span></span>
+<span><span class="st">  The body mass (*g*) compared to flipper length (*mm*) of</span></span>
+<span><span class="st">  &lt;span style='color:{hex[[1]]};'&gt;Adelie&lt;/span&gt;,</span></span>
+<span><span class="st">  &lt;span style='color:{hex[[2]]};'&gt;Chinstrap&lt;/span&gt;, and</span></span>
+<span><span class="st">  &lt;span style='color:{hex[[3]]};'&gt;Gentoo&lt;/span&gt; penguins</span></span>
+<span><span class="st">  on the islands of Biscoe, Dream, and Torgersen off the</span></span>
+<span><span class="st">  coast of Antartica."</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">longer_styled_title</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Flipper length (*mm*)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Body mass (*g*)"</span>,</span>
+<span>       shape <span class="op">=</span> <span class="st">"**Sex**"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    plot.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox_simple</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">11</span>, lineheight <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                                        padding <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">margin</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">10</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    axis.title.x <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    axis.title.y <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    legend.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/element-textbox-1-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Text boxes can also have a background color and border. Because <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox()</a></code> has word wrapping, the width of the box can also be restricted.</p>
+<div class="cell">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">longer_styled_title</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Flipper length (*mm*)"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"Body mass (*g*)"</span>,</span>
+<span>       shape <span class="op">=</span> <span class="st">"**Sex**"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    plot.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox_simple</a></span><span class="op">(</span></span>
+<span>      size <span class="op">=</span> <span class="fl">11</span>, lineheight <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>      width <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">3</span>, <span class="st">"in"</span><span class="op">)</span>, <span class="co"># fixed width</span></span>
+<span>      hjust <span class="op">=</span> <span class="fl">1</span>, <span class="co"># alignment of box relative to plot</span></span>
+<span>      linetype <span class="op">=</span> <span class="fl">1</span>, <span class="co"># turn on border</span></span>
+<span>      fill <span class="op">=</span> <span class="st">"darkseagreen1"</span>, <span class="co"># background fill color</span></span>
+<span>      r <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">3</span>, <span class="st">"pt"</span><span class="op">)</span>, <span class="co"># radius for rounded corners</span></span>
+<span>      padding <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">margin</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>, <span class="co"># padding around text inside the box</span></span>
+<span>      margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">margin</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">10</span>, <span class="fl">0</span><span class="op">)</span> <span class="co"># margin outside the box</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    axis.title.x <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    axis.title.y <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    legend.title <span class="op">=</span> <span class="fu"><a href="https://wilkelab.org/ggtext/reference/element_markdown.html">element_markdown</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="02-themes_files/figure-html/element-textbox-2-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>See <a href="02-facets.html#sec-facet-ggtext" class="quarto-xref"><span>Section 22.7.1</span></a> for an example of using <code><a href="https://wilkelab.org/ggtext/reference/element_textbox.html">element_textbox()</a></code> to provide labels for a faceted plot.</p>
+
+
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="./02-facets.html" class="pagination-link  aria-label=">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Facets</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./02-patchwork.html" class="pagination-link" aria-label="<span class='chapter-number'>24</span>&nbsp; <span class='chapter-title'>patchwork</span>">
+        <span class="nav-page-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">patchwork</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
