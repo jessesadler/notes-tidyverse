@@ -2,130 +2,130 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/index.html</loc>
-    <lastmod>2024-01-08T23:01:13.562Z</lastmod>
+    <lastmod>2025-01-28T19:25:37.102Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-pipe.html</loc>
-    <lastmod>2024-01-08T23:25:09.753Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.476Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-readr.html</loc>
-    <lastmod>2024-01-08T23:01:13.540Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.476Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-dplyr-colwise.html</loc>
-    <lastmod>2024-01-08T23:01:13.538Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.475Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-dplyr-rowwise.html</loc>
-    <lastmod>2024-01-08T23:01:13.538Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.476Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-dplyr-1.0.0.html</loc>
-    <lastmod>2024-01-08T23:01:13.537Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.475Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-dplyr-1.1.0.html</loc>
-    <lastmod>2024-01-08T23:01:13.538Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.475Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-forcats.html</loc>
-    <lastmod>2024-01-08T23:01:13.539Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.476Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-lubridate.html</loc>
-    <lastmod>2024-01-08T23:01:13.539Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.476Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-tidy-data.html</loc>
-    <lastmod>2024-01-08T23:01:13.541Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.477Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-tidyr-pivoting.html</loc>
-    <lastmod>2024-01-08T23:01:13.541Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.477Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-tidyr-rectangling.html</loc>
-    <lastmod>2024-01-08T23:01:13.542Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.477Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/01-purrr.html</loc>
-    <lastmod>2024-01-08T23:01:13.540Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.476Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-ggplot2-rstudioconf-2022.html</loc>
-    <lastmod>2024-01-08T23:01:13.545Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.478Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-geoms.html</loc>
-    <lastmod>2024-01-08T23:01:13.544Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.478Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-annotations.html</loc>
-    <lastmod>2024-01-08T23:01:13.543Z</lastmod>
+    <lastmod>2025-01-28T20:05:53.390Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-aesthetics.html</loc>
-    <lastmod>2024-01-08T23:01:13.542Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.477Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-scales-position.html</loc>
-    <lastmod>2024-01-08T23:01:13.547Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.479Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-scales-color.html</loc>
-    <lastmod>2024-01-08T23:01:13.546Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.479Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-scales-aes.html</loc>
-    <lastmod>2024-01-08T23:01:13.546Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.479Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-coords.html</loc>
-    <lastmod>2024-01-08T23:01:13.543Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.477Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-guides.html</loc>
-    <lastmod>2024-01-08T23:01:13.545Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.478Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-facets.html</loc>
-    <lastmod>2024-01-08T23:01:13.543Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.477Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-themes.html</loc>
-    <lastmod>2024-01-08T23:01:13.547Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.479Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/02-patchwork.html</loc>
-    <lastmod>2024-01-08T23:01:13.546Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.478Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/03-programming-dplyr-superceded.html</loc>
-    <lastmod>2024-01-08T23:01:13.548Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.480Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/03-programming-dplyr.html</loc>
-    <lastmod>2024-01-08T23:01:13.549Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.480Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/03-metaprogramming.html</loc>
-    <lastmod>2024-01-08T23:01:13.548Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.479Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/03-rlang-tidyeval.html</loc>
-    <lastmod>2024-01-08T23:01:13.549Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.480Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/03-rlang-metaprogramming.html</loc>
-    <lastmod>2024-01-08T23:01:13.549Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.480Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/readr-data.html</loc>
-    <lastmod>2024-01-08T23:01:13.562Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.486Z</lastmod>
   </url>
   <url>
     <loc>https://jessesadler.github.io/notes-tidyverse/references.html</loc>
-    <lastmod>2024-01-08T23:01:13.563Z</lastmod>
+    <lastmod>2025-01-23T20:32:26.486Z</lastmod>
   </url>
 </urlset>
