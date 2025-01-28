@@ -329,6 +329,7 @@ p +
 You can make curved line segments and add arrows just like in `geom_curve()`. See below @sec-ann-curves for more on controlling aspects of curves. Arguments for curvature are:
 
 - `segment.curvature`: Number from -1 to 1; negative for left-hand and positive for right-hand curves; 0 for straight lines.
+  - `segment.curvature` *is not working for me when rendered in quarto*
 - `segment.angle`: 0-180, less than 90 skews control points toward the start point.
 - `segment.ncp`: number of control points to make a smoother curve.
 - `segment.shape`: curve shape by control points.
@@ -342,7 +343,7 @@ p +
                   xlim = c(NA, 190),
                   ylim = c(4500, NA),
                   direction = "y",
-                  segment.curvature = -0.5,
+                  #segment.curvature = -0.5,
                   arrow = arrow(length = unit(0.015, "npc"))) + 
   ylim(c(NA, 7500))
 ```
@@ -357,7 +358,7 @@ p +
                   xlim = c(NA, 190),
                   ylim = c(4500, NA),
                   direction = "y",
-                  segment.curvature = -0.5,
+                  #segment.curvature = -0.5,
                   segment.inflect = TRUE,
                   arrow = arrow(length = unit(0.015, "npc"))) + 
   ylim(c(NA, 7500))

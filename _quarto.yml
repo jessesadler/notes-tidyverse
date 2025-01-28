@@ -5,6 +5,7 @@ project:
 book:
   title: "tidyverse notes"
   author: "Jesse Sadler"
+  cover-image: cover.png
   site-url: https://jessesadler.github.io/notes-tidyverse/
   repo-url: https://github.com/jessesadler/notes-tidyverse
   repo-actions: [edit,issue]
