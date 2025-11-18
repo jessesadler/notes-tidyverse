@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.39">
+<meta name="generator" content="quarto-1.8.25">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="dcterms.date" content="2023-03-31">
 <title>10&nbsp; tidyr: Pivoting – tidyverse notes</title>
@@ -19,8 +19,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -31,7 +32,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -63,15 +64,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./01-tidyr-rectangling.html" rel="next">
 <link href="./01-tidy-data.html" rel="prev">
-<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-50f792bb6489d9fd35268808da1062ac.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf77a05ce6ba3f5649b1c5bec9928afc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e2e5655231f1b4cbde84d3563dddb56a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-6853a96d81807ee0c123ccfb52403b06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -99,7 +102,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 </head>
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
@@ -115,7 +118,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
     <div class="sidebar-title mb-0 py-0">
       <a href="./">tidyverse notes</a> 
         <div class="sidebar-tools-main">
@@ -443,7 +448,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header><p><a href="https://tidyr.tidyverse.org/articles/pivot.html">This vignette</a> describes the usage of <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer()</a></code> and <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider()</a></code> as tidying methods that supersede <code><a href="https://tidyr.tidyverse.org/reference/gather.html">gather()</a></code> and <code><a href="https://tidyr.tidyverse.org/reference/spread.html">spread()</a></code>. The two new functions are meant to be more intuitive than <code><a href="https://tidyr.tidyverse.org/reference/gather.html">gather()</a></code> and <code><a href="https://tidyr.tidyverse.org/reference/spread.html">spread()</a></code>. They can work with multiple value variables that may have different types and can use specs to model the shape of the outcome.</p>
 <div class="cell">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="sec-longer" class="level2" data-number="10.1"><h2 data-number="10.1" class="anchored" data-anchor-id="sec-longer">
 <span class="header-section-number">10.1</span> Longer</h2>
@@ -475,7 +480,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="header-section-number">10.1.1</span> String data in column names</h3>
 <p>Data: <code>relig_income</code></p>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">relig_income</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">relig_income</span></span>
 <span><span class="co">#&gt; # A tibble: 18 × 11</span></span>
 <span><span class="co">#&gt;    religion `&lt;$10k` `$10-20k` `$20-30k` `$30-40k` `$40-50k` `$50-75k` `$75-100k`</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
@@ -520,14 +525,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 Agnostic $100-150k            109</span></span>
 <span><span class="co">#&gt;  9 Agnostic &gt;150k                 84</span></span>
 <span><span class="co">#&gt; 10 Agnostic Don't know/refused    96</span></span>
-<span><span class="co">#&gt; # ℹ 170 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 170 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-num-data" class="level3" data-number="10.1.2"><h3 data-number="10.1.2" class="anchored" data-anchor-id="sec-num-data">
 <span class="header-section-number">10.1.2</span> Numeric data in column names</h3>
 <p>Data: <code>billboard</code></p>
 <p>Use of arguments <code>names_prefix</code> to strip away prefix in column names of <code>wk</code> and <code>names_transform</code> to convert character to integer.</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">billboard</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">billboard</span></span>
 <span><span class="co">#&gt; # A tibble: 317 × 79</span></span>
 <span><span class="co">#&gt;    artist     track date.entered   wk1   wk2   wk3   wk4   wk5   wk6   wk7   wk8</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;      &lt;chr&gt; &lt;date&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
@@ -571,7 +576,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 2Ge+her The Hardest Part Of ... 2000-09-02       1    91</span></span>
 <span><span class="co">#&gt;  9 2Ge+her The Hardest Part Of ... 2000-09-02       2    87</span></span>
 <span><span class="co">#&gt; 10 2Ge+her The Hardest Part Of ... 2000-09-02       3    92</span></span>
-<span><span class="co">#&gt; # ℹ 5,297 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 5,297 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-multi-vars" class="level3" data-number="10.1.3"><h3 data-number="10.1.3" class="anchored" data-anchor-id="sec-multi-vars">
 <span class="header-section-number">10.1.3</span> Many variables in column names</h3>
@@ -593,7 +598,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Use of <code>readr</code> functions to convert the gender and age to factors. This is faster than using <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> afterwards.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">who</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">who</span></span>
 <span><span class="co">#&gt; # A tibble: 7,240 × 60</span></span>
 <span><span class="co">#&gt;    country  iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534 new_sp_m3544</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;</span></span>
@@ -643,14 +648,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 Afghanistan AF    AFG    1980 sp        f      014      NA</span></span>
 <span><span class="co">#&gt;  9 Afghanistan AF    AFG    1980 sp        f      1524     NA</span></span>
 <span><span class="co">#&gt; 10 Afghanistan AF    AFG    1980 sp        f      2534     NA</span></span>
-<span><span class="co">#&gt; # ℹ 405,430 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 405,430 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-multi-obs" class="level3" data-number="10.1.4"><h3 data-number="10.1.4" class="anchored" data-anchor-id="sec-multi-obs">
 <span class="header-section-number">10.1.4</span> Multiple observations per row</h3>
 <p>Data: <code>household</code></p>
 <p>Use of <code>".value"</code> in <code>names_to</code> to indicate that part of the column name specifies the “value” being measured and so should be used as a variable name.</p>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">household</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">household</span></span>
 <span><span class="co">#&gt; # A tibble: 5 × 5</span></span>
 <span><span class="co">#&gt;   family dob_child1 dob_child2 name_child1 name_child2</span></span>
 <span><span class="co">#&gt;    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;chr&gt;       &lt;chr&gt;      </span></span>
@@ -678,12 +683,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; 6      4 child1 2004-10-10 Craig </span></span>
 <span><span class="co">#&gt; 7      4 child2 2009-08-27 Khai  </span></span>
 <span><span class="co">#&gt; 8      5 child1 2000-12-05 Parker</span></span>
-<span><span class="co">#&gt; 9      5 child2 2005-02-28 Gracie</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 9      5 child2 2005-02-28 Gracie</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Data: <code>anscombe</code></p>
 <p>Use of <code>cols_vary = "slowest"</code> to group values from columns <code>x1</code> and <code>y1</code> together,.</p>
 <div class="cell">
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">anscombe</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">anscombe</span></span>
 <span><span class="co">#&gt;    x1 x2 x3 x4    y1   y2    y3    y4</span></span>
 <span><span class="co">#&gt; 1  10 10 10  8  8.04 9.14  7.46  6.58</span></span>
 <span><span class="co">#&gt; 2   8  8  8  8  6.95 8.14  6.77  5.76</span></span>
@@ -717,7 +722,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 1         4  4.26</span></span>
 <span><span class="co">#&gt;  9 1        12 10.8 </span></span>
 <span><span class="co">#&gt; 10 1         7  4.82</span></span>
-<span><span class="co">#&gt; # ℹ 34 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 34 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section></section><section id="sec-wider" class="level2" data-number="10.2"><h2 data-number="10.2" class="anchored" data-anchor-id="sec-wider">
 <span class="header-section-number">10.2</span> Wider</h2>
@@ -756,7 +761,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="header-section-number">10.2.1</span> Capture-recapture data</h3>
 <p>Data: <code>fish_encounters</code></p>
 <div class="cell">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fish_encounters</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fish_encounters</span></span>
 <span><span class="co">#&gt; # A tibble: 114 × 3</span></span>
 <span><span class="co">#&gt;    fish  station  seen</span></span>
 <span><span class="co">#&gt;    &lt;fct&gt; &lt;fct&gt;   &lt;int&gt;</span></span>
@@ -799,14 +804,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; 16 4862        1     1      1     1       1     1     1     1     1     0     0</span></span>
 <span><span class="co">#&gt; 17 4863        1     1      0     0       0     0     0     0     0     0     0</span></span>
 <span><span class="co">#&gt; 18 4864        1     1      0     0       0     0     0     0     0     0     0</span></span>
-<span><span class="co">#&gt; 19 4865        1     1      1     0       0     0     0     0     0     0     0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 19 4865        1     1      1     0       0     0     0     0     0     0     0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-agg" class="level3" data-number="10.2.2"><h3 data-number="10.2.2" class="anchored" data-anchor-id="sec-agg">
 <span class="header-section-number">10.2.2</span> Aggregation</h3>
 <p>Data: <code>warpbreaks</code></p>
 <p>Use of <code>values_fn</code> to create aggregate when <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider()</a></code> matches multiple cells.</p>
 <div class="cell">
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">warpbreaks</span> <span class="op">&lt;-</span> <span class="va">warpbreaks</span> <span class="op">|&gt;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">warpbreaks</span> <span class="op">&lt;-</span> <span class="va">warpbreaks</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">wool</span>, <span class="va">tension</span>, <span class="va">breaks</span><span class="op">)</span></span>
 <span><span class="va">warpbreaks</span></span>
@@ -858,7 +863,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;   &lt;fct&gt;   &lt;dbl&gt; &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1 L        44.6  28.2</span></span>
 <span><span class="co">#&gt; 2 M        24    28.8</span></span>
-<span><span class="co">#&gt; 3 H        24.6  18.8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 3 H        24.6  18.8</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-create-colnames" class="level3" data-number="10.2.3"><h3 data-number="10.2.3" class="anchored" data-anchor-id="sec-create-colnames">
 <span class="header-section-number">10.2.3</span> Generate column name from multiple variables</h3>
@@ -866,7 +871,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Take tidy data and widen to have one column for each combination of two columns. Do this by specifying multiple variables for <code>names_from</code>.</p>
 <p>Control how the column names are constructed with <code>names_sep</code> and <code>names_prefix</code>, or the workhorse <code>names_glue</code></p>
 <div class="cell">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create tidy data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create tidy data</span></span>
 <span><span class="va">production</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/expand_grid.html">expand_grid</a></span><span class="op">(</span></span>
 <span>    product <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, </span>
@@ -879,16 +884,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; # A tibble: 45 × 4</span></span>
 <span><span class="co">#&gt;    product country  year production</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt;      &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 A       AI       2000      0.991</span></span>
-<span><span class="co">#&gt;  2 A       AI       2001      1.01 </span></span>
-<span><span class="co">#&gt;  3 A       AI       2002      1.26 </span></span>
-<span><span class="co">#&gt;  4 A       AI       2003     -1.19 </span></span>
-<span><span class="co">#&gt;  5 A       AI       2004      0.801</span></span>
-<span><span class="co">#&gt;  6 A       AI       2005      0.728</span></span>
-<span><span class="co">#&gt;  7 A       AI       2006      0.256</span></span>
-<span><span class="co">#&gt;  8 A       AI       2007     -0.929</span></span>
-<span><span class="co">#&gt;  9 A       AI       2008      0.675</span></span>
-<span><span class="co">#&gt; 10 A       AI       2009     -1.17 </span></span>
+<span><span class="co">#&gt;  1 A       AI       2000     -1.52 </span></span>
+<span><span class="co">#&gt;  2 A       AI       2001      0.789</span></span>
+<span><span class="co">#&gt;  3 A       AI       2002      0.283</span></span>
+<span><span class="co">#&gt;  4 A       AI       2003      0.405</span></span>
+<span><span class="co">#&gt;  5 A       AI       2004      0.873</span></span>
+<span><span class="co">#&gt;  6 A       AI       2005     -0.198</span></span>
+<span><span class="co">#&gt;  7 A       AI       2006      1.07 </span></span>
+<span><span class="co">#&gt;  8 A       AI       2007     -0.838</span></span>
+<span><span class="co">#&gt;  9 A       AI       2008     -0.420</span></span>
+<span><span class="co">#&gt; 10 A       AI       2009     -0.627</span></span>
 <span><span class="co">#&gt; # ℹ 35 more rows</span></span>
 <span></span>
 <span><span class="co"># With names_sep and names_prefix</span></span>
@@ -902,21 +907,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; # A tibble: 15 × 4</span></span>
 <span><span class="co">#&gt;     year prod.A.AI prod.B.AI prod.B.EI</span></span>
 <span><span class="co">#&gt;    &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1  2000    0.991     -1.13      1.22 </span></span>
-<span><span class="co">#&gt;  2  2001    1.01      -1.62     -0.112</span></span>
-<span><span class="co">#&gt;  3  2002    1.26       0.101    -0.392</span></span>
-<span><span class="co">#&gt;  4  2003   -1.19       1.54      1.22 </span></span>
-<span><span class="co">#&gt;  5  2004    0.801      0.174    -0.279</span></span>
-<span><span class="co">#&gt;  6  2005    0.728     -2.57     -0.927</span></span>
-<span><span class="co">#&gt;  7  2006    0.256     -0.916    -0.983</span></span>
-<span><span class="co">#&gt;  8  2007   -0.929     -0.470    -0.184</span></span>
-<span><span class="co">#&gt;  9  2008    0.675      1.38      0.663</span></span>
-<span><span class="co">#&gt; 10  2009   -1.17      -0.514    -0.499</span></span>
-<span><span class="co">#&gt; 11  2010    1.38      -0.278    -0.337</span></span>
-<span><span class="co">#&gt; 12  2011    0.0638     0.948    -1.21 </span></span>
-<span><span class="co">#&gt; 13  2012   -2.80      -1.87     -0.186</span></span>
-<span><span class="co">#&gt; 14  2013    0.543     -0.342     0.789</span></span>
-<span><span class="co">#&gt; 15  2014   -1.10       0.867     0.373</span></span>
+<span><span class="co">#&gt;  1  2000    -1.52     -0.354   0.00783</span></span>
+<span><span class="co">#&gt;  2  2001     0.789     1.18    0.247  </span></span>
+<span><span class="co">#&gt;  3  2002     0.283     0.401   1.71   </span></span>
+<span><span class="co">#&gt;  4  2003     0.405     0.806  -0.364  </span></span>
+<span><span class="co">#&gt;  5  2004     0.873    -0.295   0.575  </span></span>
+<span><span class="co">#&gt;  6  2005    -0.198    -0.253   1.15   </span></span>
+<span><span class="co">#&gt;  7  2006     1.07     -0.351   0.374  </span></span>
+<span><span class="co">#&gt;  8  2007    -0.838     1.23    0.829  </span></span>
+<span><span class="co">#&gt;  9  2008    -0.420    -1.22   -0.175  </span></span>
+<span><span class="co">#&gt; 10  2009    -0.627    -0.319   0.540  </span></span>
+<span><span class="co">#&gt; 11  2010    -2.02      0.758   2.40   </span></span>
+<span><span class="co">#&gt; 12  2011     0.428    -0.233   2.06   </span></span>
+<span><span class="co">#&gt; 13  2012    -1.12      0.510   0.417  </span></span>
+<span><span class="co">#&gt; 14  2013     0.591     1.02   -0.659  </span></span>
+<span><span class="co">#&gt; 15  2014    -1.95     -0.805   1.71</span></span>
 <span></span>
 <span><span class="co"># With names_glue</span></span>
 <span><span class="va">production</span> <span class="op">|&gt;</span> </span>
@@ -928,27 +933,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; # A tibble: 15 × 4</span></span>
 <span><span class="co">#&gt;     year prod_A_AI prod_B_AI prod_B_EI</span></span>
 <span><span class="co">#&gt;    &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1  2000    0.991     -1.13      1.22 </span></span>
-<span><span class="co">#&gt;  2  2001    1.01      -1.62     -0.112</span></span>
-<span><span class="co">#&gt;  3  2002    1.26       0.101    -0.392</span></span>
-<span><span class="co">#&gt;  4  2003   -1.19       1.54      1.22 </span></span>
-<span><span class="co">#&gt;  5  2004    0.801      0.174    -0.279</span></span>
-<span><span class="co">#&gt;  6  2005    0.728     -2.57     -0.927</span></span>
-<span><span class="co">#&gt;  7  2006    0.256     -0.916    -0.983</span></span>
-<span><span class="co">#&gt;  8  2007   -0.929     -0.470    -0.184</span></span>
-<span><span class="co">#&gt;  9  2008    0.675      1.38      0.663</span></span>
-<span><span class="co">#&gt; 10  2009   -1.17      -0.514    -0.499</span></span>
-<span><span class="co">#&gt; 11  2010    1.38      -0.278    -0.337</span></span>
-<span><span class="co">#&gt; 12  2011    0.0638     0.948    -1.21 </span></span>
-<span><span class="co">#&gt; 13  2012   -2.80      -1.87     -0.186</span></span>
-<span><span class="co">#&gt; 14  2013    0.543     -0.342     0.789</span></span>
-<span><span class="co">#&gt; 15  2014   -1.10       0.867     0.373</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt;  1  2000    -1.52     -0.354   0.00783</span></span>
+<span><span class="co">#&gt;  2  2001     0.789     1.18    0.247  </span></span>
+<span><span class="co">#&gt;  3  2002     0.283     0.401   1.71   </span></span>
+<span><span class="co">#&gt;  4  2003     0.405     0.806  -0.364  </span></span>
+<span><span class="co">#&gt;  5  2004     0.873    -0.295   0.575  </span></span>
+<span><span class="co">#&gt;  6  2005    -0.198    -0.253   1.15   </span></span>
+<span><span class="co">#&gt;  7  2006     1.07     -0.351   0.374  </span></span>
+<span><span class="co">#&gt;  8  2007    -0.838     1.23    0.829  </span></span>
+<span><span class="co">#&gt;  9  2008    -0.420    -1.22   -0.175  </span></span>
+<span><span class="co">#&gt; 10  2009    -0.627    -0.319   0.540  </span></span>
+<span><span class="co">#&gt; 11  2010    -2.02      0.758   2.40   </span></span>
+<span><span class="co">#&gt; 12  2011     0.428    -0.233   2.06   </span></span>
+<span><span class="co">#&gt; 13  2012    -1.12      0.510   0.417  </span></span>
+<span><span class="co">#&gt; 14  2013     0.591     1.02   -0.659  </span></span>
+<span><span class="co">#&gt; 15  2014    -1.95     -0.805   1.71</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-tidy-census" class="level3" data-number="10.2.4"><h3 data-number="10.2.4" class="anchored" data-anchor-id="sec-tidy-census">
 <span class="header-section-number">10.2.4</span> Tidy census</h3>
 <p>Data: <code>us_rent_income</code></p>
 <div class="cell">
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">us_rent_income</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">us_rent_income</span></span>
 <span><span class="co">#&gt; # A tibble: 104 × 5</span></span>
 <span><span class="co">#&gt;    GEOID NAME       variable estimate   moe</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;</span></span>
@@ -982,7 +987,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 10    Delaware                       31560          1076        247       10</span></span>
 <span><span class="co">#&gt;  9 11    District of Columbia           43198          1424        681       17</span></span>
 <span><span class="co">#&gt; 10 12    Florida                        25952          1077         70        3</span></span>
-<span><span class="co">#&gt; # ℹ 42 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 42 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>See <a href="#sec-wide-spec" class="quarto-xref"><span>Section 10.4.2</span></a> for a different way to do this with a <code>spec</code>.</p>
 </section><section id="sec-missing-vals" class="level3" data-number="10.2.5"><h3 data-number="10.2.5" class="anchored" data-anchor-id="sec-missing-vals">
@@ -990,7 +995,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Data: Factor of weekdays</p>
 <p>When you want to turn a column of factor data into column names. <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider()</a></code> defaults to generating columns from the data that exists, but you might want to include columns from all possible factor levels. Use <code>names_expand</code> to make implicit factor levels explicit.</p>
 <div class="cell">
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
 <span><span class="va">weekdays</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Mon"</span>, <span class="st">"Tue"</span>, <span class="st">"Wed"</span>, <span class="st">"Thu"</span>, <span class="st">"Fri"</span>, <span class="st">"Sat"</span>, <span class="st">"Sun"</span><span class="op">)</span></span>
 <span><span class="va">daily</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
 <span>  day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Tue"</span>, <span class="st">"Thu"</span>, <span class="st">"Fri"</span>, <span class="st">"Mon"</span><span class="op">)</span>, levels <span class="op">=</span> <span class="va">weekdays</span><span class="op">)</span>,</span>
@@ -1014,12 +1019,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; # A tibble: 1 × 7</span></span>
 <span><span class="co">#&gt;     Mon   Tue   Wed   Thu   Fri   Sat   Sun</span></span>
 <span><span class="co">#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1     5     2    NA     3     1    NA    NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 1     5     2    NA     3     1    NA    NA</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Data: Factor and year data</p>
 <p>If multiple <code>names_from</code> columns are provided, <code>names_expand</code> will generate a Cartesian product of all possible combinations of the names_from values.</p>
 <div class="cell">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
 <span><span class="va">percentages</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
 <span>  year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2018</span>, <span class="fl">2019</span>, <span class="fl">2020</span>, <span class="fl">2020</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -1044,12 +1049,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; # A tibble: 1 × 6</span></span>
 <span><span class="co">#&gt;   A_2018 A_2019 A_2020 B_2018 B_2019 B_2020</span></span>
 <span><span class="co">#&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1    100      0     40      0    100     60</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 1    100      0     40      0    100     60</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Data: Missing factor levels in <code>id_cols</code></p>
 <p>Missing rows in factor instead of missing columns as above. Need to use <code>id_expand = TRUE</code>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">daily</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="va">daily</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"A"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">daily</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="va">daily</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"A"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">daily</span></span>
 <span><span class="co">#&gt; # A tibble: 4 × 3</span></span>
 <span><span class="co">#&gt;   day   value type </span></span>
@@ -1075,13 +1080,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; 4 Thu       0     3</span></span>
 <span><span class="co">#&gt; 5 Fri       0     1</span></span>
 <span><span class="co">#&gt; 6 Sat       0     0</span></span>
-<span><span class="co">#&gt; 7 Sun       0     0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 7 Sun       0     0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-unused-cols" class="level3" data-number="10.2.6"><h3 data-number="10.2.6" class="anchored" data-anchor-id="sec-unused-cols">
 <span class="header-section-number">10.2.6</span> Unused columns</h3>
 <p>Issue of retaining some data in a column that is not related to the pivoting process. Use of <code>unused_fn</code> to apply a function to unused columns instead of dropping them. You can retain the information by creating a list column.</p>
 <div class="cell">
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
 <span><span class="va">updates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
 <span>  county <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Wake"</span>, <span class="st">"Wake"</span>, <span class="st">"Wake"</span>, <span class="st">"Guilford"</span>, <span class="st">"Guilford"</span><span class="op">)</span>,</span>
 <span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2023-01-01"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0</span><span class="op">:</span><span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2023-01-03"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>,</span>
@@ -1124,13 +1129,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;   county       A     B     C date      </span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;list&gt;    </span></span>
 <span><span class="co">#&gt; 1 Wake       3.2     4   5.5 &lt;date [3]&gt;</span></span>
-<span><span class="co">#&gt; 2 Guilford   2      NA   1.2 &lt;date [2]&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 2 Guilford   2      NA   1.2 &lt;date [2]&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-contacts" class="level3" data-number="10.2.7"><h3 data-number="10.2.7" class="anchored" data-anchor-id="sec-contacts">
 <span class="header-section-number">10.2.7</span> Contact list</h3>
 <p>Contact list with variable number of fields per contact. Can use <code><a href="https://rdrr.io/r/base/cumsum.html">cumsum()</a></code> to create unique id based on first value for each person (<code>name</code>).</p>
 <div class="cell">
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
 <span><span class="va">contacts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">field</span>, <span class="op">~</span><span class="va">value</span>,</span>
 <span>  <span class="st">"name"</span>, <span class="st">"Jiena McLellan"</span>,</span>
@@ -1164,7 +1169,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;            &lt;chr&gt;   &lt;chr&gt;          </span></span>
 <span><span class="co">#&gt; 1         1 Jiena McLellan   Toyota  &lt;NA&gt;           </span></span>
 <span><span class="co">#&gt; 2         2 John Smith       google  john@google.com</span></span>
-<span><span class="co">#&gt; 3         3 Huxley Ratcliffe &lt;NA&gt;    &lt;NA&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 3         3 Huxley Ratcliffe &lt;NA&gt;    &lt;NA&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section></section><section id="sec-longer-wider" class="level2" data-number="10.3"><h2 data-number="10.3" class="anchored" data-anchor-id="sec-longer-wider">
 <span class="header-section-number">10.3</span> Longer, then wider</h2>
@@ -1182,7 +1187,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">world_bank_pop</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">world_bank_pop</span></span>
 <span><span class="co">#&gt; # A tibble: 1,064 × 20</span></span>
 <span><span class="co">#&gt;    country indicator      `2000`  `2001`  `2002`  `2003`  `2004`  `2005`  `2006`</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;           &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
@@ -1230,7 +1235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 ABW     URB   2007  42729 0.408 </span></span>
 <span><span class="co">#&gt;  9 ABW     URB   2008  42906 0.413 </span></span>
 <span><span class="co">#&gt; 10 ABW     URB   2009  43079 0.402 </span></span>
-<span><span class="co">#&gt; # ℹ 9,566 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 9,566 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-multi-choice" class="level3" data-number="10.3.2"><h3 data-number="10.3.2" class="anchored" data-anchor-id="sec-multi-choice">
 <span class="header-section-number">10.3.2</span> Multi-choice</h3>
@@ -1241,7 +1246,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Pivot data wider and fill in missing observations with <code>FALSE</code>.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data</span></span>
 <span><span class="va">multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">id</span>, <span class="op">~</span><span class="va">choice1</span>, <span class="op">~</span><span class="va">choice2</span>, <span class="op">~</span><span class="va">choice3</span>,</span>
 <span>  <span class="fl">1</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>,</span>
@@ -1279,14 +1284,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; 1     1 TRUE  TRUE  TRUE  FALSE</span></span>
 <span><span class="co">#&gt; 2     2 FALSE TRUE  TRUE  FALSE</span></span>
 <span><span class="co">#&gt; 3     3 FALSE FALSE FALSE TRUE </span></span>
-<span><span class="co">#&gt; 4     4 FALSE TRUE  FALSE TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 4     4 FALSE TRUE  FALSE TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section></section><section id="sec-specs" class="level2" data-number="10.4"><h2 data-number="10.4" class="anchored" data-anchor-id="sec-specs">
 <span class="header-section-number">10.4</span> Manual specs</h2>
 <p>To gain more control over pivoting, you can instead create a “spec” data frame that describes exactly how data stored in the column names becomes variables (and vice versa). This section focuses on the use of <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer_spec.html">build_longer_spec()</a></code>, <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer_spec.html">pivot_longer_spec()</a></code>, <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider_spec.html">build_wider_spec()</a></code>, and <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider_spec.html">pivot_wider_spec()</a></code>.</p>
 <p>A <code>spec</code> data frame created by <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer_spec.html">build_longer_spec()</a></code> or <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider_spec.html">build_wider_spec()</a></code> with special columns called <code>.name</code> for the name of the columns and <code>.value</code> for the name of the column that the values in the cells will go into. There is also one column in spec for each column present in the long format of the data that is not present in the wide format of the data. This corresponds to the <code>names_to</code> argument in <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer()</a></code> and the <code>names_from</code> argument in <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider()</a></code>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">relig_income</span> <span class="op">|&gt;</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">relig_income</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer_spec.html">build_longer_spec</a></span><span class="op">(</span></span>
 <span>    cols <span class="op">=</span> <span class="op">!</span><span class="va">religion</span>, </span>
 <span>    names_to <span class="op">=</span> <span class="st">"income"</span>,</span>
@@ -1304,14 +1309,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  7 $75-100k           count  $75-100k          </span></span>
 <span><span class="co">#&gt;  8 $100-150k          count  $100-150k         </span></span>
 <span><span class="co">#&gt;  9 &gt;150k              count  &gt;150k             </span></span>
-<span><span class="co">#&gt; 10 Don't know/refused count  Don't know/refused</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; 10 Don't know/refused count  Don't know/refused</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="sec-long-spec" class="level3" data-number="10.4.1"><h3 data-number="10.4.1" class="anchored" data-anchor-id="sec-long-spec">
 <span class="header-section-number">10.4.1</span> Longer</h3>
 <p>Data: <code>relig_income</code></p>
 <p>With a spec the process for pivoting is two steps. Creating a spec and then pivoting the spec. This does the same as <a href="#sec-string-data" class="quarto-xref"><span>Section 10.1.1</span></a>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Build spec</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Build spec</span></span>
 <span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="va">relig_income</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer_spec.html">build_longer_spec</a></span><span class="op">(</span></span>
 <span>    cols <span class="op">=</span> <span class="op">!</span><span class="va">religion</span>, </span>
@@ -1348,14 +1353,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 Agnostic $100-150k            109</span></span>
 <span><span class="co">#&gt;  9 Agnostic &gt;150k                 84</span></span>
 <span><span class="co">#&gt; 10 Agnostic Don't know/refused    96</span></span>
-<span><span class="co">#&gt; # ℹ 170 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 170 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-wide-spec" class="level3" data-number="10.4.2"><h3 data-number="10.4.2" class="anchored" data-anchor-id="sec-wide-spec">
 <span class="header-section-number">10.4.2</span> Wider</h3>
 <p>Data: <code>us_rent_income</code></p>
 <p>Ability to improve the widening of the data from <a href="#sec-tidy-census" class="quarto-xref"><span>Section 10.2.4</span></a> through the use of a <code>spec</code>. Change the names of the columns from the default of <code>estimate_income</code>, <code>estimate_rent</code>, <code>moe_income</code>, and <code>moe_rent</code> to <code>income</code>, <code>rent</code>, <code>income_moe</code>, and <code>rent_moe</code>.</p>
 <div class="cell">
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Default spec</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Default spec</span></span>
 <span><span class="va">spec1</span> <span class="op">&lt;-</span> <span class="va">us_rent_income</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider_spec.html">build_wider_spec</a></span><span class="op">(</span></span>
 <span>    names_from <span class="op">=</span> <span class="va">variable</span>, </span>
@@ -1400,14 +1405,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8 10    Delaware              31560  1076        247       10</span></span>
 <span><span class="co">#&gt;  9 11    District of Columbia  43198  1424        681       17</span></span>
 <span><span class="co">#&gt; 10 12    Florida               25952  1077         70        3</span></span>
-<span><span class="co">#&gt; # ℹ 42 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 42 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-by-hand" class="level3" data-number="10.4.3"><h3 data-number="10.4.3" class="anchored" data-anchor-id="sec-by-hand">
 <span class="header-section-number">10.4.3</span> By hand</h3>
 <p>Data: <code>construction</code></p>
 <p>The column names in the data are two different kinds of variables: <code>units</code> and <code>region</code>. This can be described by creating a <code>spec</code> by hand.</p>
 <div class="cell">
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
 <span>  <span class="op">~</span><span class="va">.name</span>,            <span class="op">~</span><span class="va">.value</span>, <span class="op">~</span><span class="va">units</span>,  <span class="op">~</span><span class="va">region</span>,     </span>
 <span>  <span class="st">"1 unit"</span>,          <span class="st">"n"</span>,     <span class="st">"1"</span>,     <span class="cn">NA</span>,          </span>
 <span>  <span class="st">"2 to 4 units"</span>,    <span class="st">"n"</span>,     <span class="st">"2-4"</span>,   <span class="cn">NA</span>,          </span>
@@ -1432,14 +1437,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  8  2018 February 1     &lt;NA&gt;        882</span></span>
 <span><span class="co">#&gt;  9  2018 February 2-4   &lt;NA&gt;         NA</span></span>
 <span><span class="co">#&gt; 10  2018 February 5+    &lt;NA&gt;        400</span></span>
-<span><span class="co">#&gt; # ℹ 53 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 53 more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Since there is no overlap between the <code>units</code> and <code>region</code> data, it would actually be better to place them in two separate tables.</p>
 </section><section id="sec-theory" class="level3" data-number="10.4.4"><h3 data-number="10.4.4" class="anchored" data-anchor-id="sec-theory">
 <span class="header-section-number">10.4.4</span> Theory</h3>
 <p>The same <code>spec</code> is used for <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer()</a></code> and <code><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider()</a></code>. You can see this through the symmetry of the two functions.</p>
 <div class="cell">
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">construction</span> <span class="op">|&gt;</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">construction</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer_spec.html">pivot_longer_spec</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider_spec.html">pivot_wider_spec</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 9 × 9</span></span>
@@ -1454,241 +1459,248 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; 7  2018 July        829             NA               360       108     183   594</span></span>
 <span><span class="co">#&gt; 8  2018 August      939             NA               286        90     205   649</span></span>
 <span><span class="co">#&gt; 9  2018 Septe…      835             NA               304       117     175   560</span></span>
-<span><span class="co">#&gt; # ℹ 1 more variable: West &lt;dbl&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">#&gt; # ℹ 1 more variable: West &lt;dbl&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
 </section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
       }
+      return false;
     }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
       }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
     });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp("https:\/\/jessesadler\.github\.io\/notes-tidyverse\/");
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
     }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/jessesadler\.github\.io\/notes-tidyverse\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
-    };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
         }
-        return container.innerHTML
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1696,185 +1708,161 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
       <a href="./01-tidy-data.html" class="pagination-link" aria-label="Tidy data">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Tidy data</span></span>
       </a>          
