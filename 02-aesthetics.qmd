@@ -12,6 +12,7 @@ source("_common.R")
 ```
 
 ## Resources {#sec-aes-resources}
+
 - [Aesthetics documentation](https://ggplot2.tidyverse.org/reference/index.html#aesthetics)
 - [Aesthetic specifications vignette](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html)
 - [Wickham, ggplot2 Book: Aesthetic mappings](https://ggplot2-book.org/layers.html#sec-aes)
@@ -33,6 +34,7 @@ penguins <- penguins |>
 ```
 
 ## Mapping vs setting aesthetics {#sec-aes-map}
+
 **Aesthetics** define the visual properties of geoms. They can either be mapped to change according to variables in the data or set as a constant value.
 
 - **Map** an aesthetic to a variable with `aes()`: `aes(color = species)`
@@ -51,6 +53,7 @@ penguins |>
 ```
 
 ### Naming layers {#sec-aes-naming}
+
 An alternative between mapping and setting aesthetics is to **name** the layers within `aes()` to distinguish them and create a legend. This is useful when you want to compare multiple layers such as two `geom_smooth()` layers with different methods.
 
 ```{r}
@@ -64,6 +67,7 @@ penguins |>
 ```
 
 ## Common aesthetics {#sec-aes-common}
+
 The documentation for each geom provides the aesthetics that can be used with it. Common aesthetics include:
 
 - positions: `x`, `y`
@@ -74,6 +78,7 @@ The documentation for each geom provides the aesthetics that can be used with it
 - groupings: `group`
 
 ## Default aesthetics for geoms
+
 Each geom has default aesthetics when drawing the geoms. For a complete list see the table created by [Dana Seidel](https://gist.github.com/dpseidel/57f28ccc034ccfdd0cf25b6c6c82a635). The gist includes code to create a list and table of the default aesthetics:
 
 ```{r}
@@ -86,30 +91,35 @@ aes_list <- lapply(geoms, function(x) x$default_aes)
 The list provides a nice way to look at the default aesthetics, but it is quite long. We can simplify the list to concentrate on aesthetics used for the main *types* of geoms.
 
 #### Points
+
 ```{r}
 #| label: point-aes
 aes_list[c("GeomPoint")]
 ```
 
 #### Lines
+
 ```{r}
 #| label: line-aes
 aes_list[c("GeomLine", "GeomSmooth")]
 ```
 
 #### Rectangles
+
 ```{r}
 #| label: rect-aes
 aes_list[c("GeomPolygon", "GeomBar", "GeomBoxplot")]
 ```
 
 #### Text
+
 ```{r}
 #| label: text-aes
 aes_list[c("GeomText", "GeomLabel")]
 ```
 
 ## Color, fill, and alpha {#sec-aes-color}
+
 Add color to the geom with either `color` or `fill` aesthetics. See [Color related aesthetics](https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html) for more.
 
 - `color` is used with `geom_point()`, lines, and the outline of polygon geoms.
@@ -120,12 +130,14 @@ Colors can be specified with either **rbg** hex string, color name listed under 
 `alpha`: Values of `alpha` range from 0 to 1, with lower values corresponding to more transparent colors.
 
 ## Lines {#sec-aes-lines}
+
 The appearance of a line is affected by `linewidth`, `linetype`, `lineend`, `linejoin`. See [ggplot2 Aesthetic specifications: Lines](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#lines)
 
-`linewidth`: used to control the width or size of the line. 
+`linewidth`: used to control the width or size of the line.
 
 #### Line type
-`linetype`: can be specified with an integer of 0 to 6 or by name: 
+
+`linetype`: can be specified with an integer of 0 to 6 or by name:
 
 - 0 = blank
 - 1 = solid
@@ -138,10 +150,12 @@ The appearance of a line is affected by `linewidth`, `linetype`, `lineend`, `lin
 Alternatively, `linetype` can be created with a string containing 2, 4, 6, or 8 hexadecimal digits that provide lengths of on and off. Thus, `"3313"` specifies three units on followed by three off followed by one on and finally three off.
 
 #### Line ends
+
 - `lineend` can be one of `"butt"` (the default), `"round"`, or `"square"`.
 - `linejoin` can be one of `"round"` (the default), `"mitre"`, or `"bevel"`.
 
 ## Points {#sec-aes-points}
+
 Points can be chosen in 5 ways, see the visualization in the [Aesthetics vignette](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html#sec:shape-spec):
 
 - An integer: 0 to 25
@@ -151,6 +165,7 @@ Points can be chosen in 5 ways, see the visualization in the [Aesthetics vignett
 - `NA` to draw nothing
 
 ## Grouping {#sec-aes-groups}
+
 The group aesthetic is by default set to the interaction of all discrete variables in the plot. This default is often good enough, but when it does not work or when there is no discrete variable, you need to explicitly map `group` to a variable that has a different value for each group. See [Aesthetics: grouping](https://ggplot2.tidyverse.org/reference/aes_group_order.html).
 
 For most applications the grouping is set implicitly by mapping one or more discrete variables to `x`, `y`, `color`, `fill`, `alpha`, `shape`, `size`, and/or `linetype`. The typical case where grouping does not work by default is with `geom_line()` when only positional aesthetics are set. See @sec-geom-line for examples.

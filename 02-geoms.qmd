@@ -507,6 +507,23 @@ penguins |>
   stat_summary(fun = median, fun.min = min, fun.max = max)
 ```
 
+Another example that creates error bars for standard error of the mean with toy data.
+
+```{r}
+#| label: stat-summary-error
+set.seed(240)
+age_data <- tibble(
+  sex = sample(c("Male", "Female"), 20, replace = TRUE),
+  age = sample(5:75, 20)
+)
+
+age_data |> 
+  ggplot(aes(x = sex, y = age)) + 
+  stat_summary(geom = "bar", fun = mean, fill = gray(0.6)) + 
+  stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.2) + 
+  geom_jitter(width = 0.2)
+```
+
 One useful point to note is that you can, of course, place a numeric value in either `ymin` or `ymax` such as beginning the line at 0.
 
 ```{r}
