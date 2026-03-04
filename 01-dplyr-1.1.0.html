@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.8.27">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="dcterms.date" content="2023-02-01">
 <title>6&nbsp; dplyr 1.1.0 – tidyverse notes</title>
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf77a05ce6ba3f5649b1c5bec9928afc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-99e777b2b3262cb0e1538bc5fc5de7fc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-6853a96d81807ee0c123ccfb52403b06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
@@ -118,9 +118,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="./index.html" class="sidebar-logo-link">
-      </a>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">tidyverse notes</a> 
         <div class="sidebar-tools-main">
@@ -545,8 +543,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">transactions</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">companies</span>, by <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/join_by.html">join_by</a></span><span class="op">(</span><span class="va">company</span> <span class="op">==</span> <span class="va">id</span><span class="op">)</span>,</span>
 <span>             multiple <span class="op">=</span> <span class="st">"error"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Specifying `multiple = "error"` was deprecated in dplyr 1.1.1.</span></span>
-<span><span class="co">#&gt; ℹ Please use `relationship = "many-to-one"` instead.</span></span>
 <span><span class="co">#&gt; Error in `inner_join()`:</span></span>
 <span><span class="co">#&gt; ! Each row in `x` must match at most 1 row in `y`.</span></span>
 <span><span class="co">#&gt; ℹ Row 3 of `x` matches multiple rows in `y`.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -709,11 +705,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="case_when" class="level3" data-number="6.5.1"><h3 data-number="6.5.1" class="anchored" data-anchor-id="case_when">
 <span class="header-section-number">6.5.1</span> <code>case_when()</code>
 </h3>
-<p>Ability to use regular <code>NA</code> in <code><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when()</a></code> instead of specific class of <code>NA</code>. The following now just works.</p>
+<p>Ability to use regular <code>NA</code> in <code><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html">case_when()</a></code> instead of specific class of <code>NA</code>. The following now just works.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">12</span>, <span class="op">-</span><span class="fl">5</span>, <span class="fl">6</span>, <span class="op">-</span><span class="fl">2</span>, <span class="cn">NA</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html">case_when</a></span><span class="op">(</span></span>
 <span>  <span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">10</span> <span class="op">~</span> <span class="st">"large"</span>,</span>
 <span>  <span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">0</span> <span class="op">~</span> <span class="st">"small"</span>,</span>
 <span>  <span class="va">x</span> <span class="op">&lt;</span> <span class="fl">0</span> <span class="op">~</span> <span class="cn">NA</span></span>
@@ -722,7 +718,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>New <code>.default</code> argument for when none of the cases are met. The <code>.default</code> is always processed last, so the recommendation is to place it at the end of the list of cases. Now the negative values are labeled “other”.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html">case_when</a></span><span class="op">(</span></span>
 <span>  <span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">10</span> <span class="op">~</span> <span class="st">"large"</span>,</span>
 <span>  <span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">0</span> <span class="op">~</span> <span class="st">"small"</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">~</span> <span class="st">"missing"</span>,</span>
@@ -732,11 +728,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section><section id="case_match" class="level3" data-number="6.5.2"><h3 data-number="6.5.2" class="anchored" data-anchor-id="case_match">
 <span class="header-section-number">6.5.2</span> case_match()</h3>
-<p>Remapping values with <code><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when()</a></code> has been possible, but is a bit verbose.</p>
+<p>Remapping values with <code><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html">case_when()</a></code> has been possible, but is a bit verbose.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"USA"</span>, <span class="st">"Canada"</span>, <span class="st">"Wales"</span>, <span class="st">"UK"</span>, <span class="st">"China"</span>, <span class="cn">NA</span>, <span class="st">"Mexico"</span>, <span class="st">"Russia"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html">case_when</a></span><span class="op">(</span></span>
 <span>  <span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"USA"</span>, <span class="st">"Canada"</span>, <span class="st">"Mexico"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"North America"</span>,</span>
 <span>  <span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Wales"</span>, <span class="st">"UK"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Europe"</span>,</span>
 <span>  <span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="st">"China"</span> <span class="op">~</span> <span class="st">"Asia"</span></span>
@@ -753,6 +749,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"France"</span>, <span class="st">"UK"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Europe"</span>,</span>
 <span>  <span class="st">"China"</span> <span class="op">~</span> <span class="st">"Asia"</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: `case_match()` was deprecated in dplyr 1.2.0.</span></span>
+<span><span class="co">#&gt; ℹ Please use `recode_values()` instead.</span></span>
 <span><span class="co">#&gt; [1] "North America" "North America" NA              "Europe"       </span></span>
 <span><span class="co">#&gt; [5] "Asia"          NA              "North America" NA</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>

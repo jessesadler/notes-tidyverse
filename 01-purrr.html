@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.8.27">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="dcterms.date" content="2023-03-17">
 <title>12&nbsp; purrr – tidyverse notes</title>
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf77a05ce6ba3f5649b1c5bec9928afc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-99e777b2b3262cb0e1538bc5fc5de7fc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-6853a96d81807ee0c123ccfb52403b06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
@@ -118,9 +118,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>
   </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="./index.html" class="sidebar-logo-link">
-      </a>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">tidyverse notes</a> 
         <div class="sidebar-tools-main">
@@ -512,31 +510,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, mean <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt;  [1]  2.6011717  0.4014987 -0.1844694  0.5466973 -1.6223687  0.8899809</span></span>
-<span><span class="co">#&gt;  [7]  1.3163046  2.4121908  2.3117419  1.7888309</span></span>
+<span><span class="co">#&gt;  [1]  0.53448090  1.19047044  0.88322335  0.36645092  1.90382545 -1.49278159</span></span>
+<span><span class="co">#&gt;  [7] -0.02360761  0.61627182  0.08417237  1.25695587</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[2]]</span></span>
-<span><span class="co">#&gt;  [1] -0.8142824  3.3130987  2.3448799  2.5583001  1.6597526  1.9403809</span></span>
-<span><span class="co">#&gt;  [7]  2.0324331  1.4775853  1.9884239  3.2440392</span></span>
+<span><span class="co">#&gt;  [1] 1.9731518 1.3930216 1.9917365 1.1340438 2.4449432 2.4818092 0.7424925</span></span>
+<span><span class="co">#&gt;  [8] 2.0532400 2.0154133 0.4324419</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[3]]</span></span>
-<span><span class="co">#&gt;  [1] 2.611965 2.975608 3.133854 4.356062 3.517583 2.699743 3.636693 2.371603</span></span>
-<span><span class="co">#&gt;  [9] 1.355763 3.391129</span></span>
+<span><span class="co">#&gt;  [1] 2.553368 1.295247 2.837050 2.350296 2.392251 3.723393 3.282115 3.220745</span></span>
+<span><span class="co">#&gt;  [9] 3.098413 4.341710</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[4]]</span></span>
-<span><span class="co">#&gt;  [1] 4.833583 2.555765 4.016068 3.738574 4.547772 4.479482 4.875502 4.819298</span></span>
-<span><span class="co">#&gt;  [9] 5.503321 3.136075</span></span>
+<span><span class="co">#&gt;  [1] 4.762994 3.455215 3.414810 5.398869 5.070938 3.433321 5.085779 5.296707</span></span>
+<span><span class="co">#&gt;  [9] 3.169662 4.881905</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[5]]</span></span>
-<span><span class="co">#&gt;  [1] 3.909141 4.262970 4.879990 4.958956 5.124383 5.782317 5.991882 4.627907</span></span>
-<span><span class="co">#&gt;  [9] 4.456325 6.079972</span></span>
+<span><span class="co">#&gt;  [1] 4.574804 4.367292 5.136959 4.885410 4.201245 4.902887 5.204766 4.678141</span></span>
+<span><span class="co">#&gt;  [9] 6.538635 1.842236</span></span>
 <span></span>
 <span><span class="co"># Simplify output to a vector instead of a list</span></span>
 <span><span class="co"># by computing the mean of the distributions</span></span>
 <span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, mean <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span><span class="op">(</span><span class="va">mean</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.9232496 1.5937354 3.4285853 3.9536497 5.3846279</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">#&gt; [1] 0.8424586 2.3390154 3.1717500 4.3689486 5.3606893</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-pluck-style" class="level3" data-number="12.2.4"><h3 data-number="12.2.4" class="anchored" data-anchor-id="sec-pluck-style">
 <span class="header-section-number">12.2.4</span> <code>pluck()</code> style</h3>
@@ -747,11 +745,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Note that the order is value then index</span></span>
 <span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html">imap_chr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, <span class="va">paste</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "8 1"  "10 2" "3 3"  "1 4"  "5 5"  "2 6"  "9 7"  "4 8"  "7 9"  "6 10"</span></span>
+<span><span class="co">#&gt;  [1] "6 1"  "1 2"  "2 3"  "7 4"  "5 5"  "8 6"  "9 7"  "10 8" "4 9"  "3 10"</span></span>
 <span></span>
 <span><span class="co"># Use anonymous function to reverse value/index order in output</span></span>
 <span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html">imap_chr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span>, <span class="va">idx</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">idx</span>, <span class="st">": "</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "1: 3"  "2: 7"  "3: 4"  "4: 9"  "5: 5"  "6: 8"  "7: 10" "8: 2"  "9: 6" </span></span>
+<span><span class="co">#&gt;  [1] "1: 8"  "2: 10" "3: 5"  "4: 7"  "5: 6"  "6: 9"  "7: 2"  "8: 4"  "9: 3" </span></span>
 <span><span class="co">#&gt; [10] "10: 1"</span></span>
 <span></span>
 <span><span class="co"># Name of column and calculated value of column</span></span>
