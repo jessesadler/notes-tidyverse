@@ -48,7 +48,7 @@ bikes$season <- forcats::fct_inorder(bikes$season)
 - positions: `x, y`
 - colors: `color`, `fill`
 - shapes: `shape`, `linetype`
-- size: `size`
+- size: `size` `linesize`
 - transparency: `alpha`
 - groupings: `group`
 

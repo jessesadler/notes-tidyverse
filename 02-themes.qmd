@@ -25,7 +25,7 @@ Themes affect the aesthetics of non-data components of plots: i.e. titles, label
 
 ### ggplot2 Theme Elements {.unnumbered}
 
-![Isabella Benabaye - ggplot2 Theme Elements Reference Sheet](img/ggplot2-theme-elements-reference-v2.png)
+[![Isabella Benabaye - ggplot2 Theme Elements Reference Sheet](img/ggplot2-theme-elements-reference-v2.png)](https://isabella-b.com/blog/ggplot2-theme-elements-reference/)
 
 ## Base plot {#sec-theme-baseplot}
 

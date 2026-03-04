@@ -282,7 +282,7 @@ Other [scales formats](https://scales.r-lib.org/reference/index.html#axis-labels
 
 - `label_bytes()`: formats numbers as kilobytes, megabytes etc.
 - `label_comma()`: formats numbers as decimals with commas added.
-- `label_dollar()`: formats numbers as currency.
+- `label_currency()`: formats numbers as currency.
 - `label_ordinal()`: formats numbers in rank order: 1st, 2nd, 3rd etc.
 - `label_percent()`: formats numbers as percentages.
 - `label_pvalue()`: formats numbers as p-values: <.05, <.01, .34, etc.
